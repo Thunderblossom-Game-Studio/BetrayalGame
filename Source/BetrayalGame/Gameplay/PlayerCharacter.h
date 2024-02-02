@@ -20,10 +20,7 @@ public:
 
 	APlayerCharacter();
 
-	void Quit();
-
-	void RandomDamage();
-	
+	void Quit() const;
 private:
 	
 #pragma region Camera
@@ -47,20 +44,27 @@ private:
 	
 #pragma region Input
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* RunAction;
 
 #pragma endregion
 
 #pragma region Movement
 
 	virtual void Move(const FInputActionValue& Value) override;
+
+	void RunStart();
+
+	void RunEnd();
 
 #pragma endregion 
 
@@ -71,8 +75,4 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
-	
-
-	
 };

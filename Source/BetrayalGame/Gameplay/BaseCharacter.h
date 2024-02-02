@@ -73,19 +73,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed;
 
+	UPROPERTY(Replicated)
+	bool bIsRunning;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float StunnedSpeed;
-
-	UPROPERTY()
-	float CurrentSpeed;
-
+	
 	UPROPERTY(Replicated)
 	bool bIsStunned;
 
 	// Different implementation depending if the character is AI or Player
 	virtual void Move(const FInputActionValue& Value);
 	virtual void Move(const FVector2D Value);
-
+	
 #pragma endregion 
 	
 protected:

@@ -4,9 +4,7 @@
 #include "../Gameplay/BaseCharacter.h"
 
 #include "Net/UnrealNetwork.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -15,8 +13,6 @@ ABaseCharacter::ABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
-
-	
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -44,11 +40,17 @@ void ABaseCharacter::NetDebugging()
 
 		const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, healthMessage);
+
+		const FString speedMessage = FString::Printf(TEXT("Your current speed is: %f"),GetCharacterMovement()->MaxWalkSpeed);
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, speedMessage);
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Running: " + FString(bIsRunning ? "true" : "false"));
 		
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Dead: " + FString(bIsDead ? "true" : "false"));
 	}
 	
 }
+
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
 {
@@ -79,7 +81,6 @@ void ABaseCharacter::OnHealthUpdate()
 		{
 			if(bIsDead)
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead! and Server");
-		
 		}
 		else
 		{
@@ -87,11 +88,6 @@ void ABaseCharacter::OnHealthUpdate()
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead! and Client");
 		}
 	}
-	
-	
-
-	
-	
 }
 
 void ABaseCharacter::SetCurrentHealth(float NewCurrentHealth)
@@ -110,7 +106,7 @@ void ABaseCharacter::BeginPlay()
 	
 	CurrentHealth = MaxHealth;
 
-	SetCurrentHealth(-1.f);
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 }
 
@@ -118,20 +114,15 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	
 	NetDebugging();
-		
-
+	
 }
 
 // Called to bind functionality to input
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	
-	//PlayerInputComponent->BindKey(EKeys::SpaceBar, IE_Pressed, this, &ABaseCharacter::NetDebugging);
 	
 }
 
