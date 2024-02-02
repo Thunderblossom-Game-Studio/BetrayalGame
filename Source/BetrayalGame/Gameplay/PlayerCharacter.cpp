@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -16,6 +17,16 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
+	
+}
+
+void APlayerCharacter::Quit()
+{
+	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
+}
+
+void APlayerCharacter::RandomDamage()
+{
 	
 }
 
@@ -37,9 +48,10 @@ void APlayerCharacter::UpDownLook(const FInputActionValue& Value)
 	if(!Controller)
 		return;
 	
-	const float NewRotation = CameraComponent->GetRelativeRotation().Pitch + LookInput.Y * BaseLookUpRate * GetWorld()->GetDeltaSeconds();
+	const float NewRotation = LookInput.Y * BaseLookUpRate * GetWorld()->GetDeltaSeconds();
 
-	AddControllerPitchInput(-NewRotation);
+		
+	AddControllerPitchInput(-NewRotation ); // Value is negated because it was inverted
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
@@ -92,5 +104,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);
 		
 	}
-	
+
+	PlayerInputComponent->BindKey(EKeys::SpaceBar, IE_Pressed, this, &APlayerCharacter::RandomDamage);
+
+	PlayerInputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &APlayerCharacter::Quit);
 }
