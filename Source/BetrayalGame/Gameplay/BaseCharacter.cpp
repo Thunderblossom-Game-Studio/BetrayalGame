@@ -15,6 +15,8 @@ ABaseCharacter::ABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
+
+	
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -22,6 +24,30 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABaseCharacter, CurrentHealth);
+	DOREPLIFETIME(ABaseCharacter, bIsDead);
+}
+
+void ABaseCharacter::NetDebugging()
+{
+	if(IsLocallyControlled())
+	{
+		if(GetLocalRole() == ROLE_Authority)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Server!");
+
+			
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Client!");
+		}
+
+		const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, healthMessage);
+		
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Dead: " + FString(bIsDead ? "true" : "false"));
+	}
+	
 }
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
@@ -41,28 +67,31 @@ void ABaseCharacter::OnRep_CurrentHealth()
 
 void ABaseCharacter::OnHealthUpdate()
 {
-	// This runs ONLY on client
-	if(IsLocallyControlled())
+	// Runs on every machine
+	if(CurrentHealth <= 0.0f)
+		bIsDead = true;
+	
+	
+	if(IsLocallyControlled()) // Not sure if this is necessary
 	{
-		if(CurrentHealth <= 0.0f)
-			bIsDead = true;
+		// Runs just on the server
+		if(HasAuthority())
+		{
+			if(bIsDead)
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead! and Server");
 		
+		}
+		else
+		{
+			if(bIsDead)
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead! and Client");
+		}
 	}
-
-	// This runs ONLY on the server
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		
-	}
-
-
-	if(bIsDead)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead!");
-	}
+	
+	
 
 	
-	// Everything else runs on all machines
+	
 }
 
 void ABaseCharacter::SetCurrentHealth(float NewCurrentHealth)
@@ -78,7 +107,10 @@ void ABaseCharacter::SetCurrentHealth(float NewCurrentHealth)
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	CurrentHealth = MaxHealth;
 
+	SetCurrentHealth(-1.f);
 
 }
 
@@ -86,6 +118,10 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	
+	NetDebugging();
+		
 
 }
 
@@ -95,8 +131,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	
+	//PlayerInputComponent->BindKey(EKeys::SpaceBar, IE_Pressed, this, &ABaseCharacter::NetDebugging);
 	
-
-	//PlayerInputComponent->BindKey(EKeys::SpaceBar, IE_Pressed, this, &ABaseCharacter::DealDamage);
 }
 

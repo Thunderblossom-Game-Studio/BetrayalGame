@@ -19,6 +19,11 @@ class BETRAYALGAME_API APlayerCharacter : public ABaseCharacter
 public:
 
 	APlayerCharacter();
+
+	void Quit();
+
+	void RandomDamage();
+	
 private:
 	
 #pragma region Camera
@@ -67,7 +72,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
-
+	
 
 	
 };
