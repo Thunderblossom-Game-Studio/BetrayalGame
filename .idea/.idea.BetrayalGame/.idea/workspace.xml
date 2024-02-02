@@ -12,11 +12,6 @@
   <component name="ChangeListManager">
     <list default="true" id="009aa940-599f-4b4e-b1a8-53e6ed108aed" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BetrayalGame/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BetrayalGame/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/BP_PlayerCharacter.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GameModes/BP_BetrayalGameMode.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameModes/BP_BetrayalGameMode.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/BaseCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/BaseCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/BaseCharacter.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/PlayerCharacter.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BetrayalGame/Gameplay/PlayerCharacter.h" afterDir="false" />
     </list>
@@ -27,6 +22,10 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Source/BetrayalGame/Gameplay/BaseCharacter.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/BetrayalGame/Gameplay/PlayerCharacter.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="Jenkins.Settings">
     <option name="lastSelectedView" value="all" />
@@ -46,7 +45,7 @@
     &quot;C++ Project.BetrayalGame.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;FMP-84-Base-Character-Setup&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;build&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -187,6 +186,8 @@
       <updated>1706817731547</updated>
       <workItem from="1706817733410" duration="18817000" />
       <workItem from="1706881386324" duration="9478000" />
+      <workItem from="1706916226433" duration="432000" />
+      <workItem from="1706916703466" duration="236000" />
     </task>
     <servers />
   </component>

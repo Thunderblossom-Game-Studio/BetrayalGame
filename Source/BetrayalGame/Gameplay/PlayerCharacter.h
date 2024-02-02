@@ -20,7 +20,7 @@ public:
 
 	APlayerCharacter();
 
-	void Quit() const;
+	//void Quit() const;
 private:
 	
 #pragma region Camera

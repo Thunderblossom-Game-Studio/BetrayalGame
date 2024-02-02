@@ -21,10 +21,10 @@ APlayerCharacter::APlayerCharacter()
 	
 }
 
-void APlayerCharacter::Quit() const
+/*void APlayerCharacter::Quit() const
 {
 	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
-}
+}*/
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
 {
@@ -118,5 +118,5 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
 	}
 	
-	PlayerInputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &APlayerCharacter::Quit);
+	//PlayerInputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &APlayerCharacter::Quit);
 }
