@@ -32,20 +32,15 @@ class BETRAYALGAME_API AMonsterController : public AAIController
 public:
 	AMonsterController();
 
-	virtual void BeginPlay() override;
-	
 #pragma region Components
 // Variables
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Monster | Components", meta = (AllowPrivateAccess = "true"))
-	UBehaviorTreeComponent* BehaviourTreeComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Monster | Components", meta = (AllowPrivateAccess = "true"))
-	UAISenseConfig_Sight* SightConfig;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster | Components", meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* BehaviourTree;
+	
 // Getters
 public:
-	const UBehaviorTreeComponent* GetBehaviourTreeComponent() const { return BehaviourTreeComponent; }
-	const UAISenseConfig_Sight* GetSightConfig() const { return SightConfig; }
+	const UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
 	
 #pragma endregion
 
@@ -65,12 +60,12 @@ public:
 // Variables
 protected:	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Monster | Targetting", meta = (AllowPrivateAccess = "true"))
-	APawn* TargetPawn;
+	AActor* TargetActor;
 
 // Getters/Setters
 public:
-	const APawn* GetTargetPawn() const { return TargetPawn; }
-	void SetTargetPawn(APawn* NewTarget) { TargetPawn = NewTarget; }
+	const AActor* GetTargetActor() const { return TargetActor; }
+	void SetTargetActor(AActor* NewTarget) { TargetActor = NewTarget; }
 	
 #pragma endregion
 };

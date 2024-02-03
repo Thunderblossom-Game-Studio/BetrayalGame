@@ -4,12 +4,7 @@
 #include "MonsterController.h"
 
 AMonsterController::AMonsterController()
-: BehaviourTreeComponent(nullptr), SightConfig(nullptr), RoomTraversalType(), TargetPawn(nullptr)
+: BehaviourTree(nullptr), RoomTraversalType(), TargetActor(nullptr)
 {
 }
 
-void AMonsterController::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
