@@ -31,13 +31,22 @@ class BETRAYALGAME_API UBetrayalGameInstance : public UGameInstance
 
 	UBetrayalGameInstance(const FObjectInitializer& ObjectInitializer);
 	
+	UFUNCTION(BlueprintCallable, Category = "General")
+	void QuitGame();
+	
 #pragma endregion
 	
-private:
 #pragma region UI
+private:
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WB_MainMenuClass;
+	
 	UPROPERTY()
 	UUserWidget* WB_MainMenu;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WB_LobbyClass;
+	
 	UPROPERTY()
 	UUserWidget* WB_Lobby;
 
@@ -46,7 +55,13 @@ public:
 	void ShowMainMenu();
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HideMainMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowLobby();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HideLobby();
 #pragma endregion
 
 #pragma region Save/Load
@@ -75,6 +90,8 @@ public:
 #pragma region Networking
 
 private:
+	const TSharedPtr<const FUniqueNetId> GetNetID();
+	
 #pragma region Session Creation
 	// Session created delegate
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
@@ -88,6 +105,13 @@ private:
 
 	// Online session settings
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
+
+	// Internal create session method
+	UFUNCTION()
+	void UI_HostGame();
+
+	UFUNCTION()
+	void UI_JoinGame();
 	
 	/**
 	*	Create a joinable session
@@ -187,6 +211,7 @@ private:
 #pragma endregion
 
 public:
+#pragma region Blueprint Nodes
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	/**	Host a game
 	 * 
@@ -216,7 +241,7 @@ public:
 	 * 
 	 */
 	void DestroySessionAndLeaveGame();
-	
+#pragma endregion
 #pragma endregion
 	
 };
