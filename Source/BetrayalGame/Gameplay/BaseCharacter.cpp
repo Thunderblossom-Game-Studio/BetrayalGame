@@ -25,29 +25,26 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void ABaseCharacter::NetDebugging()
 {
-	if(IsLocallyControlled())
+
+	if(HasAuthority())
 	{
-		if(GetLocalRole() == ROLE_Authority)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Server!");
-
-			
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Client!");
-		}
-
-		const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, healthMessage);
-
-		const FString speedMessage = FString::Printf(TEXT("Your current speed is: %f"),GetCharacterMovement()->MaxWalkSpeed);
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, speedMessage);
-
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Running: " + FString(bIsRunning ? "true" : "false"));
-		
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Dead: " + FString(bIsDead ? "true" : "false"));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Server!");
 	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Client!");
+	}
+
+	const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, healthMessage);
+
+	const FString speedMessage = FString::Printf(TEXT("Your current speed is: %f"),GetCharacterMovement()->MaxWalkSpeed);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, speedMessage);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Running: " + FString(bIsRunning ? "true" : "false"));
+		
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Is Dead: " + FString(bIsDead ? "true" : "false"));
+
 	
 }
 

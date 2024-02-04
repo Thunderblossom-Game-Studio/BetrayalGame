@@ -20,7 +20,10 @@ public:
 
 	APlayerCharacter();
 
-	//void Quit() const;
+	virtual void NetDebugging() override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
 	
 #pragma region Camera
@@ -41,7 +44,6 @@ public:
 private:
 #pragma endregion 
 	
-	
 #pragma region Input
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
@@ -55,19 +57,46 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* RunAction;
-
+private:
 #pragma endregion
 
 #pragma region Movement
-
+public:
 	virtual void Move(const FInputActionValue& Value) override;
 
 	void RunStart();
 
 	void RunEnd();
+private:
+#pragma endregion
 
+#pragma region Inventory
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	class UInventoryComponent* InventoryComponent;
+
+private:	
 #pragma endregion 
 
+#pragma region Interaction
+public:
+
+	UPROPERTY(Replicated)
+	class ABaseInteractable* InteractableInFocus;
+
+	UFUNCTION(Server, Reliable)
+	void Server_TraceForInteractables();
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void TraceForActors();
+	
+	
+
+private:
+#pragma endregion 
+
+	
 protected:
 	virtual void BeginPlay() override;
 

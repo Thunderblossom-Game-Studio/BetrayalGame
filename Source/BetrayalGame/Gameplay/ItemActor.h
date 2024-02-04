@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseInteractable.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
 #include "ItemActor.generated.h"
@@ -27,7 +28,7 @@ struct FItem : public FTableRowBase
 
 
 UCLASS()
-class BETRAYALGAME_API AItemActor : public AActor
+class BETRAYALGAME_API AItemActor : public ABaseInteractable
 {
 	GENERATED_BODY()
 	

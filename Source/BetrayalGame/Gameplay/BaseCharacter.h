@@ -22,7 +22,7 @@ public:
 
 #pragma region Debugging
 	
-	void NetDebugging();
+	virtual void NetDebugging();
 	
 	
 #pragma endregion 

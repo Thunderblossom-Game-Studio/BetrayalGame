@@ -3,11 +3,13 @@
 
 #include "../Gameplay/PlayerCharacter.h"
 
+#include "BaseInteractable.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -18,13 +20,35 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
+
+	//SetReplicates(true);
 	
 }
 
-/*void APlayerCharacter::Quit() const
+void APlayerCharacter::NetDebugging()
 {
-	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
-}*/
+	if(HasAuthority())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Server interactable in focus: " + InteractableInFocus->GetName());
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Client interactable in focus: " + InteractableInFocus->GetName());
+	}
+	
+}
+
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, InteractableInFocus);
+	
+}
+
+
+
+
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
 {
@@ -89,6 +113,58 @@ void APlayerCharacter::RunEnd()
 	bIsRunning = false;
 }
 
+
+void APlayerCharacter::Server_TraceForInteractables_Implementation()
+{
+	FVector TraceStart = CameraComponent->GetComponentLocation();
+	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
+
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
+	{
+		AActor* HitActor = HitResult.GetActor();
+		
+		if(!HitActor)
+			return;
+
+		if(HitActor->ActorHasTag("Interactable"))
+		{
+			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, InteractableInFocus->GetName() + " detected by line trace!");
+			
+		}
+		else if(!HitActor->ActorHasTag("Interactable"))
+		{
+			InteractableInFocus = nullptr;
+		}
+	}
+}
+
+void APlayerCharacter::TraceForActors()
+{
+	if(HasAuthority())
+	{
+		// If we are the server, we can just call the server function directly
+		Server_TraceForInteractables();
+		
+	}
+	else
+	{
+		// If we are a client, we need to call the server function through the player controller
+		Server_TraceForInteractables();
+		
+	}
+
+	FVector TraceStart = CameraComponent->GetComponentLocation();
+	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
+
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 1.0f, 0, 1.0f);
+	
+	
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -101,6 +177,8 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	
+	TraceForActors();
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -117,6 +195,4 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &APlayerCharacter::RunStart);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
 	}
-	
-	//PlayerInputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &APlayerCharacter::Quit);
 }
