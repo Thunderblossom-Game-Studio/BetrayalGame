@@ -17,6 +17,25 @@ class BETRAYALGAME_API AChaser : public AMonster
 public:
 	AChaser();
 
+#pragma region Movement
+	// Variables
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
+	float MoveSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
+	float SprintSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
+	bool bSprinting;
+	
+	// Getters
+public:	
+	float GetMoveSpeed() const { return MoveSpeed; }	
+	float GetSprintSpeed() const { return SprintSpeed; }	
+	bool IsSprinting() const { return bSprinting; }	
+	void SetSprinting(const bool& IsSprinting);	
+	
+#pragma endregion
+	
 #pragma region Catching
 // Variables
 private:

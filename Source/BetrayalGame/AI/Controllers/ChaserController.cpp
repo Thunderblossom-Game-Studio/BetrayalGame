@@ -4,6 +4,7 @@
 #include "ChaserController.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
+#include "BetrayalGame/AI/Pawns/Chaser.h"
 #include "Engine/Engine.h"
 
 AChaserController::AChaserController()
@@ -29,31 +30,66 @@ void AChaserController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	World = GetWorld();
+	ChaserPawn = GetPawn<AChaser>();
+
+	if (ChaserPawn)
+		ChaserPawn->SetSprinting(false);
+	
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		if (PerceptionComponent)			
+		if (PerceptionComponent)
+		{
 			PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AChaserController::OnSenseTargetUpdated);
+		}
 		if (BehaviourTree)
 			RunBehaviorTree(BehaviourTree);
 	}
 }
 
+void AChaserController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+
 void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)
 {
 	if (!UpdatedActor)
-		return;
-	
+		return;	
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		TargetActor = UpdatedActor;
+		World->GetTimerManager().ClearTimer(LOSTimerHandle);
+		if (TargetActor)
+		{
+			const float CurrentTargetDistance = FVector::Distance(TargetActor->GetActorLocation(), GetPawn()->GetActorLocation());
+			const float NewTargetDistance = FVector::Distance(UpdatedActor->GetActorLocation(), GetPawn()->GetActorLocation());
+			if (NewTargetDistance < CurrentTargetDistance)
+				TargetActor = UpdatedActor;
+		}
+		else
+		{
+			TargetActor = UpdatedActor;			
+		}
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Detected Actor: " + TargetActor->GetFName().ToString());
+		Blackboard->SetValueAsBool("LineOfSight", true);
 		Blackboard->SetValueAsObject("TargetActor", TargetActor);
+		if (ChaserPawn)
+			ChaserPawn->SetSprinting(true);
 	}
-	else if (TargetActor == UpdatedActor)
+	else if (TargetActor && TargetActor == UpdatedActor)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, "Detected Actor: " + TargetActor->GetFName().ToString());
-		Blackboard->SetValueAsVector("LastKnownLocation", TargetActor->GetActorLocation());
-		TargetActor = nullptr;
-		Blackboard->ClearValue("TargetActor");			
-	}	
+		World->GetTimerManager().SetTimer(LOSTimerHandle, this, &AChaserController::LOSRecaptureFail, LineOfSightTimer, false);
+	}
+}
+
+void AChaserController::LOSRecaptureFail()
+{
+	World->GetTimerManager().ClearTimer(LOSTimerHandle);
+	Blackboard->SetValueAsVector("LastKnownLocation", TargetActor->GetActorLocation());
+	TargetActor = nullptr;
+	Blackboard->ClearValue("TargetActor");
+	Blackboard->SetValueAsBool("LineOfSight", false);
+	if (ChaserPawn)
+		ChaserPawn->SetSprinting(false);
 }
