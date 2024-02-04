@@ -31,17 +31,52 @@ UCLASS()
 class BETRAYALGAME_API AItemActor : public ABaseInteractable
 {
 	GENERATED_BODY()
-	
-public:	
+
+#pragma region Base Functions
+public:
 	// Sets default values for this actor's properties
 	AItemActor();
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+private:
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	
+#pragma endregion
+
+#pragma region Networking
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+private:
+#pragma endregion 
+	
+#pragma region Interactable Overrides
+public:
+	
+	virtual void OnInteract(class ABaseCharacter* Interactor) override;
+
+private:
+#pragma endregion
+	
+#pragma region Item
+public:
+	
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
+	FDataTableRowHandle ItemData;
+
+	
+private:
+#pragma endregion 
+
+
+
+	
+	
+
 
 };

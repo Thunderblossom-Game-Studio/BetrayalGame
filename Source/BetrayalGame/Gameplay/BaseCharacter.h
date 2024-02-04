@@ -21,9 +21,8 @@ public:
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 #pragma region Debugging
-	
-	virtual void NetDebugging();
-	
+
+	void NetDebugging();
 	
 #pragma endregion 
 	
@@ -32,6 +31,7 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float MaxHealth;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
@@ -62,7 +62,6 @@ public:
 	bool IsDead() const { return bIsDead; }
 
 #pragma endregion
-
 
 #pragma region Movement
 

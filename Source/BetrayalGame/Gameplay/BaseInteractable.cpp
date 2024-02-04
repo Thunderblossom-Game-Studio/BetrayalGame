@@ -3,6 +3,10 @@
 
 #include "../Gameplay/BaseInteractable.h"
 
+#include "BaseCharacter.h"
+
+
+
 // Sets default values
 ABaseInteractable::ABaseInteractable()
 {
@@ -19,6 +23,36 @@ void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	
+}
+
+void ABaseInteractable::OnInteract(ABaseCharacter* Interactor)
+{
+	if(HasAuthority())
+		ServerOnInteract(Interactor);
+	else
+	{
+		ServerOnInteract(Interactor);
+		GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetActorLabel() + " Interacted with " + GetActorLabel());
+	}
+	
+}
+
+bool ABaseInteractable::ServerOnInteract_Validate(ABaseCharacter* Interactor)
+{
+	return true;
+}
+
+void ABaseInteractable::ServerOnInteract_Implementation(ABaseCharacter* Interactor)
+{
+	Destroy();
+}
+
+void ABaseInteractable::OnBeginFocus(ABaseCharacter* Interactor)
+{
+}
+
+void ABaseInteractable::OnEndFocus(ABaseCharacter* Interactor)
+{
 }
 
 // Called when the game starts or when spawned

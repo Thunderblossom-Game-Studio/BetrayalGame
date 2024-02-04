@@ -20,8 +20,6 @@ public:
 
 	APlayerCharacter();
 
-	virtual void NetDebugging() override;
-
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
@@ -57,6 +55,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* RunAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
 private:
 #pragma endregion
 
@@ -82,16 +83,17 @@ private:
 #pragma region Interaction
 public:
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Interaction")
 	class ABaseInteractable* InteractableInFocus;
-
-	UFUNCTION(Server, Reliable)
+	
+	UFUNCTION(Client, Reliable)
 	void Server_TraceForInteractables();
 
-	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	UFUNCTION(NetMulticast, Reliable)
 	void TraceForActors();
 	
-	
+	UFUNCTION(Client, Reliable)
+	void Interact();
 
 private:
 #pragma endregion 
