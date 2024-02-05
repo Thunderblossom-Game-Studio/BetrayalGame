@@ -17,6 +17,10 @@ class BETRAYALGAME_API AChaser : public AMonster
 public:
 	AChaser();
 
+	virtual void BeginPlay() override;
+	
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 #pragma region Movement
 	// Variables
 private:
@@ -24,7 +28,8 @@ private:
 	float MoveSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
+
+	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
 	bool bSprinting;
 	
 	// Getters
@@ -33,6 +38,10 @@ public:
 	float GetSprintSpeed() const { return SprintSpeed; }	
 	bool IsSprinting() const { return bSprinting; }	
 	void SetSprinting(const bool& IsSprinting);	
+	
+public:
+	UPROPERTY()
+	UCharacterMovementComponent* Movement;
 	
 #pragma endregion
 	

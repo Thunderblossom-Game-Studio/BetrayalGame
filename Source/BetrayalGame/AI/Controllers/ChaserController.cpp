@@ -9,6 +9,8 @@
 
 AChaserController::AChaserController()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception"));
 	
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
@@ -43,52 +45,48 @@ void AChaserController::BeginPlay()
 			PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AChaserController::OnSenseTargetUpdated);
 		}
 		if (BehaviourTree)
-			RunBehaviorTree(BehaviourTree);
+		{
+			RunBehaviorTree(BehaviourTree);			
+		}
 	}
-}
-
-void AChaserController::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
 }
 
 void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)
 {
-	if (!UpdatedActor)
+	if (!UpdatedActor || !HasAuthority())
 		return;	
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		World->GetTimerManager().ClearTimer(LOSTimerHandle);
+
 		if (TargetActor)
-		{
-			const float CurrentTargetDistance = FVector::Distance(TargetActor->GetActorLocation(), GetPawn()->GetActorLocation());
-			const float NewTargetDistance = FVector::Distance(UpdatedActor->GetActorLocation(), GetPawn()->GetActorLocation());
-			if (NewTargetDistance < CurrentTargetDistance)
-				TargetActor = UpdatedActor;
-		}
-		else
-		{
-			TargetActor = UpdatedActor;			
-		}
+			return;
+		
+		TargetActor = UpdatedActor;
+		Blackboard->SetValueAsObject("TargetActor", TargetActor);
+
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Detected Actor: " + TargetActor->GetFName().ToString());
 		Blackboard->SetValueAsBool("LineOfSight", true);
-		Blackboard->SetValueAsObject("TargetActor", TargetActor);
 		if (ChaserPawn)
 			ChaserPawn->SetSprinting(true);
 	}
 	else if (TargetActor && TargetActor == UpdatedActor)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, "Detected Actor: " + TargetActor->GetFName().ToString());
-		World->GetTimerManager().SetTimer(LOSTimerHandle, this, &AChaserController::LOSRecaptureFail, LineOfSightTimer, false);
+		FTimerDelegate LoseDelegate;
+		LoseDelegate.BindUFunction(this, FName("LOSRecaptureFail"), UpdatedActor);
+		World->GetTimerManager().SetTimer(LOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
 	}
 }
 
 void AChaserController::LOSRecaptureFail()
 {
-	World->GetTimerManager().ClearTimer(LOSTimerHandle);
-	Blackboard->SetValueAsVector("LastKnownLocation", TargetActor->GetActorLocation());
-	TargetActor = nullptr;
+	World->GetTimerManager().ClearTimer(LOSTimerHandle);	
+	if (TargetActor)
+		Blackboard->SetValueAsVector("LastKnownLocation", TargetActor->GetActorLocation());
+	TargetActor = nullptr;	
 	Blackboard->ClearValue("TargetActor");
+
 	Blackboard->SetValueAsBool("LineOfSight", false);
 	if (ChaserPawn)
 		ChaserPawn->SetSprinting(false);

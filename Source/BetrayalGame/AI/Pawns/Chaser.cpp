@@ -4,23 +4,48 @@
 #include "Chaser.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AChaser::AChaser()
-	: MoveSpeed(400), SprintSpeed(600), bSprinting(false)
+	: MoveSpeed(400), SprintSpeed(600), bSprinting(false), Movement(nullptr)
 {
+	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+}
+
+void AChaser::BeginPlay()
+{
+	Super::BeginPlay();
+
+	
+	Movement = GetCharacterMovement();
+}
+
+void AChaser::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AChaser, bSprinting);
 }
 
 void AChaser::SetSprinting(const bool& IsSprinting)
 {
+	if (!HasAuthority())
+		return;
+	
+	if (!Movement)		
+		Movement = GetCharacterMovement();
 	bSprinting = IsSprinting;
 	if (bSprinting)
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		Movement->MaxWalkSpeed = SprintSpeed;
 	else
-		GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+		Movement->MaxWalkSpeed = MoveSpeed;	
 }
 
 void AChaser::Teleport(AActor* Target)
 {
+	if (!HasAuthority())
+		return;
 	if (!Target)
 		return;
 	

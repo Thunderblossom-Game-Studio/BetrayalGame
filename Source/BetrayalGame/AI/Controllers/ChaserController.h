@@ -18,7 +18,6 @@ public:
 	AChaserController();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
 	
 #pragma region Perception Configuration
 // Variables

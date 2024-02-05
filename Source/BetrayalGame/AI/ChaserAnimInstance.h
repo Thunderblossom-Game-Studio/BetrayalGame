@@ -25,9 +25,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
 	bool bChasing;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
-	class AMonsterController* Controller;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
-	class AMonster* Pawn;
+	class AChaser* Pawn;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Monster | Animation")
