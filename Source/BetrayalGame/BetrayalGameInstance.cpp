@@ -291,6 +291,9 @@ void UBetrayalGameInstance::OnCreateSessionComplete(FName SessionName, bool bWas
 
 		// Start the session
 		Sessions->StartSession(SessionName);
+
+		// ServerTravel to the lobby
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelToLoad), true, "listen");
 	}
 }
 
@@ -440,7 +443,6 @@ bool UBetrayalGameInstance::JoinSession(TSharedPtr<const FUniqueNetId> UserId, F
 			OnJoinSessionCompleteDelegate);
 
 		bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
-		UGameplayStatics::OpenLevel(GetWorld(), "L_Map", true, "listen");
 	}
 
 	return bSuccessful;
@@ -475,7 +477,8 @@ void UBetrayalGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSess
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			Print(SessionName.ToString() + " resolved to: " + TravelURL);
+			PlayerController->ClientTravel(TravelURL + "?listen", ETravelType::TRAVEL_Absolute);
 		}
 	}
 }
