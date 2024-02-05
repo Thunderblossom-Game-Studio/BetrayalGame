@@ -7,7 +7,7 @@
 #include "Net/UnrealNetwork.h"
 
 AChaser::AChaser()
-	: MoveSpeed(400), SprintSpeed(600), bSprinting(false), Movement(nullptr)
+	: MoveSpeed(100), SprintSpeed(600), bSprinting(false), Movement(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
