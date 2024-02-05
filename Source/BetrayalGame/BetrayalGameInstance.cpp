@@ -3,11 +3,12 @@
 #include "BetrayalGameInstance.h"
 #include "StaticUtils.h"
 #include "OnlineSessionSettings.h"
-#include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
 #include "Online/OnlineSessionNames.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "Lobby/Widget_SessionConnectBtn.h"
 
 #pragma region General
 
@@ -149,7 +150,9 @@ void UBetrayalGameInstance::ShowLobby()
 	if (UButton* JoinButton = Cast<UButton>(WB_Lobby->GetWidgetFromName("Btn_JoinGame")))
 	{
 		JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_JoinGame);
-		JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
+		//JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
+
+		// Search for online games
 	}
 	else
 		Print("UBetrayalGameInstance::ShowLobby(): Join game button not found!");
@@ -194,7 +197,6 @@ void UBetrayalGameInstance::UI_HostGame()
 void UBetrayalGameInstance::UI_JoinGame()
 {
 	FindOnlineGames(false, false);
-	JoinOnlineGame(0);
 }
 
 bool UBetrayalGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN,
@@ -230,7 +232,16 @@ bool UBetrayalGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, F
 		SessionSettings->bAllowJoinViaPresence = true;
 		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
 
-		SessionSettings->Set(SETTING_MAPNAME, FString("L_Map"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		if(LevelToLoad != "")
+		{
+			const FString MapName = LevelToLoad;
+			SessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true);
+		}
+		else
+		{
+			Print("UBetrayalGameInstance::HostSession(): LevelToLoad is empty!");
+		}
 
 		// Set the delegate to the handle of the session created function
 		CreateSessionDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
@@ -280,6 +291,9 @@ void UBetrayalGameInstance::OnCreateSessionComplete(FName SessionName, bool bWas
 
 		// Start the session
 		Sessions->StartSession(SessionName);
+
+		// ServerTravel to the lobby
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelToLoad), true, "listen");
 	}
 }
 
@@ -324,6 +338,7 @@ void UBetrayalGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, 
 
 	if (Sessions.IsValid() && UserId.IsValid())
 	{
+		// Build session search parameters
 		SessionSearch = MakeShareable(new FOnlineSessionSearch());
 
 		SessionSearch->bIsLanQuery = bIsLAN;
@@ -372,10 +387,40 @@ void UBetrayalGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 	// Log number of results
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
-	// Log info about each session
+	// // Log info about each session
+	// for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+	// {
+	// 	Print("Session " + FString::FromInt(i) + ": " + SessionSearch->SearchResults[i].Session.OwningUserName);
+	// }
+
+	// Create a widget for each session found
+	if(!WB_Lobby)
+	{
+		Print("UBetrayalGameInstance::OnFindSessionsComplete(): WB_Lobby is null!");
+		return;
+	}
+
+	// Clear the session list
+	ClearSessions();
+
+	// Reference to session list
+	UWidget* SessionList = WB_Lobby->GetWidgetFromName("Scrl_Sessions");
+	if(!SessionList)
+	{
+		Print("UBetrayalGameInstance::OnFindSessionsComplete(): Session list is null!");
+		return;
+	}
+
+	// Populate the session list
 	for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
 	{
-		Print("Session " + FString::FromInt(i) + ": " + SessionSearch->SearchResults[i].Session.OwningUserName);
+		const FString SessionName = SessionSearch->SearchResults[i].Session.OwningUserName;
+		const int32 ConnectedPlayers = SessionSearch->SearchResults[i].Session.SessionSettings.NumPublicConnections - SessionSearch->SearchResults[i].Session.NumOpenPublicConnections;
+		const int32 MaxPlayers = SessionSearch->SearchResults[i].Session.SessionSettings.NumPublicConnections;
+		const int32 Ping = SessionSearch->SearchResults[i].PingInMs;
+		const int32 SearchResultsIndex = i;
+
+		AddSessionToList(FName(*SessionName), ConnectedPlayers, MaxPlayers, Ping, SearchResultsIndex);
 	}
 }
 
@@ -432,7 +477,8 @@ void UBetrayalGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSess
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			Print(SessionName.ToString() + " resolved to: " + TravelURL);
+			PlayerController->ClientTravel(TravelURL + "?listen", ETravelType::TRAVEL_Absolute);
 		}
 	}
 }
@@ -475,10 +521,20 @@ void UBetrayalGameInstance::FindOnlineGames(bool bIsLAN, bool bIsPresence)
 }
 
 void UBetrayalGameInstance::JoinOnlineGame(int32 SessionIndex)
-{
-	// TODO: Set up a way to select a session to join
-	// Currently joins the first session found
+{	
+	// Validate the session search
+	if (SessionSearch.IsValid() && SessionSearch->SearchResults.Num() > 0)
+	{
+		// Join the session
+		JoinSession(GetNetID(), NAME_GameSession, SessionSearch->SearchResults[SessionIndex]);
+	}
+	else
+	{
+		Print("UBetrayalGameInstance::JoinOnlineGame(): Session search is invalid or empty!");
+	}
 
+/*	Original code:
+	// Currently joins the first session found
 	// Search result
 	FOnlineSessionSearchResult SearchResult;
 
@@ -495,6 +551,7 @@ void UBetrayalGameInstance::JoinOnlineGame(int32 SessionIndex)
 			}
 		}
 	}
+	*/
 }
 
 void UBetrayalGameInstance::DestroySessionAndLeaveGame()
