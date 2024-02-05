@@ -19,6 +19,13 @@ public:
 	ABaseCharacter();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+#pragma region Debugging
+	
+	void NetDebugging();
+	
+	
+#pragma endregion 
 	
 #pragma region Health System
 	
@@ -28,7 +35,7 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	bool bIsDead;
 
 public:
@@ -54,8 +61,6 @@ public:
 
 	bool IsDead() const { return bIsDead; }
 
-	void DealDamage();
-
 #pragma endregion
 
 
@@ -68,18 +73,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed;
 
+	UPROPERTY(Replicated)
+	bool bIsRunning;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float StunnedSpeed;
-
-	UPROPERTY()
-	float CurrentSpeed;
-
+	
 	UPROPERTY(Replicated)
 	bool bIsStunned;
 
+	// Different implementation depending if the character is AI or Player
 	virtual void Move(const FInputActionValue& Value);
 	virtual void Move(const FVector2D Value);
-
+	
 #pragma endregion 
 	
 protected:
