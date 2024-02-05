@@ -12,8 +12,7 @@
 #include "Net/UnrealNetwork.h"
 
 APlayerCharacter::APlayerCharacter()
-{
-
+{	
 	BaseTurnRate = 45.0f;
 	BaseLookUpRate = 45.0f;
 	
@@ -22,6 +21,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = true;
 
 	InteractableInFocus = nullptr;
+
+	bReplicates = true;
 	
 }
 
@@ -96,8 +97,17 @@ void APlayerCharacter::RunEnd()
 	bIsRunning = false;
 }
 
-void APlayerCharacter::Server_TraceForInteractables_Implementation()
+void APlayerCharacter::TraceForInteractables()
 {
+	if(!IsLocallyControlled())
+	{
+		return;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "Not local player");
+	}
+	
 	FVector TraceStart = CameraComponent->GetComponentLocation();
 	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
 
@@ -110,63 +120,34 @@ void APlayerCharacter::Server_TraceForInteractables_Implementation()
 		
 		if(!HitActor)
 			return;
-
-		if(HitActor->ActorHasTag("Interactable"))
-		{
-			//Server_SetInteractableInFocus(Cast<ABaseInteractable>(HitActor));
-
-			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
-			
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, InteractableInFocus->GetName() + " detected by line trace!");
-			
-		}
-		else if(!HitActor->ActorHasTag("Interactable"))
-		{
-			InteractableInFocus = nullptr;
-		}
-	}
-}
-
-void APlayerCharacter::TraceForActors_Implementation()
-{
-	FVector TraceStart = CameraComponent->GetComponentLocation();
-	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
-
-	FHitResult HitResult;
-	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
-
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
-	{
-		AActor* HitActor = HitResult.GetActor();
 		
-		if(!HitActor)
-			return;
-
-		if(HitActor->ActorHasTag("Interactable"))
+		if(HitActor->Implements<ABaseInteractable>() && HitActor != InteractableInFocus)
 		{
-			//Server_SetInteractableInFocus(Cast<ABaseInteractable>(HitActor));
-
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
 			
-			//GEngine->AddOnScreenDebugMessage(1, 0.0f, FColor::Green, InteractableInFocus->GetName() + " detected by line trace!");
-			
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, InteractableInFocus->GetActorLabel() + " detected by line trace!");
 		}
-		else if(!HitActor->ActorHasTag("Interactable"))
+		else if (!HitActor->Implements<ABaseInteractable>())
 		{
 			InteractableInFocus = nullptr;
 		}
 	}
 
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue);
 }
 
-void APlayerCharacter::Interact_Implementation()
+void APlayerCharacter::Server_Interact_Implementation()
+{
+	NetMulticast_Interact();
+}
+
+void APlayerCharacter::NetMulticast_Interact_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Interact called!");
 	
 	if(InteractableInFocus)
 	{
-		InteractableInFocus->OnInteract(this);
+		InteractableInFocus->ServerOnInteract(this);
 	}
 }
 
@@ -183,7 +164,7 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	TraceForActors();
+	TraceForInteractables();
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -200,6 +181,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &APlayerCharacter::RunStart);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
 
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Server_Interact);
 	}
 }

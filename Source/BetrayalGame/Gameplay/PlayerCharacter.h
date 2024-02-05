@@ -85,15 +85,15 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Interaction")
 	class ABaseInteractable* InteractableInFocus;
+
+	UFUNCTION()
+	void TraceForInteractables();
 	
-	UFUNCTION(Client, Reliable)
-	void Server_TraceForInteractables();
+	UFUNCTION(Server, Reliable)
+	void Server_Interact();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void TraceForActors();
-	
-	UFUNCTION(Client, Reliable)
-	void Interact();
+	void NetMulticast_Interact();
 
 private:
 #pragma endregion 

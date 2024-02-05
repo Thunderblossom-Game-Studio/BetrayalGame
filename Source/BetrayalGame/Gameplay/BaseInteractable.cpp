@@ -27,24 +27,21 @@ void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 void ABaseInteractable::OnInteract(ABaseCharacter* Interactor)
 {
-	if(HasAuthority())
-		ServerOnInteract(Interactor);
-	else
-	{
-		ServerOnInteract(Interactor);
-		GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetActorLabel() + " Interacted with " + GetActorLabel());
-	}
-	
-}
 
-bool ABaseInteractable::ServerOnInteract_Validate(ABaseCharacter* Interactor)
-{
-	return true;
+	Destroy();
+
+	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetActorLabel() + " Interacted with " + GetActorLabel());
+	
 }
 
 void ABaseInteractable::ServerOnInteract_Implementation(ABaseCharacter* Interactor)
 {
-	Destroy();
+	NetMulticastOnInteract(Interactor);
+}
+
+void ABaseInteractable::NetMulticastOnInteract_Implementation(ABaseCharacter* Interactor)
+{
+	OnInteract(Interactor);
 }
 
 void ABaseInteractable::OnBeginFocus(ABaseCharacter* Interactor)

@@ -13,12 +13,13 @@ class BETRAYALGAME_API ABaseInteractable : public AActor
 
 #pragma region Interaction
 public:
-
-	
 	virtual void OnInteract(class ABaseCharacter* Interactor);
 
-	UFUNCTION(Server,Reliable,WithValidation)
+	UFUNCTION(Server,Reliable)
 	void ServerOnInteract(class ABaseCharacter* Interactor);
+
+	UFUNCTION(NetMulticast,Reliable)
+	void NetMulticastOnInteract(class ABaseCharacter* Interactor);
 	
 	UFUNCTION()
 	virtual void OnBeginFocus(class ABaseCharacter* Interactor);
@@ -26,18 +27,10 @@ public:
 	UFUNCTION()
 	virtual void OnEndFocus(class ABaseCharacter* Interactor);
 
+private:
 #pragma endregion 
 
 
-
-
-
-
-
-	
-	
-	
-	
 	
 public:	
 	// Sets default values for this actor's properties
