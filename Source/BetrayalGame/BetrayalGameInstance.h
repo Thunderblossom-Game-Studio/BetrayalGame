@@ -40,17 +40,17 @@ class BETRAYALGAME_API UBetrayalGameInstance : public UGameInstance
 private:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WB_MainMenuClass;
-	
-	UPROPERTY()
-	UUserWidget* WB_MainMenu;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WB_LobbyClass;
 	
-	UPROPERTY()
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UUserWidget* WB_MainMenu;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UUserWidget* WB_Lobby;
 
-public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowMainMenu();
 
@@ -91,6 +91,9 @@ public:
 
 private:
 	const TSharedPtr<const FUniqueNetId> GetNetID();
+
+	UPROPERTY(EditAnywhere, Category = "Networking")
+	FString LevelToLoad = "";
 	
 #pragma region Session Creation
 	// Session created delegate
@@ -192,6 +195,16 @@ private:
 	 *	@param	Result			Result of the async action
 	 */
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+public:
+	// Clear sessions
+	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
+	void ClearSessions();
+
+	// Add session to UI
+	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
+	void AddSessionToList(FName SessionName, int32 ConnectedPlayers, int32 MaxPlayers, int32 Ping, int32 SearchResultsIndex);
+private:
 #pragma endregion
 
 #pragma region Session Destruction
