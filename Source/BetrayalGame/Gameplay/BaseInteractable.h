@@ -15,8 +15,11 @@ class BETRAYALGAME_API ABaseInteractable : public AActor, public IInteractable
 	
 #pragma region Interaction
 public:
-	UFUNCTION()
+	
 	virtual void OnInteract(class AActor* Interactor);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
+	void InteractEvent(class AActor* Interactor);
 	
 	UFUNCTION()
 	virtual void OnBeginFocus(class AActor* Interactor);
@@ -27,8 +30,6 @@ public:
 private:
 #pragma endregion 
 
-
-	
 public:	
 	// Sets default values for this actor's properties
 	ABaseInteractable();

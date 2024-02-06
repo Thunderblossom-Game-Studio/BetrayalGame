@@ -29,29 +29,9 @@ void ABaseInteractable::OnInteract(AActor* Interactor)
 	Destroy();
 }
 
-void ABaseInteractable::ServerOnInteract_Implementation(AActor* Interactor)
+void ABaseInteractable::InteractEvent_Implementation(AActor* Interactor)
 {
-	NetMulticastOnInteract(Interactor);
-}
-
-void ABaseInteractable::NetMulticastOnInteract_Implementation(AActor* Interactor)
-{
-	if(HasAuthority())
-	{
-		//GEngine->AddOnScreenDebugMessage(-10, 5.0f, FColor::Purple, this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
-		GEngine->AddOnScreenDebugMessage(-11, 5.0f, FColor::Purple, "Local: " + FString::FromInt(GetLocalRole()) + " Remote: " + FString::FromInt(GetRemoteRole()) + " " + this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
-	}
-	else
-	{
-		//GEngine->AddOnScreenDebugMessage(-12, 5.0f, FColor::Cyan, this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
-		GEngine->AddOnScreenDebugMessage(-13, 1.0f, FColor::Cyan, "Local: " + FString::FromInt(GetLocalRole()) + " Remote: " + FString::FromInt(GetRemoteRole()) + " " + this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
-	}
-}
-
-
-void ABaseInteractable::Server_Destroy_Implementation(class AActor* Who)
-{
-	
+	OnInteract(Interactor);
 }
 
 void ABaseInteractable::OnBeginFocus(AActor* Interactor)
