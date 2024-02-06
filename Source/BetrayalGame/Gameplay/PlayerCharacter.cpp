@@ -107,6 +107,9 @@ void APlayerCharacter::TraceForInteractables()
 	{
 		AActor* HitActor = HitResult.GetActor();
 		
+		if(!HitActor)
+			return;
+		
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
 		{
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
