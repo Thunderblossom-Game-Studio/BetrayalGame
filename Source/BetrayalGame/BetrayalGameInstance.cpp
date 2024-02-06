@@ -41,7 +41,7 @@ void UBetrayalGameInstance::QuitGame()
 }
 
 
-#pragma endregion
+#pragma endregion General
 
 #pragma region UI
 void UBetrayalGameInstance::ShowMainMenu()
@@ -166,7 +166,7 @@ void UBetrayalGameInstance::HideLobby()
 	else
 		Print("UBetrayalGameInstance::HideLobby(): WB_Lobby is null!");
 }
-#pragma endregion
+#pragma endregion UI
 
 #pragma region Save/Load
 void UBetrayalGameInstance::SavePlayerProfile()
@@ -181,7 +181,7 @@ void UBetrayalGameInstance::CheckPlayerProfile()
 {
 }
 
-#pragma endregion
+#pragma endregion Save/Load
 
 #pragma region Networking
 const TSharedPtr<const FUniqueNetId> UBetrayalGameInstance::GetNetID()
@@ -574,4 +574,4 @@ void UBetrayalGameInstance::DestroySessionAndLeaveGame()
 	Sessions->DestroySession(NAME_GameSession);
 }
 
-#pragma endregion
+#pragma endregion Networking
