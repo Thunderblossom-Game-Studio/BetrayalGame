@@ -62,8 +62,10 @@ public:
 
 	virtual void Move(const FInputActionValue& Value) override;
 
+	UFUNCTION(Server, Reliable)
 	void RunStart();
 
+	UFUNCTION(Server, Reliable)
 	void RunEnd();
 
 #pragma endregion 
@@ -75,4 +77,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 };

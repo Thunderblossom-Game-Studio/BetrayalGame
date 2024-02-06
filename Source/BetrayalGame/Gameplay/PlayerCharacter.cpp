@@ -18,7 +18,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
-	
+	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
+	bReplicates = true;
 }
 
 /*void APlayerCharacter::Quit() const
@@ -55,7 +56,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 	const FVector2D MovementInput = Value.Get<FVector2D>();
 
-	if(bIsRunning)
+	if (bIsRunning)		
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	else
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -71,22 +72,22 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 	
 		// Right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-
 		
 		AddMovementInput(ForwardDirection, MovementInput.Y);
 		AddMovementInput(RightDirection , MovementInput.X);
 	}
 }
 
-void APlayerCharacter::RunStart()
+void APlayerCharacter::RunStart_Implementation()
 {
 	bIsRunning = true;
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
-void APlayerCharacter::RunEnd()
+void APlayerCharacter::RunEnd_Implementation()
 {
 	bIsRunning = false;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void APlayerCharacter::BeginPlay()
@@ -119,4 +120,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 	
 	//PlayerInputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &APlayerCharacter::Quit);
+}
+
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
