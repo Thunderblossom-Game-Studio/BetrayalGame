@@ -3,29 +3,36 @@
 
 #include "../Gameplay/PlayerCharacter.h"
 
+#include "BaseInteractable.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 APlayerCharacter::APlayerCharacter()
-{
-
+{	
 	BaseTurnRate = 45.0f;
 	BaseLookUpRate = 45.0f;
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
+
 	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
+
+	InteractableInFocus = nullptr;
+
 	bReplicates = true;
 }
 
-/*void APlayerCharacter::Quit() const
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, false);
-}*/
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+}
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
 {
@@ -90,6 +97,58 @@ void APlayerCharacter::RunEnd_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+void APlayerCharacter::TraceForInteractables()
+{
+	FVector TraceStart = CameraComponent->GetComponentLocation();
+	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(FName(TEXT("")), false, this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
+	{
+		AActor* HitActor = HitResult.GetActor();
+		
+		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
+		{
+			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
+		}
+		else if (!HitActor->Implements<UInteractable>())
+		{
+			InteractableInFocus = nullptr;
+		}
+	}
+	else
+	{
+		InteractableInFocus = nullptr;
+	}
+	
+	DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue,false,0.1f,-1,1.0f);
+}
+
+void APlayerCharacter::LocalInteract()
+{
+	if(InteractableInFocus)
+	{
+		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
+	}
+}
+
+void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
+{
+	if(Interactable)
+		Interactable->OnInteract(NewOwner);
+	
+	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Owner: " + NewOwner->GetActorLabel());
+	
+	NetMulticast_Interact(NewOwner,Interactable);
+}
+
+void APlayerCharacter::NetMulticast_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
+{
+	// if(NewOwner)
+	// 	GEngine->AddOnScreenDebugMessage(-11, 2.0f, FColor::Green, "Interactable Owner: " + NewOwner->GetActorLabel());
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -102,6 +161,27 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (Controller && Controller->IsLocalPlayerController())
+	{
+		if(HasAuthority())
+		{
+			if(!InteractableInFocus)
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
+			else
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
+		}
+		else
+		{
+			if(!InteractableInFocus)
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
+			else
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
+		}
+	}
+
+
+	TraceForInteractables();
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -117,9 +197,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &APlayerCharacter::RunStart);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
+
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
 	}
-	
-	//PlayerInputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &APlayerCharacter::Quit);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
