@@ -41,7 +41,7 @@ void UBetrayalGameInstance::QuitGame()
 }
 
 
-#pragma endregion
+#pragma endregion General
 
 #pragma region UI
 void UBetrayalGameInstance::ShowMainMenu()
@@ -166,7 +166,7 @@ void UBetrayalGameInstance::HideLobby()
 	else
 		Print("UBetrayalGameInstance::HideLobby(): WB_Lobby is null!");
 }
-#pragma endregion
+#pragma endregion UI
 
 #pragma region Save/Load
 void UBetrayalGameInstance::SavePlayerProfile()
@@ -181,7 +181,7 @@ void UBetrayalGameInstance::CheckPlayerProfile()
 {
 }
 
-#pragma endregion
+#pragma endregion Save/Load
 
 #pragma region Networking
 const TSharedPtr<const FUniqueNetId> UBetrayalGameInstance::GetNetID()
@@ -191,7 +191,7 @@ const TSharedPtr<const FUniqueNetId> UBetrayalGameInstance::GetNetID()
 
 void UBetrayalGameInstance::UI_HostGame()
 {
-	HostSession(GetNetID(), "Some Test", false, false, 4);
+	HostSession(GetNetID(), "Some Test", false, true, 4);
 }
 
 void UBetrayalGameInstance::UI_JoinGame()
@@ -231,11 +231,12 @@ bool UBetrayalGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, F
 		SessionSettings->bShouldAdvertise = true;
 		SessionSettings->bAllowJoinViaPresence = true;
 		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+		SessionSettings->bUseLobbiesIfAvailable = true;
 
 		if(LevelToLoad != "")
 		{
 			const FString MapName = LevelToLoad;
-			SessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+			SessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true);
 		}
 		else
@@ -574,4 +575,4 @@ void UBetrayalGameInstance::DestroySessionAndLeaveGame()
 	Sessions->DestroySession(NAME_GameSession);
 }
 
-#pragma endregion
+#pragma endregion Networking
