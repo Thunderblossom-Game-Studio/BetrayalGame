@@ -3,14 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interactable.h"
 #include "GameFramework/Actor.h"
 #include "BaseInteractable.generated.h"
 
 UCLASS()
-class BETRAYALGAME_API ABaseInteractable : public AActor 
+class BETRAYALGAME_API ABaseInteractable : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
+public:
+	
+	UPROPERTY(Replicated)
+	class ABaseCharacter* InteractableOwner;
+private:
+	
 #pragma region Interaction
 public:
 	virtual void OnInteract(class ABaseCharacter* Interactor);
@@ -20,7 +27,10 @@ public:
 
 	UFUNCTION(NetMulticast,Reliable)
 	void NetMulticastOnInteract(class ABaseCharacter* Interactor);
-	
+
+	UFUNCTION(Server,Reliable)
+	void Server_Destroy(class AActor* Who);
+		
 	UFUNCTION()
 	virtual void OnBeginFocus(class ABaseCharacter* Interactor);
 

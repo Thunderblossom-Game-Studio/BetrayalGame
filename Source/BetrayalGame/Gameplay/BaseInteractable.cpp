@@ -4,7 +4,7 @@
 #include "../Gameplay/BaseInteractable.h"
 
 #include "BaseCharacter.h"
-
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -14,23 +14,21 @@ ABaseInteractable::ABaseInteractable()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SetReplicates(true);
-
-	Tags.Add("Interactable");
 }
 
 void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ABaseInteractable, InteractableOwner);
 	
 }
 
 void ABaseInteractable::OnInteract(ABaseCharacter* Interactor)
 {
 
-	Destroy();
 
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetActorLabel() + " Interacted with " + GetActorLabel());
+
 	
 }
 
@@ -41,7 +39,40 @@ void ABaseInteractable::ServerOnInteract_Implementation(ABaseCharacter* Interact
 
 void ABaseInteractable::NetMulticastOnInteract_Implementation(ABaseCharacter* Interactor)
 {
-	OnInteract(Interactor);
+	if(HasAuthority())
+	{
+		if(!GetOwner())
+			return;
+		
+		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Cyan, this->GetName() + " is now owned by " + GetOwner()->GetName());
+	}
+	else
+	{
+		if(!GetOwner())
+			return;
+		
+		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Purple, this->GetName() + " is now owned by " + GetOwner()->GetName());
+
+	}
+		
+	// if(HasAuthority())
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Purple, this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
+	// 	//Destroy();
+	// }
+	// else
+	// {
+	// 	
+	// 	Server_Destroy_Implementation(Interactor);
+	// }
+}
+
+
+void ABaseInteractable::Server_Destroy_Implementation(class AActor* Who)
+{
+	GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Purple, this->GetName() + " was destroyed by  " + Who->GetActorLabel());
+	
+	Destroy();
 }
 
 void ABaseInteractable::OnBeginFocus(ABaseCharacter* Interactor)
@@ -64,6 +95,13 @@ void ABaseInteractable::BeginPlay()
 void ABaseInteractable::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	
+	if(!InteractableOwner)
+		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Red, "My name is " + this->GetName() + " and I have no owner");
+	else
+		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Green, "My name is " + this->GetName() + " and my owner is " + InteractableOwner->GetName());
+
 
 }
 

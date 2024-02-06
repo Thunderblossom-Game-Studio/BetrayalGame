@@ -108,46 +108,32 @@ void APlayerCharacter::TraceForInteractables()
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "Not local player");
 	}
 	
-	FVector TraceStart = CameraComponent->GetComponentLocation();
-	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
 
-	FHitResult HitResult;
-	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
+}
 
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
-	{
-		AActor* HitActor = HitResult.GetActor();
-		
-		if(!HitActor)
-			return;
-		
-		if(HitActor->Implements<ABaseInteractable>() && HitActor != InteractableInFocus)
-		{
-			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
-			
-			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, InteractableInFocus->GetActorLabel() + " detected by line trace!");
-		}
-		else if (!HitActor->Implements<ABaseInteractable>())
-		{
-			InteractableInFocus = nullptr;
-		}
-	}
+void APlayerCharacter::NetMulticast_Trace_Implementation()
+{
+	
+}
 
-	DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue);
+void APlayerCharacter::Server_Trace_Implementation()
+{
+	NetMulticast_Trace();
 }
 
 void APlayerCharacter::Server_Interact_Implementation()
 {
+	InteractableInFocus->InteractableOwner = this;
 	NetMulticast_Interact();
 }
 
 void APlayerCharacter::NetMulticast_Interact_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Interact called!");
-	
 	if(InteractableInFocus)
 	{
-		InteractableInFocus->ServerOnInteract(this);
+		GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Interact called!");
+		
+		//InteractableInFocus->ServerOnInteract_Implementation(this);
 	}
 }
 
@@ -163,8 +149,63 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (Controller && Controller->IsLocalPlayerController())
+	{
+		
+		if(HasAuthority())
+		{
+			if(!InteractableInFocus)
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
+			}
+			
+		}
+		else
+		{
+			if(!InteractableInFocus)
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
+			}
+		}
+	}
 	
-	TraceForInteractables();
+	FVector TraceStart = CameraComponent->GetComponentLocation();
+	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(FName(TEXT("")), false, this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
+	{
+		AActor* HitActor = HitResult.GetActor();
+		
+		if(!HitActor)
+		{
+			InteractableInFocus = nullptr;
+			return;
+		}
+			
+				
+		//GEngine->AddOnScreenDebugMessage(5, 0.0f, FColor::Green, "Looking at: " + HitActor->GetActorLabel());
+		
+
+		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "Looking at Interactable: " + HitActor->GetActorLabel());
+			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
+		}
+		else if (!HitActor->Implements<UInteractable>())
+		{
+			InteractableInFocus = nullptr;
+		}
+	}
+	
+	DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue,false,0.1f,-1,1.0f);
+	
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -181,6 +222,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &APlayerCharacter::RunStart);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
 
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Server_Interact);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Server_Interact_Implementation);
 	}
 }
