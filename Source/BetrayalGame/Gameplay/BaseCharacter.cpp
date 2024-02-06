@@ -127,7 +127,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	NetDebugging();
-	
 }
 
 // Called to bind functionality to input

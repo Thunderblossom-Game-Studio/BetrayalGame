@@ -21,10 +21,10 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
 
+	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
+
 	InteractableInFocus = nullptr;
 
-	//bReplicates = true;
-	
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -62,7 +62,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 	const FVector2D MovementInput = Value.Get<FVector2D>();
 
-	if(bIsRunning)
+	if (bIsRunning)		
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	else
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -84,14 +84,16 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void APlayerCharacter::RunStart()
+void APlayerCharacter::RunStart_Implementation()
 {
 	bIsRunning = true;
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
-void APlayerCharacter::RunEnd()
+void APlayerCharacter::RunEnd_Implementation()
 {
 	bIsRunning = false;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void APlayerCharacter::TraceForInteractables()
@@ -197,4 +199,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
 	}
+}
+
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
