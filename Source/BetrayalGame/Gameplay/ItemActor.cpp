@@ -32,7 +32,7 @@ void AItemActor::OnInteract(AActor* Interactor)
 {
 	Super::OnInteract(Interactor);
 
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetActorLabel() + " Interacted with " + ItemData.DataTable.GetName());
+	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor. + " Interacted with " + ItemData.DataTable.GetName());
 }
 
 // Called every frame

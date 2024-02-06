@@ -135,7 +135,7 @@ void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, cl
 	if(Interactable)
 		Interactable->OnInteract(NewOwner);
 	
-	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Owner: " + NewOwner->GetActorLabel());
+	//GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Owner: " + NewOwner->GetActorLabel());
 	
 	NetMulticast_Interact(NewOwner,Interactable);
 }
