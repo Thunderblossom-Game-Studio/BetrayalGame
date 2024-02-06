@@ -12,30 +12,17 @@ class BETRAYALGAME_API ABaseInteractable : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
-public:
-	
-	UPROPERTY(Replicated)
-	class ABaseCharacter* InteractableOwner;
-private:
 	
 #pragma region Interaction
 public:
-	virtual void OnInteract(class ABaseCharacter* Interactor);
-
-	UFUNCTION(Server,Reliable)
-	void ServerOnInteract(class ABaseCharacter* Interactor);
-
-	UFUNCTION(NetMulticast,Reliable)
-	void NetMulticastOnInteract(class ABaseCharacter* Interactor);
-
-	UFUNCTION(Server,Reliable)
-	void Server_Destroy(class AActor* Who);
-		
 	UFUNCTION()
-	virtual void OnBeginFocus(class ABaseCharacter* Interactor);
+	virtual void OnInteract(class AActor* Interactor);
+	
+	UFUNCTION()
+	virtual void OnBeginFocus(class AActor* Interactor);
 
 	UFUNCTION()
-	virtual void OnEndFocus(class ABaseCharacter* Interactor);
+	virtual void OnEndFocus(class AActor* Interactor);
 
 private:
 #pragma endregion 

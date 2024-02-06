@@ -58,7 +58,7 @@ private:
 #pragma region Interactable Overrides
 public:
 	
-	virtual void OnInteract(class ABaseCharacter* Interactor) override;
+	virtual void OnInteract(class AActor* Interactor) override;
 
 private:
 #pragma endregion

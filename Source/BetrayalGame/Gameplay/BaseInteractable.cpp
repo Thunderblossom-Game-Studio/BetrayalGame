@@ -14,72 +14,51 @@ ABaseInteractable::ABaseInteractable()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SetReplicates(true);
+	bAlwaysRelevant = true;
 }
 
 void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ABaseInteractable, InteractableOwner);
 	
 }
 
-void ABaseInteractable::OnInteract(ABaseCharacter* Interactor)
+void ABaseInteractable::OnInteract(AActor* Interactor)
 {
 
-
-
-	
+	Destroy();
 }
 
-void ABaseInteractable::ServerOnInteract_Implementation(ABaseCharacter* Interactor)
+void ABaseInteractable::ServerOnInteract_Implementation(AActor* Interactor)
 {
 	NetMulticastOnInteract(Interactor);
 }
 
-void ABaseInteractable::NetMulticastOnInteract_Implementation(ABaseCharacter* Interactor)
+void ABaseInteractable::NetMulticastOnInteract_Implementation(AActor* Interactor)
 {
 	if(HasAuthority())
 	{
-		if(!GetOwner())
-			return;
-		
-		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Cyan, this->GetName() + " is now owned by " + GetOwner()->GetName());
+		//GEngine->AddOnScreenDebugMessage(-10, 5.0f, FColor::Purple, this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
+		GEngine->AddOnScreenDebugMessage(-11, 5.0f, FColor::Purple, "Local: " + FString::FromInt(GetLocalRole()) + " Remote: " + FString::FromInt(GetRemoteRole()) + " " + this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
 	}
 	else
 	{
-		if(!GetOwner())
-			return;
-		
-		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Purple, this->GetName() + " is now owned by " + GetOwner()->GetName());
-
+		//GEngine->AddOnScreenDebugMessage(-12, 5.0f, FColor::Cyan, this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
+		GEngine->AddOnScreenDebugMessage(-13, 1.0f, FColor::Cyan, "Local: " + FString::FromInt(GetLocalRole()) + " Remote: " + FString::FromInt(GetRemoteRole()) + " " + this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
 	}
-		
-	// if(HasAuthority())
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Purple, this->GetName() + " was destroyed by  " + Interactor->GetActorLabel());
-	// 	//Destroy();
-	// }
-	// else
-	// {
-	// 	
-	// 	Server_Destroy_Implementation(Interactor);
-	// }
 }
 
 
 void ABaseInteractable::Server_Destroy_Implementation(class AActor* Who)
 {
-	GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Purple, this->GetName() + " was destroyed by  " + Who->GetActorLabel());
 	
-	Destroy();
 }
 
-void ABaseInteractable::OnBeginFocus(ABaseCharacter* Interactor)
+void ABaseInteractable::OnBeginFocus(AActor* Interactor)
 {
 }
 
-void ABaseInteractable::OnEndFocus(ABaseCharacter* Interactor)
+void ABaseInteractable::OnEndFocus(AActor* Interactor)
 {
 }
 
@@ -88,6 +67,9 @@ void ABaseInteractable::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Local Role for " + this->GetName() + " is: " + FString::FromInt(GetLocalRole()));
+	
+	GEngine->AddOnScreenDebugMessage(-11, 10.0f, FColor::Green, "Remote Role for " + this->GetName() + " is: " + FString::FromInt(GetRemoteRole()));
 	
 }
 
@@ -96,12 +78,6 @@ void ABaseInteractable::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	
-	if(!InteractableOwner)
-		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Red, "My name is " + this->GetName() + " and I have no owner");
-	else
-		GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Green, "My name is " + this->GetName() + " and my owner is " + InteractableOwner->GetName());
-
 
 }
 

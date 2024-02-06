@@ -28,7 +28,7 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AItemActor, ItemData);
 }
 
-void AItemActor::OnInteract(ABaseCharacter* Interactor)
+void AItemActor::OnInteract(AActor* Interactor)
 {
 	Super::OnInteract(Interactor);
 

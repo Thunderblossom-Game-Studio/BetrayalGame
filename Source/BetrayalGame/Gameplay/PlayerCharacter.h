@@ -83,28 +83,22 @@ private:
 #pragma region Interaction
 public:
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
 	class ABaseInteractable* InteractableInFocus;
 	
 	void TraceForInteractables();
-
-	UFUNCTION(Server,Reliable)
-	void Server_Trace();
-
-	UFUNCTION(NetMulticast,Reliable)
-	void NetMulticast_Trace();
-
+	
+	void LocalInteract();
 	
 	UFUNCTION(Server, Reliable)
-	void Server_Interact();
+	void Server_Interact(class AActor* NewOwner, class ABaseInteractable* Interactable);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticast_Interact();
+	void NetMulticast_Interact(class AActor* NewOwner, class ABaseInteractable* Interactable);
 
 private:
 #pragma endregion 
 
-	
 protected:
 	virtual void BeginPlay() override;
 

@@ -21,6 +21,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ABaseCharacter, CurrentHealth);
 	DOREPLIFETIME(ABaseCharacter, bIsDead);
+	DOREPLIFETIME(ABaseCharacter, bIsRunning);
 }
 
 void ABaseCharacter::NetDebugging()
@@ -47,7 +48,7 @@ void ABaseCharacter::NetDebugging()
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Client!");
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, "You are the Client!");
 
 			const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
 			GEngine->AddOnScreenDebugMessage(-2, 0.0f, FColor::White, healthMessage);
