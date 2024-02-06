@@ -124,7 +124,7 @@ void APlayerCharacter::TraceForInteractables()
 		InteractableInFocus = nullptr;
 	}
 	
-	DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue,false,0.1f,-1,1.0f);
+	//DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue,false,0.1f,-1,1.0f);
 }
 
 void APlayerCharacter::LocalInteract()
