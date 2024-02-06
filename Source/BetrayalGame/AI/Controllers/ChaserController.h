@@ -28,7 +28,8 @@ protected:
 	float LineOfSightTimer = 3.0f;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FTimerHandle LOSTimerHandle;
-	
+
+// Exposed Functions/Events
 public:
 	UFUNCTION()
 	void OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus);
@@ -39,6 +40,7 @@ public:
 public:	
 	const UAISenseConfig_Sight* GetSightConfig() const { return SightConfig; }
 
+// Cached Variables
 private:
 	UPROPERTY()
 	UWorld* World;

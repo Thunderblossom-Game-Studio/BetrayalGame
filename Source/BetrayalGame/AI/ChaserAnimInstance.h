@@ -18,7 +18,9 @@ public:
 	UChaserAnimInstance();
 
 	virtual void NativeInitializeAnimation() override;
-	
+
+#pragma region Animation Conditions
+// Exposed Variables
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed;
@@ -27,8 +29,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
 	class AChaser* Pawn;
 
+// Exposed Functions
 public:
 	UFUNCTION(BlueprintCallable, Category = "Monster | Animation")
 	void CustomAnimUpdate();
+	
+#pragma endregion
 	
 };

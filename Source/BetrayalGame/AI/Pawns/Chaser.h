@@ -28,7 +28,6 @@ private:
 	float MoveSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed;
-
 	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
 	bool bSprinting;
 	

@@ -47,7 +47,7 @@ public:
 #pragma region Movement
 // Variables
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
 	TEnumAsByte<ERoomTraversalType> RoomTraversalType;
 
 // Getters
