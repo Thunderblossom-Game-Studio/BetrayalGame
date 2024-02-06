@@ -14,7 +14,7 @@ ABaseInteractable::ABaseInteractable()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SetReplicates(true);
-	bAlwaysRelevant = true;
+	//bAlwaysRelevant = true;
 }
 
 void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -23,7 +23,7 @@ APlayerCharacter::APlayerCharacter()
 
 	InteractableInFocus = nullptr;
 
-	bReplicates = true;
+	//bReplicates = true;
 	
 }
 
