@@ -20,7 +20,8 @@ public:
 
 	APlayerCharacter();
 
-	//void Quit() const;
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
 	
 #pragma region Camera
@@ -41,7 +42,6 @@ public:
 private:
 #pragma endregion 
 	
-	
 #pragma region Input
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
@@ -56,16 +56,47 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* RunAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
+private:
 #pragma endregion
 
 #pragma region Movement
-
+public:
 	virtual void Move(const FInputActionValue& Value) override;
 
 	void RunStart();
 
 	void RunEnd();
+private:
+#pragma endregion
 
+#pragma region Inventory
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	class UInventoryComponent* InventoryComponent;
+
+private:	
+#pragma endregion 
+
+#pragma region Interaction
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	class ABaseInteractable* InteractableInFocus;
+	
+	void TraceForInteractables();
+	
+	void LocalInteract();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Interact(class AActor* NewOwner, class ABaseInteractable* Interactable);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_Interact(class AActor* NewOwner, class ABaseInteractable* Interactable);
+
+private:
 #pragma endregion 
 
 protected:
