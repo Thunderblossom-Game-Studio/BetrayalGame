@@ -13,5 +13,8 @@ UCLASS()
 class BETRAYALGAME_API ABetrayalGameMode : public AGameMode
 {
 	GENERATED_BODY()
+
+public:
+	void StartMatch() override;
 	
 };
