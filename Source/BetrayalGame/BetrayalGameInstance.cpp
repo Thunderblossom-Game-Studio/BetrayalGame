@@ -8,7 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
-#include "Lobby/Widget_SessionConnectBtn.h"
+#include "Steam/steam_api.h"
 
 #pragma region General
 
@@ -82,17 +82,17 @@ void UBetrayalGameInstance::ShowMainMenu()
 	// Bind the play button to the play function
 	if (UButton* PlayButton = Cast<UButton>(WB_MainMenu->GetWidgetFromName("Btn_Play")))
 	{
-		PlayButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::ShowLobby);
-		PlayButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideMainMenu);
+		//PlayButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::ShowLobby);
+		//PlayButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideMainMenu);
 	}
 	else
 		Print("UBetrayalGameInstance::ShowMainMenu(): Play button not found!");
 
 	// Bind the quit button to the quit function
-	if (UButton* QuitButton = Cast<UButton>(WB_MainMenu->GetWidgetFromName("Btn_Quit")))
-		QuitButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::QuitGame);
-	else
-		Print("UBetrayalGameInstance::ShowMainMenu(): Quit button not found!");
+	// if (UButton* QuitButton = Cast<UButton>(WB_MainMenu->GetWidgetFromName("Btn_Quit")))
+	// 	//QuitButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::QuitGame);
+	// else
+	// 	Print("UBetrayalGameInstance::ShowMainMenu(): Quit button not found!");
 }
 
 void UBetrayalGameInstance::HideMainMenu()
@@ -141,15 +141,15 @@ void UBetrayalGameInstance::ShowLobby()
 	// Set up button bindings
 	if (UButton* HostButton = Cast<UButton>(WB_Lobby->GetWidgetFromName("Btn_HostGame")))
 	{
-		HostButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_HostGame);
-		HostButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
+		//HostButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_HostGame);
+		//HostButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
 	}
 	else
 		Print("UBetrayalGameInstance::ShowLobby(): Host game button not found!");
 
 	if (UButton* JoinButton = Cast<UButton>(WB_Lobby->GetWidgetFromName("Btn_JoinGame")))
 	{
-		JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_JoinGame);
+		//JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_JoinGame);
 		//JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
 
 		// Search for online games
