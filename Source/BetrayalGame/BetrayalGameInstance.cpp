@@ -191,7 +191,7 @@ const TSharedPtr<const FUniqueNetId> UBetrayalGameInstance::GetNetID()
 
 void UBetrayalGameInstance::UI_HostGame()
 {
-	HostSession(GetNetID(), "Some Test", false, true, 4);
+	HostSession(GetNetID(), NAME_GameSession, false, true, 6);
 }
 
 void UBetrayalGameInstance::UI_JoinGame()
@@ -344,12 +344,8 @@ void UBetrayalGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, 
 
 		SessionSearch->bIsLanQuery = bIsLAN;
 		SessionSearch->MaxSearchResults = 10000;
-		SessionSearch->PingBucketSize = 50;
-
-		if (bIsPresence)
-		{
-			SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
-		}
+		SessionSearch->PingBucketSize = 5000;
+		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
 
 		TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
 
@@ -367,7 +363,8 @@ void UBetrayalGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, 
 
 void UBetrayalGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
-	Print("Session search completed: " + FString::FromInt(bWasSuccessful));
+	const FString log = (bWasSuccessful) ? "Session search completed successfully!" : "Session search failed!";
+	Print(log);
 
 	IOnlineSubsystem* const OnlineSubsystem = IOnlineSubsystem::Get();
 	if (!OnlineSubsystem)
