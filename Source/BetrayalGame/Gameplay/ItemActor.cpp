@@ -4,6 +4,7 @@
 #include "../Gameplay/ItemActor.h"
 
 #include "BaseCharacter.h"
+#include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -32,6 +33,19 @@ void AItemActor::OnInteract(AActor* Interactor)
 {
 	Super::OnInteract(Interactor);
 
+	FItem Item = *ItemData.DataTable->FindRow<FItem>(ItemData.RowName, "Paper");
+	//FItem Item* = ItemData.DataTable->FindRow<FItem>(ItemData.RowName, "Paper");
+
+	// Cast interactor to player
+	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
+
+	Player->ActorItem = &Item;
+
+	GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Interactor->GetName() + " picked up " + Player->ActorItem->ItemName.ToString());
+	
+	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetName() + " Interacted with " + Item.ItemDescription.ToString());
+	
+	Destroy();
 	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor. + " Interacted with " + ItemData.DataTable.GetName());
 }
 

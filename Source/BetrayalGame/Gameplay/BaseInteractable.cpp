@@ -25,8 +25,10 @@ void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 void ABaseInteractable::OnInteract(AActor* Interactor)
 {
-
-	Destroy();
+	if(ActorHasTag("Door"))
+		Destroy();
+	
+	
 }
 
 void ABaseInteractable::InteractEvent_Implementation(AActor* Interactor)

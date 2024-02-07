@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "../Gameplay/BaseCharacter.h"
+#include "ItemActor.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -78,6 +79,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	class UInventoryComponent* InventoryComponent;
+
+	FItem* ActorItem;
 
 private:	
 #pragma endregion 

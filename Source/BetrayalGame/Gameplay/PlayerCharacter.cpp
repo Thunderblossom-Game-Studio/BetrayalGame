@@ -133,6 +133,8 @@ void APlayerCharacter::LocalInteract()
 	{
 		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
 	}
+
+
 }
 
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
@@ -172,13 +174,24 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
 			else
 				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
+
+			if(!ActorItem)
+				GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, "No item owned");
+			else
+				GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, "Owned item: " );
+				
 		}
 		else
 		{
 			if(!InteractableInFocus)
-				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
+				GEngine->AddOnScreenDebugMessage(0, 0.0f, FColor::Red, "InteractableInFocus is null");
 			else
-				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
+				GEngine->AddOnScreenDebugMessage(0, 0.0f, FColor::Green, "InteractableInFocus is not null");
+
+			if(!ActorItem)
+				GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Red, "No item owned");
+			else
+				GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Owned item: ");
 		}
 	}
 
