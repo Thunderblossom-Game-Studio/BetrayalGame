@@ -13,5 +13,5 @@ UCLASS()
 class BETRAYALGAME_API ABetrayalGameState : public AGameState
 {
 	GENERATED_BODY()
-	
+
 };
