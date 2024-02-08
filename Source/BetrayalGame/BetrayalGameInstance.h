@@ -28,8 +28,8 @@ class BETRAYALGAME_API UBetrayalGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 #pragma region General
-
 	UBetrayalGameInstance(const FObjectInitializer& ObjectInitializer);
+	virtual void Init() override;
 	
 	UFUNCTION(BlueprintCallable, Category = "General")
 	void QuitGame();
@@ -195,6 +195,16 @@ private:
 	 *	@param	Result			Result of the async action
 	 */
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	// Invite Handling
+	FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
+	FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
+
+	FDelegateHandle OnSessionInviteReceivedDelegateHandle;
+	FOnSessionInviteReceivedDelegate OnSessionInviteReceivedDelegate;
+	
+	void OnSessionInviteReceived(const FUniqueNetId& UniqueNetId, const FUniqueNetId& UniqueNetId1, const FString& String, const FOnlineSessionSearchResult& OnlineSessionSearchResult);
+	void OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
 public:
 	// Clear sessions

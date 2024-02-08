@@ -32,6 +32,25 @@ UBetrayalGameInstance::UBetrayalGameInstance(const FObjectInitializer& ObjectIni
 	// Session destroy function binding
 	OnDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(
 		this, &UBetrayalGameInstance::OnDestroySessionComplete);
+
+	// Invite accepted function binding
+	OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(
+		this, &UBetrayalGameInstance::OnSessionUserInviteAccepted);
+
+	OnSessionInviteReceivedDelegate = FOnSessionInviteReceivedDelegate::CreateUObject(
+		this, &UBetrayalGameInstance::OnSessionInviteReceived);
+}
+
+void UBetrayalGameInstance::Init()
+{
+	Super::Init();
+
+	const auto SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegate);
+		SessionInterface->AddOnSessionInviteReceivedDelegate_Handle(OnSessionInviteReceivedDelegate);
+	}
 }
 
 void UBetrayalGameInstance::QuitGame()
@@ -344,7 +363,7 @@ void UBetrayalGameInstance::FindSessions(TSharedPtr<const FUniqueNetId> UserId, 
 
 		SessionSearch->bIsLanQuery = bIsLAN;
 		SessionSearch->MaxSearchResults = 10000;
-		SessionSearch->PingBucketSize = 5000;
+		SessionSearch->PingBucketSize = 50;
 		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
 
 		TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
@@ -478,6 +497,19 @@ void UBetrayalGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSess
 			Print(SessionName.ToString() + " resolved to: " + TravelURL);
 			PlayerController->ClientTravel(TravelURL + "?listen", ETravelType::TRAVEL_Absolute);
 		}
+	}
+}
+
+void UBetrayalGameInstance::OnSessionInviteReceived(const FUniqueNetId& UniqueNetId, const FUniqueNetId& UniqueNetId1, const FString& String, const FOnlineSessionSearchResult& OnlineSessionSearchResult)
+{
+	Print("OnSessionInviteReceived: " + String);
+}
+
+void UBetrayalGameInstance::OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult)
+{
+	if (bWasSuccesful)
+	{
+		JoinSession(UserId, NAME_GameSession, InviteResult);
 	}
 }
 
