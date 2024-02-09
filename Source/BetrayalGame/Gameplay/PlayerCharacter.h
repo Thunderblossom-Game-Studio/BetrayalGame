@@ -21,6 +21,8 @@ public:
 
 	APlayerCharacter();
 
+	void DebugInput();
+	
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
@@ -80,7 +82,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	class UInventoryComponent* InventoryComponent;
 
-	FItem* ActorItem;
+	UPROPERTY(Replicated)
+	FItem ActorItem;
+
+	UFUNCTION()
+	void OnRep_ActorItem();
+		
+	UFUNCTION(Server, Reliable)
+	void Server_AddItemToInventory(FItem Item, APlayerCharacter* Player);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnItemActor(FItem Item);
 
 private:	
 #pragma endregion 

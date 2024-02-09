@@ -27,9 +27,18 @@ APlayerCharacter::APlayerCharacter()
 
 }
 
+void APlayerCharacter::DebugInput()
+{
+	//APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
+
+	Server_SpawnItemActor(ActorItem);
+}
+
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, ActorItem);
 	
 }
 
@@ -96,6 +105,34 @@ void APlayerCharacter::RunEnd_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+void APlayerCharacter::Server_AddItemToInventory_Implementation(FItem Item, APlayerCharacter* Player)
+{
+	Player->ActorItem = Item;
+
+	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Player->ActorItem.ItemName.ToString() + " to " + Player->GetName());
+}
+
+void APlayerCharacter::Server_SpawnItemActor_Implementation(FItem Item)
+{
+	//Spawn item actor
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
+	FRotator SpawnRotation = GetActorRotation();
+
+	AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item.ItemActor, SpawnLocation, SpawnRotation, SpawnParams);
+	
+	if(ItemActor)
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, "Item Spawned: " + ItemActor->GetName());
+}
+
+void APlayerCharacter::OnRep_ActorItem()
+{
+	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + ActorItem.ItemName.ToString() + " was replicated.");
+}
+
 void APlayerCharacter::TraceForInteractables()
 {
 	FVector TraceStart = CameraComponent->GetComponentLocation();
@@ -133,8 +170,6 @@ void APlayerCharacter::LocalInteract()
 	{
 		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
 	}
-
-
 }
 
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
@@ -174,12 +209,6 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
 			else
 				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
-
-			if(!ActorItem)
-				GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, "No item owned");
-			else
-				GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, "Owned item: " );
-				
 		}
 		else
 		{
@@ -187,11 +216,6 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 				GEngine->AddOnScreenDebugMessage(0, 0.0f, FColor::Red, "InteractableInFocus is null");
 			else
 				GEngine->AddOnScreenDebugMessage(0, 0.0f, FColor::Green, "InteractableInFocus is not null");
-
-			if(!ActorItem)
-				GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Red, "No item owned");
-			else
-				GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Owned item: ");
 		}
 	}
 
@@ -215,4 +239,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
 	}
+
+	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);
 }
