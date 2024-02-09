@@ -3,3 +3,9 @@
 
 #include "../Gameplay/BetrayalGameMode.h"
 
+void ABetrayalGameMode::StartMatch()
+{
+	Super::StartMatch();
+
+	
+}

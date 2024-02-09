@@ -51,11 +51,31 @@ public:
 	const UAISenseConfig_Sight* GetSightConfig() const { return SightConfig; }
 	const UAISenseConfig_Hearing* GetHearingConfig() const { return HearingConfig; }
 	const UAISenseConfig_Damage* GetDamageConfig() const { return DamageConfig; }
+	
+#pragma endregion
 
+#pragma region Line Of Sight
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player | Perception | Sight", meta = (AllowPrivateAccess = "true"))
+	class AMonster* AttackingMonster;
+	UPROPERTY(BlueprintReadOnly, Category = "Player | Perception | Sight", meta = (AllowPrivateAccess = "true"))
+	float LineOfSightTimer = 4.0f;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FTimerHandle LOSTimerHandle;
+
+	// Exposed Functions/Events
+public:
+	UFUNCTION(BlueprintCallable)
+	void LOSRecaptureFail();
+
+#pragma endregion
+
+	
 	// Cached Variables
 private:
 	UPROPERTY()
-	UWorld* World;
+	UWorld* World;	
+	UPROPERTY()
+	class APlayerCharacter* PlayerCharacter;
 	
-#pragma endregion
 };
