@@ -132,8 +132,7 @@ void UBetrayalGameInstance::ShowLobby()
 	// Add the Lobby widget to the viewport
 	if (WB_Lobby)
 		WB_Lobby->AddToViewport();
-
-	if (!WB_Lobby)
+	else
 	{
 		// Returns out to skip setting focus if the widget is null
 		Print("UBetrayalGameInstance::ShowLobby(): WB_Lobby is null!");
@@ -154,27 +153,6 @@ void UBetrayalGameInstance::ShowLobby()
 		InputMode.SetWidgetToFocus(WB_Lobby->GetCachedWidget());
 		PlayerController->SetInputMode(InputMode);
 	}
-	else
-		Print("UBetrayalGameInstance::ShowLobby(): Player controller not found!");
-
-	// Set up button bindings
-	if (UButton* HostButton = Cast<UButton>(WB_Lobby->GetWidgetFromName("Btn_HostGame")))
-	{
-		//HostButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_HostGame);
-		//HostButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
-	}
-	else
-		Print("UBetrayalGameInstance::ShowLobby(): Host game button not found!");
-
-	if (UButton* JoinButton = Cast<UButton>(WB_Lobby->GetWidgetFromName("Btn_JoinGame")))
-	{
-		//JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::UI_JoinGame);
-		//JoinButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideLobby);
-
-		// Search for online games
-	}
-	else
-		Print("UBetrayalGameInstance::ShowLobby(): Join game button not found!");
 }
 
 void UBetrayalGameInstance::HideLobby()
@@ -184,6 +162,37 @@ void UBetrayalGameInstance::HideLobby()
 		WB_Lobby->RemoveFromParent();
 	else
 		Print("UBetrayalGameInstance::HideLobby(): WB_Lobby is null!");
+}
+
+void UBetrayalGameInstance::ShowPasswordField()
+{
+	if (!WB_PasswordField && WB_PasswordFieldClass)
+		WB_PasswordField = CreateWidget<UUserWidget>(GetWorld(), WB_PasswordFieldClass);
+
+	if(WB_PasswordField)
+		WB_PasswordField->AddToViewport();
+	else
+	{
+		Print("UBetrayalGameInstance::ShowPasswordField(): WB_PasswordField is null!");
+		return;
+	}
+
+	// Set focus on the password field
+	if (APlayerController* PlayerController = GetFirstLocalPlayerController())
+	{
+		FInputModeUIOnly InputMode;
+
+		if (const UWidget* PasswordField = WB_PasswordField->GetWidgetFromName("Txt_Password"))
+			InputMode.SetWidgetToFocus(PasswordField->GetCachedWidget());
+		else
+			Print("UBetrayalGameInstance::ShowPasswordField(): Password field not found!");
+
+		PlayerController->SetInputMode(InputMode);
+	}
+}
+
+void UBetrayalGameInstance::HidePasswordField()
+{
 }
 #pragma endregion UI
 
@@ -243,14 +252,30 @@ bool UBetrayalGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, F
 
 		SessionSettings->bIsLANMatch = bIsLAN;
 		SessionSettings->bUsesPresence = bIsPresence;
-		SessionSettings->NumPublicConnections = MaxNumPlayers;
-		SessionSettings->NumPrivateConnections = 0;
+
+		if(bIsPrivate)
+		{
+			// Set the session as private
+			SessionSettings->NumPrivateConnections = MaxNumPlayers;
+			SessionSettings->NumPublicConnections = 0;
+		}
+		else
+		{
+			// Set the session as public
+			SessionSettings->NumPrivateConnections = 0;
+			SessionSettings->NumPublicConnections = MaxNumPlayers;
+		}
+
 		SessionSettings->bAllowInvites = true;
 		SessionSettings->bAllowJoinInProgress = true;
 		SessionSettings->bShouldAdvertise = true;
 		SessionSettings->bAllowJoinViaPresence = true;
 		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
 		SessionSettings->bUseLobbiesIfAvailable = true;
+
+		// Session password
+		SessionSettings->Set(PASSWORD, SessionPassword, EOnlineDataAdvertisementType::ViaOnlineService);
+		
 
 		if(LevelToLoad != "")
 		{
@@ -403,13 +428,7 @@ void UBetrayalGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 
 	// Log number of results
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
-
-	// // Log info about each session
-	// for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
-	// {
-	// 	Print("Session " + FString::FromInt(i) + ": " + SessionSearch->SearchResults[i].Session.OwningUserName);
-	// }
-
+	
 	// Create a widget for each session found
 	if(!WB_Lobby)
 	{
@@ -420,24 +439,10 @@ void UBetrayalGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 	// Clear the session list
 	ClearSessions();
 
-	// Reference to session list
-	UWidget* SessionList = WB_Lobby->GetWidgetFromName("Scrl_Sessions");
-	if(!SessionList)
-	{
-		Print("UBetrayalGameInstance::OnFindSessionsComplete(): Session list is null!");
-		return;
-	}
-
 	// Populate the session list
 	for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
-	{
-		const FString SessionName = SessionSearch->SearchResults[i].Session.OwningUserName;
-		const int32 ConnectedPlayers = SessionSearch->SearchResults[i].Session.SessionSettings.NumPublicConnections - SessionSearch->SearchResults[i].Session.NumOpenPublicConnections;
-		const int32 MaxPlayers = SessionSearch->SearchResults[i].Session.SessionSettings.NumPublicConnections;
-		const int32 Ping = SessionSearch->SearchResults[i].PingInMs;
-		const int32 SearchResultsIndex = i;
-
-		AddSessionToList(FName(*SessionName), ConnectedPlayers, MaxPlayers, Ping, SearchResultsIndex);
+	{		
+		AddSessionToList(FSessionData(SessionSearch->SearchResults[i], i));
 	}
 }
 

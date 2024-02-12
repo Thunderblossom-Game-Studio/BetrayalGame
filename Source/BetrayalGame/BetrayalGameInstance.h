@@ -19,6 +19,23 @@ struct FPlayerProfile
 };
 #pragma endregion
 
+#pragma region Networking
+
+// Session password key
+const FName PASSWORD = "PASSWORD";
+
+// Fucky workaround because FOnlineSessionSearchResult isn't serializable
+// Creating wrapper struct to pass to blueprint, make the button widget, then return to code
+USTRUCT(BlueprintType)
+struct FSessionData
+{
+	GENERATED_BODY()
+	FOnlineSessionSearchResult SearchResult;
+	int32 SessionIndex;
+};
+
+#pragma endregion Networking
+
 /**
  * 
  */
@@ -43,6 +60,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WB_LobbyClass;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WB_PasswordFieldClass;
 	
 public:
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
@@ -50,6 +70,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UUserWidget* WB_Lobby;
+
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UUserWidget* WB_PasswordField;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowMainMenu();
@@ -62,6 +85,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void HideLobby();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowPasswordField();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HidePasswordField();
 #pragma endregion
 
 #pragma region Save/Load
@@ -87,7 +116,16 @@ public:
 	
 #pragma endregion
 
-#pragma region Networking
+#pragma region Networking	
+	// Session password value
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
+	FString SessionPassword = ""; // Password for the session
+
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	int MAX_PLAYERS = 4; // Max number of players in a session
+
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	bool bIsPrivate = false; // Is the session private
 
 private:
 	const TSharedPtr<const FUniqueNetId> GetNetID();
@@ -213,7 +251,7 @@ public:
 
 	// Add session to UI
 	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
-	void AddSessionToList(FName SessionName, int32 ConnectedPlayers, int32 MaxPlayers, int32 Ping, int32 SearchResultsIndex);
+	void AddSessionToList(FSessionData SessionData);
 private:
 #pragma endregion
 
