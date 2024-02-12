@@ -11,7 +11,7 @@ void UWidget_SessionConnectBtn::NativePreConstruct()
 
 	_SessionName = FName(*_SessionData.SearchResult.Session.OwningUserName);
 	_ConnectedPlayers = _SessionData.SearchResult.Session.SessionSettings.NumPublicConnections - _SessionData.SearchResult.Session.NumOpenPublicConnections;
-	_MaxPlayers = _SessionData.SearchResult.Session.SessionSettings.NumPublicConnections;
+	_MaxPlayers = _SessionData.SearchResult.Session.SessionSettings.NumPublicConnections + _SessionData.SearchResult.Session.SessionSettings.NumPrivateConnections;
 	_Ping = _SessionData.SearchResult.PingInMs;
 	_SearchResultsIndex = _SessionData.SessionIndex;
 
