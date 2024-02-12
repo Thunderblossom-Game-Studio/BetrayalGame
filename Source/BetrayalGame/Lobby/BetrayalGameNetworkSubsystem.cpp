@@ -70,7 +70,8 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		{
 			const FString MapName = _GameInstance->LevelToLoad;
 			SessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
-			UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true);
+			//UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true);
+			GetWorld()->ServerTravel(MapName + "?listen", true, false);
 		}
 		else
 		{
@@ -331,7 +332,8 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		{
 			FString url = TravelURL + "?listen";
 			Print(SessionName.ToString() + " resolved to: " + url);
-			PlayerController->ClientTravel(url, ETravelType::TRAVEL_Absolute);
+			//PlayerController->ClientTravel(url, ETravelType::TRAVEL_Absolute);
+			_GameInstance->ClientTravelToSession(0, SessionName);
 		}
 		else
 		{

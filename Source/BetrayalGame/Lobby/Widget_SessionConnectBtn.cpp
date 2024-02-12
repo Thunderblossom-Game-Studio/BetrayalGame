@@ -89,16 +89,12 @@ void UWidget_SessionConnectBtn::UpdateDisplayedData()
 	_SessionName = FName(*_SessionData.Session.OwningUserName);
 
 	// Connected players
-	int32 NumPlayers = 0;
-	NumPlayers += _SessionData.Session.SessionSettings.NumPublicConnections;
-	NumPlayers += _SessionData.Session.SessionSettings.NumPrivateConnections;
-	_ConnectedPlayers = NumPlayers;
+	_ConnectedPlayers += _SessionData.Session.SessionSettings.NumPublicConnections - _SessionData.Session.NumOpenPublicConnections;
+	_ConnectedPlayers += _SessionData.Session.SessionSettings.NumPrivateConnections - _SessionData.Session.NumOpenPrivateConnections;
 
 	// Total player slots
-	int32 MaxPlayers = 0;
-	MaxPlayers += _SessionData.Session.SessionSettings.NumPublicConnections;
-	MaxPlayers += _SessionData.Session.SessionSettings.NumPrivateConnections;
-	_MaxPlayers = MaxPlayers;
+	_MaxPlayers += _SessionData.Session.SessionSettings.NumPublicConnections;
+	_MaxPlayers += _SessionData.Session.SessionSettings.NumPrivateConnections;
 	
 	// Ping
 	_Ping = _SessionData.PingInMs;
