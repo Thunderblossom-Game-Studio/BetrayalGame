@@ -94,7 +94,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers,
 	bool bIsPrivate, FString Password)
 {
-	HostSession(GetNetID(), SessionName, bIsLAN, bIsPresence, MaxNumPlayers, bIsPrivate, Password);
+	HostSession(GetNetID(), NAME_GameSession, bIsLAN, bIsPresence, MaxNumPlayers, bIsPrivate, Password);
 }
 
 void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
