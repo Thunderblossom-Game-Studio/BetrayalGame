@@ -217,18 +217,8 @@ const TSharedPtr<const FUniqueNetId> UBetrayalGameInstance::GetNetID()
 	return UGameplayStatics::GetGameInstance(GetWorld())->GetFirstGamePlayer()->GetPreferredUniqueNetId().GetUniqueNetId();
 }
 
-void UBetrayalGameInstance::UI_HostGame()
-{
-	HostSession(GetNetID(), NAME_GameSession, false, true, 6);
-}
-
-void UBetrayalGameInstance::UI_JoinGame()
-{
-	FindOnlineGames(false, false);
-}
-
 bool UBetrayalGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN,
-                                        bool bIsPresence, int32 MaxNumPlayers)
+                                        bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate, FString Password)
 {
 	IOnlineSubsystem* const OnlineSubsystem = IOnlineSubsystem::Get();
 
@@ -545,9 +535,9 @@ void UBetrayalGameInstance::OnDestroySessionComplete(FName SessionName, bool bWa
 	}
 }
 
-void UBetrayalGameInstance::StartOnlineGame(bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers)
+void UBetrayalGameInstance::StartOnlineGame(bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate, FString Password)
 {
-	HostSession(GetNetID(), NAME_GameSession, bIsLAN, bIsPresence, MaxNumPlayers);
+	HostSession(GetNetID(), NAME_GameSession, bIsLAN, bIsPresence, MaxNumPlayers, bIsPrivate, Password);
 }
 
 void UBetrayalGameInstance::FindOnlineGames(bool bIsLAN, bool bIsPresence)

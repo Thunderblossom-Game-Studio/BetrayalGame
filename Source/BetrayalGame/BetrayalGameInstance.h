@@ -124,9 +124,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
 	int MAX_PLAYERS = 4; // Max number of players in a session
 
-	UPROPERTY(BlueprintReadOnly, Category = "Networking")
-	bool bIsPrivate = false; // Is the session private
-
 private:
 	const TSharedPtr<const FUniqueNetId> GetNetID();
 
@@ -146,13 +143,6 @@ private:
 
 	// Online session settings
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
-
-	// Internal create session method
-	UFUNCTION()
-	void UI_HostGame();
-
-	UFUNCTION()
-	void UI_JoinGame();
 	
 	/**
 	*	Create a joinable session
@@ -163,7 +153,7 @@ private:
 	*	@Param		bIsPresence		Create a presence session (i.e: Discord rich presence)
 	*	@Param		MaxNumPlayers	Total number of allowed connections
 	*/
-	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers);
+	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate, FString Password);
 
 	/**
 	*	Delegate function fired on creating session
@@ -280,7 +270,7 @@ public:
 	 * @param bIsPresence   Create a presence session (i.e: Discord rich presence)
 	 * @param MaxNumPlayers Total number of allowed connections 
 	 */
-	void StartOnlineGame(bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers);
+	void StartOnlineGame(bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate, FString Password);
 
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	/**	Find an online session
