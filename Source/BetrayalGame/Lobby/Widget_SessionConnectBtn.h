@@ -16,10 +16,9 @@ class BETRAYALGAME_API UWidget_SessionConnectBtn : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	// Custom wrapper struct for FOnlineSessionSearchResult
-	UPROPERTY(BlueprintReadWrite, Category = "Lobby")
-	FSessionData _SessionData;
-
+	// Search Result
+	FOnlineSessionSearchResult _SessionData;
+	
 	// Displayed data
 	UPROPERTY(BlueprintReadWrite, Category = "Lobby")
 	FName _SessionName;
@@ -41,11 +40,15 @@ public:
 	// If the session is private
 	UPROPERTY(BlueprintReadOnly, Category = "Lobby")
 	bool _bPrivate;
-	
-	// Set data
-	virtual void NativePreConstruct() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	bool CheckPassword();
+
+	// Construct event
+	virtual void NativeConstruct() override;
+
+	// Join the session
+	UFUNCTION()
+	void OnClick();
 	
 };

@@ -2,51 +2,66 @@
 
 
 #include "Widget_SessionConnectBtn.h"
+
+#include "BetrayalGameNetworkSubsystem.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
-
-
-void UWidget_SessionConnectBtn::NativePreConstruct()
-{
-	Super::NativePreConstruct();
-
-	_SessionName = FName(*_SessionData.SearchResult.Session.OwningUserName);
-	_ConnectedPlayers = _SessionData.SearchResult.Session.SessionSettings.NumPublicConnections - _SessionData.SearchResult.Session.NumOpenPublicConnections;
-	_MaxPlayers = _SessionData.SearchResult.Session.SessionSettings.NumPublicConnections + _SessionData.SearchResult.Session.SessionSettings.NumPrivateConnections;
-	_Ping = _SessionData.SearchResult.PingInMs;
-	_SearchResultsIndex = _SessionData.SessionIndex;
-
-	// Assume if session has private connections, it's password protected
-	if(_SessionData.SearchResult.Session.SessionSettings.NumPrivateConnections > 0)
-	{
-		_SessionName = FName(_SessionName.ToString() + " (P)");
-		_bPrivate = true;
-	}
-}
+#include "Components/Button.h"
 
 bool UWidget_SessionConnectBtn::CheckPassword()
 {
-	const auto PasswordData = _SessionData.SearchResult.Session.SessionSettings.Settings.FindRef(PASSWORD).Data;
+	const auto PasswordData = _SessionData.Session.SessionSettings.Settings.FindRef(PASSWORD).Data;
 	FString Password;
 	PasswordData.GetValue(Password);
 
 	if (Password.IsEmpty())
 	{
+		// Hide the password field
+		GetGameInstance<UBetrayalGameInstance>()->HidePasswordField();
+		
 		// No password, just join
 		return true;
 	}
+
+	// Check password against stored password
+	const FString StoredPassword = GetGameInstance<UBetrayalGameInstance>()->SessionPassword;
+	if (StoredPassword.IsEmpty())
+	{
+		// No stored password, prompt for password
+		return false;
+	}
+
+	// Compare stored password with session password
+	return StoredPassword == Password;
+}
+
+void UWidget_SessionConnectBtn::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// Bind OnClick to the button
+	if (UButton* Button = Cast<UButton>(GetWidgetFromName("Btn_Join")))
+	{
+		Button->OnClicked.AddDynamic(this, &UWidget_SessionConnectBtn::OnClick);
+	}
+}
+
+void UWidget_SessionConnectBtn::OnClick()
+{
+	// Check if the session is password protected
+	if (CheckPassword())
+	{
+		// Join the session
+		GetGameInstance<UBetrayalGameInstance>()->JoinSession(GetOwningLocalPlayer(), _SessionData);
+	}
 	else
 	{
-		// Check password against stored password
-		const FString StoredPassword = GetGameInstance<UBetrayalGameInstance>()->SessionPassword;
-		if (StoredPassword.IsEmpty())
+		// Prompt for password
+		GetGameInstance<UBetrayalGameInstance>()->ShowPasswordField();
+
+		// Bind OnClick to the password field to join the session
+		if (UButton* Button = Cast<UButton>(GetGameInstance<UBetrayalGameInstance>()->WB_PasswordField->GetWidgetFromName("Btn_AcceptPswd")))
 		{
-			// No stored password, prompt for password
-			return false;
-		}
-		else
-		{
-			// Compare stored password with session password
-			return StoredPassword == Password;
+			Button->OnClicked.AddDynamic(this, &UWidget_SessionConnectBtn::OnClick);
 		}
 	}
 }
