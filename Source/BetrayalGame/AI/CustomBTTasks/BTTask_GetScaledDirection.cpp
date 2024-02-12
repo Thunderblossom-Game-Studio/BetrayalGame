@@ -14,7 +14,7 @@ UBTTask_GetScaledDirection::UBTTask_GetScaledDirection(FObjectInitializer const&
 	NodeName = TEXT("Get Scaled Direction");
 	BlackboardKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UBTTask_GetScaledDirection, BlackboardKey), AActor::StaticClass());
 	BlackboardKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTTask_GetScaledDirection, BlackboardKey));
-	ResultKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTTask_GetScaledDirection, BlackboardKey));
+	ResultKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTTask_GetScaledDirection, ResultKey));
 }
 
 EBTNodeResult::Type UBTTask_GetScaledDirection::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

@@ -2,12 +2,11 @@
 
 
 #include "ChaserAnimInstance.h"
-#include "Controllers/MonsterController.h"
 #include "Pawns/Chaser.h"
 #include "Engine/Engine.h"
 
 UChaserAnimInstance::UChaserAnimInstance()
-	: MoveSpeed(0.0f), bChasing(false), Pawn(nullptr)
+	: MoveSpeed(0.0f), bRunning(false), Chaser(nullptr)
 {
 }
 
@@ -15,17 +14,17 @@ void UChaserAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	Pawn = Cast<AChaser>(TryGetPawnOwner());
+	Chaser = Cast<AChaser>(TryGetPawnOwner());
 }
 
 void UChaserAnimInstance::CustomAnimUpdate()
 {	
-	if (!Pawn)
-		Pawn = Cast<AChaser>(TryGetPawnOwner());	
-	if (Pawn)
+	if (!Chaser)
+		Chaser = Cast<AChaser>(TryGetPawnOwner());	
+	if (Chaser)
 	{
-		bChasing = Pawn->IsSprinting();
-		FVector Speed = Pawn->GetVelocity();
+		bRunning = Chaser->bIsRunning;
+		FVector Speed = Chaser->GetVelocity();
 		Speed.Z = 0.0f;
 		MoveSpeed = Speed.Size();
 		

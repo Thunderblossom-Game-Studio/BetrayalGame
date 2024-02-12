@@ -7,7 +7,7 @@
 #include "Net/UnrealNetwork.h"
 
 AChaser::AChaser()
-	: MoveSpeed(100), SprintSpeed(600), bSprinting(false), Movement(nullptr)
+	: Movement(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
@@ -21,25 +21,27 @@ void AChaser::BeginPlay()
 	Movement = GetCharacterMovement();
 }
 
-void AChaser::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME(AChaser, bSprinting);
-}
-
-void AChaser::SetSprinting(const bool& IsSprinting)
+void AChaser::SetChasing(const bool& IsChasing)
 {
 	if (!HasAuthority())
 		return;
 	
 	if (!Movement)		
 		Movement = GetCharacterMovement();
-	bSprinting = IsSprinting;
-	if (bSprinting)
-		Movement->MaxWalkSpeed = SprintSpeed;
+	bIsRunning = IsChasing;
+	if (bIsRunning)
+		Movement->MaxWalkSpeed = RunSpeed;	
 	else
-		Movement->MaxWalkSpeed = MoveSpeed;	
+		Movement->MaxWalkSpeed = WalkSpeed;
+}
+
+void AChaser::Attack(AActor* Target)
+{	
+	if (!HasAuthority() || !Target)
+		return;
+	
+	Super::Attack(Target);	
+	Teleport(Target);
 }
 
 void AChaser::Teleport(AActor* Target)

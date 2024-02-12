@@ -18,40 +18,27 @@ public:
 	AChaser();
 
 	virtual void BeginPlay() override;
-	
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
-#pragma region Movement
-	// Variables
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
-	float MoveSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
-	float SprintSpeed;
-	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "Monster | Movement", meta = (AllowPrivateAccess = "true"))
-	bool bSprinting;
-	
-	// Getters
+		
+#pragma region Movement	
+// Getters
 public:	
-	float GetMoveSpeed() const { return MoveSpeed; }	
-	float GetSprintSpeed() const { return SprintSpeed; }	
-	bool IsSprinting() const { return bSprinting; }	
-	void SetSprinting(const bool& IsSprinting);	
+	void SetChasing(const bool& IsChasing);	
 	
-public:
+private:
 	UPROPERTY()
 	UCharacterMovementComponent* Movement;
 	
 #pragma endregion
 	
-#pragma region Catching
+#pragma region Attacking
 // Variables
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster | Attacks", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks | Teleporting", meta = (AllowPrivateAccess = "true"))
 	FVector TeleportDestination;	
 
 // Exposed Functions/Events
 public:
+	virtual void Attack(AActor* Target) override;
 	UFUNCTION(BlueprintCallable)
 	void Teleport(AActor* Target);
 	UFUNCTION(BlueprintImplementableEvent)

@@ -4,10 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BehaviorTreeComponent.h"
-#include "Perception/AIPerceptionComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
 #include "MonsterController.generated.h"
 
 /**
@@ -35,8 +31,8 @@ public:
 #pragma region Components
 // Variables
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Monster | Components", meta = (AllowPrivateAccess = "true"))
-	UBehaviorTree* BehaviourTree;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	class UBehaviorTree* BehaviourTree;
 	
 // Getters
 public:
@@ -44,6 +40,30 @@ public:
 	
 #pragma endregion
 
+#pragma region Perception Configuration
+// Variables
+protected:	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception | Sight", meta = (AllowPrivateAccess = "true"))
+	class UAISenseConfig_Sight* SightConfig;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception | Sight", meta = (AllowPrivateAccess = "true"))
+	float SightPermanenceTimer = 3.0f;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FTimerHandle LOSTimerHandle;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception | Hearing", meta = (AllowPrivateAccess = "true"))
+	class UAISenseConfig_Hearing* HearingConfig;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Perception | Hearing", meta = (AllowPrivateAccess = "true"))
+	float HearingPermanenceTimer = 3.0f;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FTimerHandle HearingTimerHandle;
+
+// Getters
+public:	
+	const UAISenseConfig_Sight* GetSightConfig() const { return SightConfig; }
+	const UAISenseConfig_Hearing* GetHearingConfig() const { return HearingConfig; }
+	
+#pragma endregion
+		
 #pragma region Movement
 // Variables
 protected:
