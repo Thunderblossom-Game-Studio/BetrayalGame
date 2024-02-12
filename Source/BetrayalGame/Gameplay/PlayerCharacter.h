@@ -85,14 +85,20 @@ public:
 	UPROPERTY(Replicated)
 	FItem ActorItem;
 
+	UPROPERTY(Replicated)
+	FItem HeldItem;
+
 	UFUNCTION()
 	void OnRep_ActorItem();
 		
 	UFUNCTION(Server, Reliable)
 	void Server_AddItemToInventory(FItem Item, APlayerCharacter* Player);
 
+	// UFUNCTION(Server, Reliable)
+	// void Server_SpawnItemFromInventory(const TArray<FItem>& Inventory, FText ItemName);
+
 	UFUNCTION(Server, Reliable)
-	void Server_SpawnItemActor(FItem Item);
+	void Server_SpawnItemFromInventory(FItem Item);
 
 private:	
 #pragma endregion 

@@ -13,6 +13,14 @@ struct FItem : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	FItem()
+	{
+		ItemName = FText::FromString("None");
+		ItemDescription = FText::FromString("None");
+		ItemIcon = nullptr;
+		ItemActor = nullptr;
+	}
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FText ItemName;
 
@@ -72,11 +80,5 @@ public:
 	
 private:
 #pragma endregion 
-
-
-
-	
-	
-
 
 };

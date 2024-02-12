@@ -6,6 +6,7 @@
 #include "BaseInteractable.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InventoryComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,32 +14,38 @@
 #include "Net/UnrealNetwork.h"
 
 APlayerCharacter::APlayerCharacter()
-{	
+{
 	BaseTurnRate = 45.0f;
 	BaseLookUpRate = 45.0f;
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
-
 	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
 
 	InteractableInFocus = nullptr;
 
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
+	InventoryComponent->InventorySize = 3;
+	
+	// Fill inventory with empty items
+	for (int i = 0; i < InventoryComponent->InventorySize; i++)
+		InventoryComponent->Inventory.Add(FItem());
 }
 
 void APlayerCharacter::DebugInput()
 {
 	//APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
 
-	Server_SpawnItemActor(ActorItem);
+	
+	//Server_SpawnItemActor(ActorItem);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APlayerCharacter, ActorItem);
+	//DOREPLIFETIME(APlayerCharacter, ActorItem);
 	
 }
 
@@ -107,31 +114,47 @@ void APlayerCharacter::RunEnd_Implementation()
 
 void APlayerCharacter::Server_AddItemToInventory_Implementation(FItem Item, APlayerCharacter* Player)
 {
-	Player->ActorItem = Item;
-
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Player->ActorItem.ItemName.ToString() + " to " + Player->GetName());
-}
-
-void APlayerCharacter::Server_SpawnItemActor_Implementation(FItem Item)
-{
-	//Spawn item actor
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-
-	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
-	FRotator SpawnRotation = GetActorRotation();
-
-	AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item.ItemActor, SpawnLocation, SpawnRotation, SpawnParams);
+	Player->InventoryComponent->Inventory.Add(Item);
 	
-	if(ItemActor)
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, "Item Spawned: " + ItemActor->GetName());
+	for (auto Item : Player->InventoryComponent->Inventory)
+	{
+		if(!Item.ItemActor)
+			return;
+		
+		GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Item.ItemName.ToString() + " to " + Player->GetName());
+	}
+	
+	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Player->InventoryComponent->Inventory.Find(Item).ItemName.ToString() + " to " + Player->GetName());
 }
 
 void APlayerCharacter::OnRep_ActorItem()
 {
 	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + ActorItem.ItemName.ToString() + " was replicated.");
 }
+
+
+// for (auto item : Inventory)
+// {
+// 	if(item.ItemName.EqualTo(ItemName))
+// 	{
+// 		FActorSpawnParameters SpawnParams;
+// 		SpawnParams.Owner = this;
+// 		SpawnParams.Instigator = GetInstigator();
+//
+// 		FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
+// 		FRotator SpawnRotation = GetActorRotation();
+// 		
+// 		AItemActor* ItemToSpawn = GetWorld()->SpawnActor<AItemActor>(item.ItemActor, SpawnLocation, SpawnRotation, SpawnParams);
+// 		
+// 		if(ItemToSpawn)
+// 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, "Item Spawned: " + ItemToSpawn->GetName());
+// 		else
+// 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Item not spawned");
+//
+// 		// Remove item from inventory
+// 		InventoryComponent->Inventory.Remove(item);
+// 	}
+// }
 
 void APlayerCharacter::TraceForInteractables()
 {

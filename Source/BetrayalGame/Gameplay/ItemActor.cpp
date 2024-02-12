@@ -39,7 +39,7 @@ void AItemActor::OnInteract(AActor* Interactor)
 	// Cast interactor to player
 	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
 
-	Player->Server_AddItemToInventory(Item,Player);
+	Player->Server_AddItemToInventory(Item, Player);
 
 	GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Interactor->GetName() + " picked up " + Player->ActorItem.ItemName.ToString());
 	

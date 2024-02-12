@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ItemActor.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
@@ -30,8 +31,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int InventorySize;
 
-	UPROPERTY(Replicated)
-	TArray<FInventorySlot> Inventory;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TArray<FItem> Inventory;
+	
+	FItem GetItemFromID(FName ID);
 	
 protected:
 	// Called when the game starts
