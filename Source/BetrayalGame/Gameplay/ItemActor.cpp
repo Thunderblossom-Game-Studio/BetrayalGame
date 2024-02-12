@@ -39,11 +39,11 @@ void AItemActor::OnInteract(AActor* Interactor)
 	// Cast interactor to player
 	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
 
-	Player->ActorItem = &Item;
+	Player->Server_AddItemToInventory(Item,Player);
 
-	GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Interactor->GetName() + " picked up " + Player->ActorItem->ItemName.ToString());
+	GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Interactor->GetName() + " picked up " + Player->ActorItem.ItemName.ToString());
 	
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetName() + " Interacted with " + Item.ItemDescription.ToString());
+	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetName() + " Interacted with " + Item.ItemDescription.ToString());
 	
 	Destroy();
 	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor. + " Interacted with " + ItemData.DataTable.GetName());
@@ -53,6 +53,5 @@ void AItemActor::OnInteract(AActor* Interactor)
 void AItemActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
