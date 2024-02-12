@@ -134,7 +134,8 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 		Sessions->StartSession(SessionName);
 
 		// ServerTravel to the lobby
-		UGameplayStatics::OpenLevel(GetWorld(), FName(*_GameInstance->LevelToLoad), true, "listen");
+		const FName LevelName = FName(*_GameInstance->LevelToLoad);
+		UGameplayStatics::OpenLevel(GetWorld(), LevelName, true, "listen");
 	}
 }
 
@@ -328,8 +329,13 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			Print(SessionName.ToString() + " resolved to: " + TravelURL);
-			PlayerController->ClientTravel(TravelURL + "?listen", ETravelType::TRAVEL_Absolute);
+			FString url = TravelURL + "?listen";
+			Print(SessionName.ToString() + " resolved to: " + url);
+			PlayerController->ClientTravel(url, ETravelType::TRAVEL_Absolute);
+		}
+		else
+		{
+			Print("Failed to resolve connect string!");
 		}
 	}
 	else
