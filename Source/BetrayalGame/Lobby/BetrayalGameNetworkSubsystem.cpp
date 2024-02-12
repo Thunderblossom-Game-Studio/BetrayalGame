@@ -134,8 +134,7 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 		Sessions->StartSession(SessionName);
 
 		// ServerTravel to the lobby
-		// TODO: Fix this
-		//UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelToLoad), true, "listen");
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*_GameInstance->LevelToLoad), true, "listen");
 	}
 }
 
@@ -202,6 +201,11 @@ void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> 
 	}
 }
 
+void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresence)
+{
+	FindSessions(GetNetID(), bIsLAN, bIsPresence);
+}
+
 void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	const FString log = (bWasSuccessful) ? "Session search completed successfully!" : "Session search failed!";
@@ -226,18 +230,27 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	// Log number of results
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
-	// Clear the session list
-	//ClearSessions();
-
 	// Populate the session list
-	for (int32 i = 0; i < SessionSearch->SearchResults.Num(); i++)
+	for (auto result : SessionSearch->SearchResults)
 	{
 		// Create new button for each session
-		auto SessionButton = NewObject<UWidget_SessionConnectBtn>(GetGameInstance());
-		SessionButton->_SessionData = SessionSearch->SearchResults[i];
+		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_GameInstance, _GameInstance->WB_SessionConnectBtnClass);
 
-		FoundSessionButtons.Add(SessionButton);
+		if(SessionButton)
+		{
+			// Set the session data
+			SessionButton->SetSessionData(result);
+			
+			// Add the button to the list of found sessions
+			FoundSessionButtons.Add(SessionButton);
+		}
+		else
+		{
+			Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): SessionButton is null!");
+		}
 	}
+
+	_GameInstance->OnSessionSearchComplete();
 }
 
 bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
@@ -260,6 +273,30 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> U
 			OnJoinSessionCompleteDelegate);
 
 		bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
+	}
+
+	return bSuccessful;
+}
+
+bool UBetrayalGameNetworkSubsystem::JoinSession(FName SessionName, const FOnlineSessionSearchResult& SearchResult)
+{
+	bool bSuccessful = false;
+
+	IOnlineSubsystem* const OnlineSubsystem = IOnlineSubsystem::Get();
+	if (!OnlineSubsystem)
+	{
+		Print("No Online Subsystem found!");
+		return bSuccessful;
+	}
+
+	IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
+
+	if(Sessions.IsValid() && GetNetID().IsValid())
+	{
+		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
+			OnJoinSessionCompleteDelegate);
+
+		bSuccessful = Sessions->JoinSession(0, SessionName, SearchResult);
 	}
 
 	return bSuccessful;
@@ -294,6 +331,10 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 			Print(SessionName.ToString() + " resolved to: " + TravelURL);
 			PlayerController->ClientTravel(TravelURL + "?listen", ETravelType::TRAVEL_Absolute);
 		}
+	}
+	else
+	{
+		Print("No Player Controller found!");
 	}
 }
 

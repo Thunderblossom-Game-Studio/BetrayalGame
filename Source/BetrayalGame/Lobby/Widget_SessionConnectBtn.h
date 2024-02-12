@@ -50,5 +50,15 @@ public:
 	// Join the session
 	UFUNCTION()
 	void OnClick();
+
+	// Set the session data
+	void SetSessionData(const FOnlineSessionSearchResult& SessionData) { _SessionData = SessionData; }
+
+	// Update the displayed data
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void UpdateDisplayedData();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
+	void OnDataUpdated();
 	
 };

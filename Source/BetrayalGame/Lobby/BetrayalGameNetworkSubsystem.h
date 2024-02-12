@@ -94,6 +94,10 @@ public:
 	*/
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
 
+	// Blueprint callable function to find sessions
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void BP_FindSessions(bool bIsLAN, bool bIsPresence);
+
 	// Delegate for searching for sessions
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
 
@@ -121,6 +125,9 @@ public:
 	*	@return		bool			True if successful, false otherwise
 	*/
 	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
+
+	
+	bool JoinSession(FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
 	// Delegate for joining a session
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;

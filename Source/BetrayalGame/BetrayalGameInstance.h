@@ -107,6 +107,9 @@ public:
 	// Session password value
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
 	FString SessionPassword = ""; // Password for the session
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
+	void OnSessionSearchComplete();
 #pragma endregion
 	
 };

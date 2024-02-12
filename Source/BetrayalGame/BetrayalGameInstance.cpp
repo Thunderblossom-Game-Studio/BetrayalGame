@@ -19,6 +19,22 @@ UBetrayalGameInstance::UBetrayalGameInstance(const FObjectInitializer& ObjectIni
 void UBetrayalGameInstance::Init()
 {
 	Super::Init();
+
+	// Create password field widget
+	if (!WB_PasswordField && WB_PasswordFieldClass)
+		WB_PasswordField = CreateWidget<UUserWidget>(GetWorld(), WB_PasswordFieldClass);
+
+	// Create Main Menu widget
+	if (!WB_MainMenu && WB_MainMenuClass)
+	{
+		WB_MainMenu = CreateWidget<UUserWidget>(GetWorld(), WB_MainMenuClass);
+	}
+
+	// Create Lobby widget
+	if (!WB_Lobby && WB_LobbyClass)
+	{
+		WB_Lobby = CreateWidget<UUserWidget>(GetWorld(), WB_LobbyClass);
+	}
 }
 
 void UBetrayalGameInstance::QuitGame()
@@ -33,12 +49,6 @@ void UBetrayalGameInstance::QuitGame()
 #pragma region UI
 void UBetrayalGameInstance::ShowMainMenu()
 {
-	// Create the main menu widget if not already created
-	if (!WB_MainMenu)
-	{
-		WB_MainMenu = CreateWidget<UUserWidget>(GetWorld(), WB_MainMenuClass);
-	}
-
 	// Add the main menu widget to the viewport
 	if (WB_MainMenu)
 		WB_MainMenu->AddToViewport();
@@ -65,21 +75,6 @@ void UBetrayalGameInstance::ShowMainMenu()
 	{
 		Print("UBetrayalGameInstance::ShowMainMenu(): Player controller not found!");
 	}
-
-	// Bind the play button to the play function
-	if (UButton* PlayButton = Cast<UButton>(WB_MainMenu->GetWidgetFromName("Btn_Play")))
-	{
-		//PlayButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::ShowLobby);
-		//PlayButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::HideMainMenu);
-	}
-	else
-		Print("UBetrayalGameInstance::ShowMainMenu(): Play button not found!");
-
-	// Bind the quit button to the quit function
-	// if (UButton* QuitButton = Cast<UButton>(WB_MainMenu->GetWidgetFromName("Btn_Quit")))
-	// 	//QuitButton->OnClicked.AddDynamic(this, &UBetrayalGameInstance::QuitGame);
-	// else
-	// 	Print("UBetrayalGameInstance::ShowMainMenu(): Quit button not found!");
 }
 
 void UBetrayalGameInstance::HideMainMenu()
@@ -93,10 +88,6 @@ void UBetrayalGameInstance::HideMainMenu()
 
 void UBetrayalGameInstance::ShowLobby()
 {
-	// Create the Lobby widget if not already created
-	if (!WB_Lobby && WB_LobbyClass)
-		WB_Lobby = CreateWidget<UUserWidget>(GetWorld(), WB_LobbyClass);
-
 	// Add the Lobby widget to the viewport
 	if (WB_Lobby)
 		WB_Lobby->AddToViewport();
@@ -134,9 +125,6 @@ void UBetrayalGameInstance::HideLobby()
 
 void UBetrayalGameInstance::ShowPasswordField()
 {
-	if (!WB_PasswordField && WB_PasswordFieldClass)
-		WB_PasswordField = CreateWidget<UUserWidget>(GetWorld(), WB_PasswordFieldClass);
-
 	if(WB_PasswordField)
 		WB_PasswordField->AddToViewport();
 	else
