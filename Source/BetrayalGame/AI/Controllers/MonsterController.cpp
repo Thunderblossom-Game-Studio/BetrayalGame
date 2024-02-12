@@ -4,7 +4,7 @@
 #include "MonsterController.h"
 
 AMonsterController::AMonsterController()
-: BehaviourTree(nullptr), RoomTraversalType(), TargetActor(nullptr)
+	: BehaviourTree(nullptr), SightConfig(nullptr), HearingConfig(nullptr), RoomTraversalType(), TargetActor(nullptr)
 {
 }
 

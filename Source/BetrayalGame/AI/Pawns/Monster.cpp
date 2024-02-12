@@ -11,7 +11,7 @@ AMonster::AMonster()
 	bReplicates = true;
 }
 
-void AMonster::Attack(APawn* Target)
+void AMonster::Attack(AActor* Target)
 {
 	if (!Target)
 		return;

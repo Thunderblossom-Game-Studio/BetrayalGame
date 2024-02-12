@@ -19,6 +19,11 @@ public:
 	UBTTask_FindRandomPointInRadius(FObjectInitializer const& ObjectInitializer);
 #pragma endregion
 
+
+protected:
+	UPROPERTY(EditAnywhere, Category=Blackboard)
+	struct FBlackboardKeySelector OriginPointKey;
+	
 #pragma region Editable Variables
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Node, meta=(AllowPrivateAccess = "true"))

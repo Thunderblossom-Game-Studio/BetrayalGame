@@ -22,17 +22,20 @@ public:
 #pragma region Animation Conditions
 // Exposed Variables
 protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation | Movement", meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
-	bool bChasing;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
-	class AChaser* Pawn;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation | Movement", meta = (AllowPrivateAccess = "true"))
+	bool bRunning;
 
 // Exposed Functions
 public:
-	UFUNCTION(BlueprintCallable, Category = "Monster | Animation")
+	UFUNCTION(BlueprintCallable, Category = "Animation | Updating")
 	void CustomAnimUpdate();
+
+// Cached Variables	
+private:	
+	UPROPERTY()
+	class AChaser* Chaser;
 	
 #pragma endregion
 	

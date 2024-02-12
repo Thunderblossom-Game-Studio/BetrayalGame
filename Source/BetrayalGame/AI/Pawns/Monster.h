@@ -41,9 +41,9 @@ protected:
 // Exposed Functions/Events
 public:
 	UFUNCTION(BlueprintCallable)
-	virtual void Attack(APawn* Target);
+	virtual void Attack(AActor* Target);
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnAttack(APawn* Target);
+	void OnAttack(AActor* Target);
 
 // Getters/Setters
 public:

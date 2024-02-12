@@ -5,7 +5,11 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BetrayalGame/AI/Pawns/Chaser.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "Engine/Engine.h"
+#include "Perception/AIPerceptionComponent.h"
 
 AChaserController::AChaserController()
 {
@@ -36,7 +40,7 @@ void AChaserController::BeginPlay()
 	ChaserPawn = GetPawn<AChaser>();
 
 	if (ChaserPawn)
-		ChaserPawn->SetSprinting(false);
+		ChaserPawn->SetChasing(false);
 	
 	if (GetLocalRole() == ROLE_Authority)
 	{
@@ -64,18 +68,19 @@ void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus S
 		
 		TargetActor = UpdatedActor;
 		Blackboard->SetValueAsObject("TargetActor", TargetActor);
-
+		OnTargetFound(TargetActor);
+		
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Detected Actor: " + TargetActor->GetFName().ToString());
 		Blackboard->SetValueAsBool("LineOfSight", true);
 		if (ChaserPawn)
-			ChaserPawn->SetSprinting(true);
+			ChaserPawn->SetChasing(true);
 	}
 	else if (TargetActor && TargetActor == UpdatedActor)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, "Detected Actor: " + TargetActor->GetFName().ToString());
 		FTimerDelegate LoseDelegate;
 		LoseDelegate.BindUFunction(this, FName("LOSRecaptureFail"), UpdatedActor);
-		World->GetTimerManager().SetTimer(LOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
+		World->GetTimerManager().SetTimer(LOSTimerHandle, LoseDelegate, SightPermanenceTimer, false);
 	}
 }
 
@@ -84,10 +89,11 @@ void AChaserController::LOSRecaptureFail()
 	World->GetTimerManager().ClearTimer(LOSTimerHandle);	
 	if (TargetActor)
 		Blackboard->SetValueAsVector("LastKnownLocation", TargetActor->GetActorLocation());
+	OnTargetLost(TargetActor);
 	TargetActor = nullptr;	
 	Blackboard->ClearValue("TargetActor");
 
 	Blackboard->SetValueAsBool("LineOfSight", false);
 	if (ChaserPawn)
-		ChaserPawn->SetSprinting(false);
+		ChaserPawn->SetChasing(false);
 }
