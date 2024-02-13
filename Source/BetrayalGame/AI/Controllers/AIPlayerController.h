@@ -18,6 +18,7 @@ public:
 	AAIPlayerController();
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 		
 #pragma region Components
 // Variables
@@ -91,6 +92,8 @@ public:
 private:
 	UPROPERTY()
 	UWorld* World;	
+	UPROPERTY()
+	class ABetrayalGameMode* BetrayalGameMode;	
 	UPROPERTY()
 	class APlayerCharacter* PlayerCharacter;
 	

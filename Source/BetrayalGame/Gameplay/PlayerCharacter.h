@@ -24,8 +24,6 @@ public:
 	void DebugInput();
 	
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-private:
 	
 #pragma region Camera
 public:

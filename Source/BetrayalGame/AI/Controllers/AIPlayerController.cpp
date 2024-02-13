@@ -5,6 +5,7 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BetrayalGame/AI/Pawns/Monster.h"
+#include "BetrayalGame/Gameplay/BetrayalGameMode.h"
 #include "BetrayalGame/Gameplay/PlayerCharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
@@ -54,6 +55,8 @@ void AAIPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	World = GetWorld();
+	if (World)
+		BetrayalGameMode = World->GetAuthGameMode<ABetrayalGameMode>();	
 	PlayerCharacter = GetPawn<APlayerCharacter>();
 	
 	if (GetLocalRole() == ROLE_Authority)
@@ -69,12 +72,37 @@ void AAIPlayerController::BeginPlay()
 	}
 }
 
+void AAIPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (!HasAuthority())
+		return;
+	if (BetrayalGameMode && Blackboard)
+	{
+		if (BetrayalGameMode->GetMatchStage() == Haunting)
+		{
+			Blackboard->SetValueAsBool("Haunt", true);
+			
+			if (PlayerCharacter)
+				PlayerCharacter->RunStart();
+		}
+		else
+		{
+			Blackboard->SetValueAsBool("Haunt", false);
+			
+			if (PlayerCharacter)
+				PlayerCharacter->RunEnd();
+		}
+	}
+}
+
 void AAIPlayerController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)
 {
 	if (!UpdatedActor || !HasAuthority())
 		return;	
 	if (!UpdatedActor->IsA(AMonster::StaticClass()))
-		return;	
+		return;
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		World->GetTimerManager().ClearTimer(LOSTimerHandle);
@@ -106,6 +134,8 @@ void AAIPlayerController::LOSRecaptureFail()
 	AttackingMonster = nullptr;	
 	Blackboard->ClearValue("Attacker");
 	Blackboard->SetValueAsBool("LineOfSight", false);
-	if (PlayerCharacter)
+	if (!BetrayalGameMode)
+		return;	
+	if (PlayerCharacter && BetrayalGameMode->GetMatchStage() != Haunting)
 			PlayerCharacter->RunEnd();
 }
