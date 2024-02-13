@@ -70,8 +70,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		{
 			const FString MapName = _GameInstance->LevelToLoad;
 			SessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
-			//UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true);
-			GetWorld()->ServerTravel(MapName + "?listen", true, false);
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true, "listen");
 		}
 		else
 		{
@@ -83,7 +82,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 			OnCreateSessionCompleteDelegate);
 
 		// Create the session
-		return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
+		return Sessions->CreateSession(*UserId, NAME_GameSession, *SessionSettings);
 	}
 	else
 	{
@@ -132,7 +131,7 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 			OnStartSessionCompleteDelegate);
 
 		// Start the session
-		Sessions->StartSession(SessionName);
+		Sessions->StartSession(NAME_GameSession);
 
 		// ServerTravel to the lobby
 		const FName LevelName = FName(*_GameInstance->LevelToLoad);
@@ -271,10 +270,9 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> U
 
 	if (Sessions.IsValid() && UserId.IsValid())
 	{
-		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
-			OnJoinSessionCompleteDelegate);
+		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegate);
 
-		bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
+		bSuccessful = Sessions->JoinSession(*UserId, NAME_GameSession, SearchResult);
 	}
 
 	return bSuccessful;
@@ -297,8 +295,8 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(FName SessionName, const FOnline
 	{
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
-
-		bSuccessful = Sessions->JoinSession(0, SessionName, SearchResult);
+		auto ID = GetNetID();
+		bSuccessful = Sessions->JoinSession(*ID, SessionName, SearchResult);
 	}
 
 	return bSuccessful;
@@ -330,10 +328,8 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			FString url = TravelURL + "?listen";
-			Print(SessionName.ToString() + " resolved to: " + url);
-			//PlayerController->ClientTravel(url, ETravelType::TRAVEL_Absolute);
-			_GameInstance->ClientTravelToSession(0, SessionName);
+			Print(SessionName.ToString() + " resolved to: " + TravelURL);
+			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
 		}
 		else
 		{
