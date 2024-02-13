@@ -70,7 +70,8 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		{
 			const FString MapName = _GameInstance->LevelToLoad;
 			SessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
-			UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true, "listen");
+			//UGameplayStatics::OpenLevel(GetWorld(), FName(*MapName), true);
+			GetWorld()->ServerTravel(MapName + "?listen", true, false);
 		}
 		else
 		{
@@ -82,7 +83,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 			OnCreateSessionCompleteDelegate);
 
 		// Create the session
-		return Sessions->CreateSession(*UserId, NAME_GameSession, *SessionSettings);
+		return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
 	}
 	else
 	{
@@ -99,15 +100,6 @@ void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLA
 
 void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	if (bWasSuccessful)
-	{
-		Print("Successfully created session: " + SessionName.ToString());
-	}
-	else
-	{
-		Print("Failed to create session: " + SessionName.ToString());
-	}
-
 	IOnlineSubsystem* const OnlineSubsystem = IOnlineSubsystem::Get();
 	if (!OnlineSubsystem)
 	{
@@ -126,16 +118,17 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 
 	if (bWasSuccessful)
 	{
+		Print("Session started successfully!");
+		
 		// Set the delegate to the handle of the session start function
-		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(
-			OnStartSessionCompleteDelegate);
+		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
 
 		// Start the session
-		Sessions->StartSession(NAME_GameSession);
-
-		// ServerTravel to the lobby
-		const FName LevelName = FName(*_GameInstance->LevelToLoad);
-		UGameplayStatics::OpenLevel(GetWorld(), LevelName, true, "listen");
+		Sessions->StartSession(SessionName);
+	}
+	else
+	{
+		Print("Failed to create session!");
 	}
 }
 
@@ -162,6 +155,7 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 	if (bWasSuccessful)
 	{
 		// Travel to the lobby
+		Print("Server travelling to map...");
 		UGameplayStatics::OpenLevel(GetWorld(), "L_Map", true, "listen");
 	}
 }
@@ -270,9 +264,10 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> U
 
 	if (Sessions.IsValid() && UserId.IsValid())
 	{
-		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegate);
+		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
+			OnJoinSessionCompleteDelegate);
 
-		bSuccessful = Sessions->JoinSession(*UserId, NAME_GameSession, SearchResult);
+		bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
 	}
 
 	return bSuccessful;
@@ -295,8 +290,8 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(FName SessionName, const FOnline
 	{
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
-		auto ID = GetNetID();
-		bSuccessful = Sessions->JoinSession(*ID, SessionName, SearchResult);
+
+		bSuccessful = Sessions->JoinSession(0, SessionName, SearchResult);
 	}
 
 	return bSuccessful;
@@ -328,8 +323,10 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			Print(SessionName.ToString() + " resolved to: " + TravelURL);
-			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			FString url = TravelURL + "?listen";
+			Print(SessionName.ToString() + " resolved to: " + url);
+			//PlayerController->ClientTravel(url, ETravelType::TRAVEL_Absolute);
+			_GameInstance->ClientTravelToSession(0, SessionName);
 		}
 		else
 		{
