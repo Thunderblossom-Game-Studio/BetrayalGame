@@ -83,7 +83,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 			OnCreateSessionCompleteDelegate);
 
 		// Create the session
-		return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
+		return Sessions->CreateSession(*UserId, NAME_GameSession, *SessionSettings);
 	}
 	else
 	{
@@ -124,7 +124,7 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
 
 		// Start the session
-		Sessions->StartSession(SessionName);
+		Sessions->StartSession(NAME_GameSession);
 	}
 	else
 	{
@@ -267,7 +267,7 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> U
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
 
-		bSuccessful = Sessions->JoinSession(*UserId, SessionName, SearchResult);
+		bSuccessful = Sessions->JoinSession(*UserId, NAME_GameSession, SearchResult);
 	}
 
 	return bSuccessful;
@@ -291,7 +291,7 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(FName SessionName, const FOnline
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
 
-		bSuccessful = Sessions->JoinSession(0, SessionName, SearchResult);
+		bSuccessful = Sessions->JoinSession(*GetNetID(), NAME_GameSession, SearchResult);
 	}
 
 	return bSuccessful;
@@ -323,10 +323,8 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			FString url = TravelURL + "?listen";
-			Print(SessionName.ToString() + " resolved to: " + url);
-			//PlayerController->ClientTravel(url, ETravelType::TRAVEL_Absolute);
-			_GameInstance->ClientTravelToSession(0, SessionName);
+			Print(SessionName.ToString() + " resolved to: " + TravelURL);
+			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
 		}
 		else
 		{
