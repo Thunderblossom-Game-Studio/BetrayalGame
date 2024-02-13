@@ -341,7 +341,8 @@ void UBetrayalGameNetworkSubsystem::OnSessionInviteReceived(const FUniqueNetId& 
                                                             const FUniqueNetId& UniqueNetId1, const FString& String,
                                                             const FOnlineSessionSearchResult& OnlineSessionSearchResult)
 {
-	Print("OnSessionInviteReceived: " + String);
+	Print("Accepted invite!");
+	JoinSession(GetNetID(), NAME_GameSession, OnlineSessionSearchResult);
 }
 
 void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId,
