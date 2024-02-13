@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BetrayalGame/BetrayalGameInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "Widget_SessionConnectBtn.generated.h"
 
@@ -15,6 +16,10 @@ class BETRAYALGAME_API UWidget_SessionConnectBtn : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	// Search Result
+	FOnlineSessionSearchResult _SessionData;
+	
+	// Displayed data
 	UPROPERTY(BlueprintReadWrite, Category = "Lobby")
 	FName _SessionName;
 
@@ -26,8 +31,34 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Lobby")
 	int32 _Ping;
+	// End of displayed data
 
+	// Index in the search results array
 	UPROPERTY(BlueprintReadWrite, Category = "Lobby")
 	int32 _SearchResultsIndex;
+
+	// If the session is private
+	UPROPERTY(BlueprintReadOnly, Category = "Lobby")
+	bool _bPrivate;
+
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	bool CheckPassword();
+
+	// Construct event
+	virtual void NativeConstruct() override;
+
+	// Join the session
+	UFUNCTION()
+	void OnClick();
+
+	// Set the session data
+	void SetSessionData(const FOnlineSessionSearchResult& SessionData) { _SessionData = SessionData; }
+
+	// Update the displayed data
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void UpdateDisplayedData();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby")
+	void OnDataUpdated();
 	
 };
