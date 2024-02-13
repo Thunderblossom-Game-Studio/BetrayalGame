@@ -76,6 +76,9 @@ void UWidget_SessionConnectBtn::OnClick()
 		// Bind OnClick to the password field to join the session
 		if (UButton* Button = Cast<UButton>(GetGameInstance<UBetrayalGameInstance>()->WB_PasswordField->GetWidgetFromName("Btn_AcceptPswd")))
 		{
+			// Clear other bindings from the button
+			Button->OnClicked.Clear();
+			// Bind OnClick to this widget instance's OnClick
 			Button->OnClicked.AddDynamic(this, &UWidget_SessionConnectBtn::OnClick);
 		}
 	}
