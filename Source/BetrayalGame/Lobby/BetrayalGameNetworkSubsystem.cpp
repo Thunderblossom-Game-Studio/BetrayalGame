@@ -264,6 +264,7 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> U
 
 	if (Sessions.IsValid() && UserId.IsValid())
 	{
+		Print("Attempting to join session: " + SessionName.ToString() + ", " + SearchResult.GetSessionIdStr());
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
 
@@ -337,19 +338,25 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 	}
 }
 
-void UBetrayalGameNetworkSubsystem::OnSessionInviteReceived(const FUniqueNetId& UniqueNetId,
-                                                            const FUniqueNetId& UniqueNetId1, const FString& String,
-                                                            const FOnlineSessionSearchResult& OnlineSessionSearchResult)
-{
-	Print("Invite Received!");
-}
-
 void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId,
-                                                                TSharedPtr<const FUniqueNetId> UserId,
-                                                                const FOnlineSessionSearchResult& InviteResult)
+	TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult)
 {
-	Print("Invite Accepted!");
-	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
+	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " + InviteResult.GetSessionIdStr());
+
+	// Join the session
+	auto Subsystem = IOnlineSubsystem::Get();
+	if (Subsystem)
+	{
+		auto Sessions = Subsystem->GetSessionInterface();
+		if (Sessions.IsValid())
+		{
+			// Clear the delegate handle
+			Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegateHandle);
+			
+			// Connecting
+			Sessions->JoinSession(*UserId, NAME_GameSession, InviteResult);
+		}
+	}
 }
 
 void UBetrayalGameNetworkSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
@@ -383,20 +390,7 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 {
 	Super::Initialize(Collection);
 
-	// Get the game instance
-	_GameInstance = Cast<UBetrayalGameInstance>(GetGameInstance());
-	if(!_GameInstance)
-	{
-		Print("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): Game instance is null!");
-	}
-
-	const auto SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
-	if (SessionInterface.IsValid())
-	{
-		SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegate);
-		SessionInterface->AddOnSessionInviteReceivedDelegate_Handle(OnSessionInviteReceivedDelegate);
-	}
-
+	
 	// Session creation function binding
 	OnCreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(
 		this, &UBetrayalGameNetworkSubsystem::OnCreateSessionComplete);
@@ -418,7 +412,22 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	// Invite accepted function binding
 	OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(
 		this, &UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted);
+	
+	// Get the game instance
+	_GameInstance = Cast<UBetrayalGameInstance>(GetGameInstance());
+	if(!_GameInstance)
+	{
+		Print("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): Game instance is null!");
+	}
 
-	OnSessionInviteReceivedDelegate = FOnSessionInviteReceivedDelegate::CreateUObject(
-		this, &UBetrayalGameNetworkSubsystem::OnSessionInviteReceived);
+	const auto SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+	if (SessionInterface.IsValid())
+	{
+		OnSessionUserInviteAcceptedDelegateHandle = SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(
+			OnSessionUserInviteAcceptedDelegate);	
+	}
+	else
+	{
+		Print("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): SessionInterface is null!");
+	}
 }

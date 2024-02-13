@@ -143,14 +143,10 @@ public:
 	 */
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
-	// Invite Handling
+	// Invite accepted delegate
 	FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
 	FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
 
-	FDelegateHandle OnSessionInviteReceivedDelegateHandle;
-	FOnSessionInviteReceivedDelegate OnSessionInviteReceivedDelegate;
-	
-	void OnSessionInviteReceived(const FUniqueNetId& UniqueNetId, const FUniqueNetId& UniqueNetId1, const FString& String, const FOnlineSessionSearchResult& OnlineSessionSearchResult);
 	void OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
 public:
