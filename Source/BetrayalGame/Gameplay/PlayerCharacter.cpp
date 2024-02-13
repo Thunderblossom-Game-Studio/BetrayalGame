@@ -26,11 +26,10 @@ APlayerCharacter::APlayerCharacter()
 	InteractableInFocus = nullptr;
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
-	InventoryComponent->InventorySize = 3;
-	
+	InventoryComponent->SetInventorySize(3);
 	// Fill inventory with empty items
-	for (int i = 0; i < InventoryComponent->InventorySize; i++)
-		InventoryComponent->Inventory.Add(FItem());
+	// for (int i = 0; i < InventoryComponent->InventorySize; i++)
+	// 	InventoryComponent->Inventory.Add(FItem());
 }
 
 void APlayerCharacter::DebugInput()
@@ -111,50 +110,6 @@ void APlayerCharacter::RunEnd_Implementation()
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
-
-void APlayerCharacter::Server_AddItemToInventory_Implementation(FItem Item, APlayerCharacter* Player)
-{
-	Player->InventoryComponent->Inventory.Add(Item);
-	
-	for (auto Item : Player->InventoryComponent->Inventory)
-	{
-		if(!Item.ItemActor)
-			return;
-		
-		GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Item.ItemName.ToString() + " to " + Player->GetName());
-	}
-	
-	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Player->InventoryComponent->Inventory.Find(Item).ItemName.ToString() + " to " + Player->GetName());
-}
-
-void APlayerCharacter::OnRep_ActorItem()
-{
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + ActorItem.ItemName.ToString() + " was replicated.");
-}
-
-
-// for (auto item : Inventory)
-// {
-// 	if(item.ItemName.EqualTo(ItemName))
-// 	{
-// 		FActorSpawnParameters SpawnParams;
-// 		SpawnParams.Owner = this;
-// 		SpawnParams.Instigator = GetInstigator();
-//
-// 		FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
-// 		FRotator SpawnRotation = GetActorRotation();
-// 		
-// 		AItemActor* ItemToSpawn = GetWorld()->SpawnActor<AItemActor>(item.ItemActor, SpawnLocation, SpawnRotation, SpawnParams);
-// 		
-// 		if(ItemToSpawn)
-// 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, "Item Spawned: " + ItemToSpawn->GetName());
-// 		else
-// 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Item not spawned");
-//
-// 		// Remove item from inventory
-// 		InventoryComponent->Inventory.Remove(item);
-// 	}
-// }
 
 void APlayerCharacter::TraceForInteractables()
 {

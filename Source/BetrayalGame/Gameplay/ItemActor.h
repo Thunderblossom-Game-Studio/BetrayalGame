@@ -15,23 +15,23 @@ struct FItem : public FTableRowBase
 
 	FItem()
 	{
-		ItemName = FText::FromString("None");
-		ItemDescription = FText::FromString("None");
-		ItemIcon = nullptr;
-		ItemActor = nullptr;
+		Name = FText::FromString("None");
+		Description = FText::FromString("None");
+		Image = nullptr;
+		Actor = nullptr;
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FText ItemName;
+	FText Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FText ItemDescription;
+	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	UTexture2D* ItemIcon;
+	UTexture2D* Image;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	TSubclassOf<AItemActor> ItemActor;
+	TSubclassOf<AItemActor> Actor;
 };
 
 

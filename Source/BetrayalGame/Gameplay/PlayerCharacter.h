@@ -82,24 +82,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	class UInventoryComponent* InventoryComponent;
 
-	UPROPERTY(Replicated)
-	FItem ActorItem;
-
-	UPROPERTY(Replicated)
-	FItem HeldItem;
-
-	UFUNCTION()
-	void OnRep_ActorItem();
-		
-	UFUNCTION(Server, Reliable)
-	void Server_AddItemToInventory(FItem Item, APlayerCharacter* Player);
-
-	// UFUNCTION(Server, Reliable)
-	// void Server_SpawnItemFromInventory(const TArray<FItem>& Inventory, FText ItemName);
-
-	UFUNCTION(Server, Reliable)
-	void Server_SpawnItemFromInventory(FItem Item);
-
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	AActor* HeldItem;
+	
 private:	
 #pragma endregion 
 

@@ -23,6 +23,23 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 }
 
 
+void UInventoryComponent::Server_AddItemToInventory_Implementation(FItem Item)
+{
+	Inventory.Add(Item);
+
+	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Item.Name.ToString() + " to " + GetOwner()->GetName() + "'s inventory");
+
+	// for (auto item : Inventory)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + item.Name.ToString());
+	// }
+
+	
+	// if(Inventory.Num() >= InventorySize)
+	// 	bIsInventoryFull = true;
+	
+}
+
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
 {

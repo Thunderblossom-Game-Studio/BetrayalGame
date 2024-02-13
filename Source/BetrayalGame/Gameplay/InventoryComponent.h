@@ -22,27 +22,41 @@ class BETRAYALGAME_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+private:	
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(EditAnywhere, Category = "Inventory")
-	int InventorySize;
+	
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	TArray<FItem> Inventory;
-	
-	FItem GetItemFromID(FName ID);
-	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+
+	
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	TArray<FItem> Inventory;
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FItem> GetInventory() const { return Inventory; }
+	
+	UFUNCTION(Server, Reliable)
+	void Server_AddItemToInventory(FItem Item);
+	
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int InventorySize;
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void SetInventorySize(int Size) { InventorySize = Size; }
+
+	UPROPERTY()
+	bool bIsInventoryFull;
 		
 };
