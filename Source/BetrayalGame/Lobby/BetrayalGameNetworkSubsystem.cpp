@@ -100,15 +100,6 @@ void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLA
 
 void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	if (bWasSuccessful)
-	{
-		Print("Successfully created session: " + SessionName.ToString());
-	}
-	else
-	{
-		Print("Failed to create session: " + SessionName.ToString());
-	}
-
 	IOnlineSubsystem* const OnlineSubsystem = IOnlineSubsystem::Get();
 	if (!OnlineSubsystem)
 	{
@@ -127,16 +118,17 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 
 	if (bWasSuccessful)
 	{
+		Print("Session started successfully!");
+		
 		// Set the delegate to the handle of the session start function
-		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(
-			OnStartSessionCompleteDelegate);
+		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
 
 		// Start the session
 		Sessions->StartSession(SessionName);
-
-		// ServerTravel to the lobby
-		const FName LevelName = FName(*_GameInstance->LevelToLoad);
-		UGameplayStatics::OpenLevel(GetWorld(), LevelName, true, "listen");
+	}
+	else
+	{
+		Print("Failed to create session!");
 	}
 }
 
@@ -163,6 +155,7 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 	if (bWasSuccessful)
 	{
 		// Travel to the lobby
+		Print("Server travelling to map...");
 		UGameplayStatics::OpenLevel(GetWorld(), "L_Map", true, "listen");
 	}
 }
