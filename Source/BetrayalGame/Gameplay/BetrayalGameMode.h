@@ -4,7 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "BetrayalGame/BetrayalGameState.h"
 #include "BetrayalGameMode.generated.h"
+
+/**
+ * Holds information about a stage in the match
+ */
+USTRUCT(Blueprintable)
+struct FStageInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage | Time")
+	bool bUsesTimer = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stage | Time")
+	float TimeLength = 60;
+};
 
 /**
  * 
@@ -15,6 +30,66 @@ class BETRAYALGAME_API ABetrayalGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
-	void StartMatch() override;
+	ABetrayalGameMode();
+
+#pragma region Game Mode Functions
+public:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	
+	virtual void StartMatch() override;
+	virtual void EndMatch() override;
+	
+#pragma endregion 
+
+#pragma region Match Stage Handling
+// Exposed Variables
+protected:
+	// Match Stage's Information
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
+	FStageInfo PrepareStage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
+	FStageInfo ExploreStage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
+	FStageInfo HauntStage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
+	FStageInfo FinishStage;
+
+	// Stage Functionality
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
+	TEnumAsByte<EMatchStage> MatchStage = Preparing;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
+	float MaxStageTimer = 30;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
+	float StageTimer = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
+	bool bStageUsesTimer = true;
+
+// Exposed Functions/Events
+public:
+	// Allows anything authoritative to change stage.
+	UFUNCTION(BlueprintCallable)
+	void SetNextStage();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPreparingStageStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnExploringStageStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHauntingStageStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnFinishingStageStart();
+
+// Class Functions
+protected:
+	void RunMatchTimer(float DeltaSeconds);
+	void SetMatchStage(TEnumAsByte<EMatchStage> NewStage);
+	void SetStageUseTimer(const bool bUseTimer);
+
+// Cached Variables
+protected:
+	UPROPERTY()
+	ABetrayalGameState* BetrayalGameState;
+	
+#pragma endregion
 };
