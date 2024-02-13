@@ -12,6 +12,20 @@ struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
 
+UENUM()
+enum EInputActionValue
+{
+	IAV_None UMETA(DisplayName = "None"),
+	IAV_Move UMETA(DisplayName = "Move"),
+	IAV_Look UMETA(DisplayName = "Look"),
+	IAV_Run UMETA(DisplayName = "Run"),
+	IAV_Interact UMETA(DisplayName = "Interact"),
+	IAV_Inventory1 UMETA(DisplayName = "Inventory1"),
+	IAV_Inventory2 UMETA(DisplayName = "Inventory2"),
+	IAV_Inventory3 UMETA(DisplayName = "Inventory3"),
+	IAV_Inventory4 UMETA(DisplayName = "Inventory4")
+};
+
 UCLASS()
 class BETRAYALGAME_API APlayerCharacter : public ABaseCharacter
 {
@@ -29,13 +43,13 @@ private:
 	
 #pragma region Camera
 public:
-	UPROPERTY(EditAnywhere,Category="Components|Camera")
+	UPROPERTY(EditAnywhere,Category="Player|Camera")
 	class UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float BaseTurnRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float BaseLookUpRate;
 
 	void TurnLook(const FInputActionValue& Value);
@@ -51,19 +65,7 @@ public:
 	UInputMappingContext* DefaultMappingContext;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* MoveAction;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* LookAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* RunAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* InteractAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
-	TArray<UInputAction*> InputActions;
+	TMap<TEnumAsByte<EInputActionValue>, UInputAction*> InputAction;
 
 private:
 #pragma endregion
@@ -95,7 +97,7 @@ private:
 #pragma region Interaction
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
 	class ABaseInteractable* InteractableInFocus;
 	
 	void TraceForInteractables();
