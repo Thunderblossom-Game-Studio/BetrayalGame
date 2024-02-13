@@ -38,15 +38,17 @@ void AItemActor::OnInteract(AActor* Interactor)
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
 
-	Player->InventoryComponent->Inventory.Add(Item);
-
-	GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Player->GetName() + " picked up " + Item.Name.ToString());
-
-	// Debug player inventory
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Player " + Player->GetName() + " inventory: " + Player->InventoryComponent->GetName());
+	if(Player->InventoryComponent->IsInventoryFull())
+		return;
+	
+	Player->InventoryComponent->Server_AddItemToInventory(Item);
 	
 	Destroy();
 	
+	//GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Player->GetName() + " picked up " + Item.Name.ToString());
+
+	// Debug player inventory
+	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Player " + Player->GetName() + " inventory: " + Player->InventoryComponent->GetName());
 	
 	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetName() + " Interacted with " + Item.ItemDescription.ToString());
 	

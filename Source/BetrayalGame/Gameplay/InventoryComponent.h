@@ -13,7 +13,9 @@ struct FInventorySlot
 {
 	GENERATED_BODY()
 	
-	FName ItemID;
+	FItem Item;
+	bool bIsEmpty;
+	bool bIsSelected;
 	int Quantity;
 };
 
@@ -58,5 +60,8 @@ public:
 
 	UPROPERTY()
 	bool bIsInventoryFull;
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool IsInventoryFull() const { return bIsInventoryFull; }
 		
 };
