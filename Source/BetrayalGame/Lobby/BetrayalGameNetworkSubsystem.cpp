@@ -342,21 +342,7 @@ void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasS
 	TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult)
 {
 	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " + InviteResult.GetSessionIdStr());
-
-	// Join the session
-	auto Subsystem = IOnlineSubsystem::Get();
-	if (Subsystem)
-	{
-		auto Sessions = Subsystem->GetSessionInterface();
-		if (Sessions.IsValid())
-		{
-			// Clear the delegate handle
-			Sessions->ClearOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegateHandle);
-			
-			// Connecting
-			Sessions->JoinSession(*UserId, NAME_GameSession, InviteResult);
-		}
-	}
+	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
 }
 
 void UBetrayalGameNetworkSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
@@ -423,8 +409,7 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	const auto SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
 	if (SessionInterface.IsValid())
 	{
-		OnSessionUserInviteAcceptedDelegateHandle = SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(
-			OnSessionUserInviteAcceptedDelegate);	
+		SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(this, &UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted);
 	}
 	else
 	{
