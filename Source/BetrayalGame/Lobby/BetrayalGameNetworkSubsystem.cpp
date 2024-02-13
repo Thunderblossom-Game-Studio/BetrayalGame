@@ -341,18 +341,15 @@ void UBetrayalGameNetworkSubsystem::OnSessionInviteReceived(const FUniqueNetId& 
                                                             const FUniqueNetId& UniqueNetId1, const FString& String,
                                                             const FOnlineSessionSearchResult& OnlineSessionSearchResult)
 {
-	Print("Accepted invite!");
-	JoinSession(GetNetID(), NAME_GameSession, OnlineSessionSearchResult);
+	Print("Invite Received!");
 }
 
 void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId,
                                                                 TSharedPtr<const FUniqueNetId> UserId,
                                                                 const FOnlineSessionSearchResult& InviteResult)
 {
-	if (bWasSuccesful)
-	{
-		JoinSession(UserId, NAME_GameSession, InviteResult);
-	}
+	Print("Invite Accepted!");
+	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
 }
 
 void UBetrayalGameNetworkSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
