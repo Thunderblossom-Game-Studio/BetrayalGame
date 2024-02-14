@@ -26,10 +26,6 @@ APlayerCharacter::APlayerCharacter()
 	InteractableInFocus = nullptr;
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
-	InventoryComponent->SetInventorySize(3);
-	// Fill inventory with empty items
-	// for (int i = 0; i < InventoryComponent->InventorySize; i++)
-	// 	InventoryComponent->Inventory.Add(FItem());
 }
 
 void APlayerCharacter::DebugInput()

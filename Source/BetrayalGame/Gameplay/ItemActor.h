@@ -21,16 +21,16 @@ struct FItem : public FTableRowBase
 		Actor = nullptr;
 	}
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, Category = "Item")
 	FText Name;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, Category = "Item")
 	FText Description;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, Category = "Item")
 	UTexture2D* Image;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, Category = "Item")
 	TSubclassOf<AItemActor> Actor;
 };
 
