@@ -86,6 +86,9 @@ protected:
 	void SetMatchStage(TEnumAsByte<EMatchStage> NewStage);
 	void SetStageUseTimer(const bool bUseTimer);
 
+public:
+	const TEnumAsByte<EMatchStage>& GetMatchStage() const { return MatchStage; }
+	
 // Cached Variables
 protected:
 	UPROPERTY()
