@@ -13,17 +13,25 @@ struct FItem : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FText ItemName;
+	FItem()
+	{
+		Name = FText::FromString("None");
+		Description = FText::FromString("None");
+		Image = nullptr;
+		Actor = nullptr;
+	}
+	
+	UPROPERTY(EditAnywhere, Category = "Item")
+	FText Name;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FText ItemDescription;
+	UPROPERTY(EditAnywhere, Category = "Item")
+	FText Description;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	UTexture2D* ItemIcon;
+	UPROPERTY(EditAnywhere, Category = "Item")
+	UTexture2D* Image;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	TSubclassOf<AItemActor> ItemActor;
+	UPROPERTY(EditAnywhere, Category = "Item")
+	TSubclassOf<AItemActor> Actor;
 };
 
 
@@ -72,11 +80,5 @@ public:
 	
 private:
 #pragma endregion 
-
-
-
-	
-	
-
 
 };

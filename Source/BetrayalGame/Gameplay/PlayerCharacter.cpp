@@ -7,6 +7,7 @@
 #include "BetrayalGameMode.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InventoryComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,32 +15,33 @@
 #include "Net/UnrealNetwork.h"
 
 APlayerCharacter::APlayerCharacter()
-{	
+{
 	BaseTurnRate = 45.0f;
 	BaseLookUpRate = 45.0f;
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
-
 	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
 
 	InteractableInFocus = nullptr;
 
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
 }
 
 void APlayerCharacter::DebugInput()
 {
 	//APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
 
-	Server_SpawnItemActor(ActorItem);
+	
+	//Server_SpawnItemActor(ActorItem);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APlayerCharacter, ActorItem);
+	//DOREPLIFETIME(APlayerCharacter, ActorItem);
 	
 }
 
@@ -91,6 +93,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 		
 		AddMovementInput(ForwardDirection, MovementInput.Y);
 		AddMovementInput(RightDirection , MovementInput.X);
+		
 	}
 }
 
@@ -104,34 +107,6 @@ void APlayerCharacter::RunEnd_Implementation()
 {
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-}
-
-void APlayerCharacter::Server_AddItemToInventory_Implementation(FItem Item, APlayerCharacter* Player)
-{
-	Player->ActorItem = Item;
-
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Player->ActorItem.ItemName.ToString() + " to " + Player->GetName());
-}
-
-void APlayerCharacter::Server_SpawnItemActor_Implementation(FItem Item)
-{
-	//Spawn item actor
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-
-	FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
-	FRotator SpawnRotation = GetActorRotation();
-
-	AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item.ItemActor, SpawnLocation, SpawnRotation, SpawnParams);
-	
-	if(ItemActor)
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, "Item Spawned: " + ItemActor->GetName());
-}
-
-void APlayerCharacter::OnRep_ActorItem()
-{
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + ActorItem.ItemName.ToString() + " was replicated.");
 }
 
 void APlayerCharacter::TraceForInteractables()
@@ -230,15 +205,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
 
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::TurnLook);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::TurnLook);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);
 
-		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &APlayerCharacter::RunStart);
-		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Run), ETriggerEvent::Started, this, &APlayerCharacter::RunStart);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Run), ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
 
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Interact), ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);

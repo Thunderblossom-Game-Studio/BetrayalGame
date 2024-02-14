@@ -3,6 +3,7 @@
 
 #include "../Gameplay/InventoryComponent.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -13,22 +14,46 @@ UInventoryComponent::UInventoryComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	SetIsReplicatedByDefault(true);
+
+	for( int i = 0; i < MaxInventorySlots; i++)
+	{
+		FInventorySlot Slot;
+		Slot.ID = i;
+		Slot.bIsEmpty = true;
+		Slot.bIsSelected = false;
+		InventorySlots.Add(Slot);
+	}
 }
 
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UInventoryComponent, Inventory);
+	DOREPLIFETIME(UInventoryComponent, InventorySlots);
 }
 
+
+void UInventoryComponent::Server_AddItemToInventory_Implementation(FItem Item)
+{
+	for (auto slot : InventorySlots)
+	{
+		if(slot.bIsEmpty)
+		{
+			slot.Item = Item;
+			slot.bIsEmpty = false;
+			break;
+		}
+		
+	}
+
+	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Item.Name.ToString() + " to " + GetOwner()->GetName() + "'s inventory");
+	
+}
 
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
 	
 }
 
@@ -39,5 +64,29 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+FInventorySlot UInventoryComponent::GetSlot(int ID)
+{
+	for (auto slot : InventorySlots)
+		if(slot.ID == ID)
+			return slot;
+
+	return FInventorySlot();
+}
+
+FItem UInventoryComponent::GetItemInSlot(int ID)
+{
+	for (auto slot : InventorySlots)
+		if(slot.ID == ID)
+			return slot.Item;
+
+	return FItem();
+}
+
+void UInventoryComponent::AddItemToInventory(FItem Item)
+{
+	
+	
 }
 
