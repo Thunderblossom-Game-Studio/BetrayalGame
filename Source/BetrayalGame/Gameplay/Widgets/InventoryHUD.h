@@ -14,9 +14,9 @@ UCLASS()
 class BETRAYALGAME_API UInventoryHUD : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	UHorizontalBox* InventorySlotsBox;
-	
+	UHorizontalBox* InventorySlotHolderBox;
 };

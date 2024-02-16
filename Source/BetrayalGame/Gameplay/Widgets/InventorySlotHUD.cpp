@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Widgets/InventorySlotWidget.h"
+#include "../Widgets/InventorySlotHUD.h"
 

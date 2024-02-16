@@ -3,15 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets\InventoryHUD.h"
 #include "ItemActor.h"
 #include "PlayerCharacter.h"
 #include "Components/ActorComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Widgets/InventoryHUD.h"
+#include "Widgets/InventorySlotHUD.h"
 #include "InventoryComponent.generated.h"
-
-
-class UInventorySlotWidget;
 
 USTRUCT()
 struct FInventorySlot
@@ -75,10 +73,9 @@ protected:
 	UInventoryHUD* InventoryBoxWidget;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventorySlotWidget> InventorySlotWidgetClass;
-
+	TSubclassOf<UInventorySlotHUD> InventorySlotWidgetClass;
 	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
-	TArray<UInventorySlotWidget*> SlotWidgets;
+	TArray<UInventorySlotHUD*> SlotWidgets;
 	
 public:	
 	// Called every frame
