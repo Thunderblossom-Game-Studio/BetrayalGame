@@ -14,15 +14,6 @@ UInventoryComponent::UInventoryComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	SetIsReplicatedByDefault(true);
-
-	for( int i = 0; i < MaxInventorySlots; i++)
-	{
-		FInventorySlot Slot;
-		Slot.ID = i;
-		Slot.bIsEmpty = true;
-		Slot.bIsSelected = false;
-		InventorySlots.Add(Slot);
-	}
 }
 
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -30,24 +21,8 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UInventoryComponent, InventorySlots);
-}
-
-
-void UInventoryComponent::Server_AddItemToInventory_Implementation(FItem Item)
-{
-	for (auto slot : InventorySlots)
-	{
-		if(slot.bIsEmpty)
-		{
-			slot.Item = Item;
-			slot.bIsEmpty = false;
-			break;
-		}
-		
-	}
-
-	GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Item: " + Item.Name.ToString() + " to " + GetOwner()->GetName() + "'s inventory");
-	
+	DOREPLIFETIME(UInventoryComponent, FilledSlotCount);
+	DOREPLIFETIME(UInventoryComponent, bIsInventoryFull);
 }
 
 // Called when the game starts
@@ -55,8 +30,23 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		InitializeInventory();
+		
+	}
+	else if (GetOwnerRole() == ROLE_SimulatedProxy)
+	{
+		Server_InitializeInventory();
+	}
 
+	InventoryBoxWidget = CreateWidget<UInventorySlotWidget>(GetWorld(), InventoryBoxWidgetClass);
+	if(InventoryBoxWidget)
+		InventoryBoxWidget->AddToViewport();
+	
+
+	
+}
 
 // Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -64,6 +54,56 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UInventoryComponent::Server_AddItemToInventory_Implementation(FItem Item)
+{
+	AddItemToInventory(Item);
+}
+
+void UInventoryComponent::AddItemToInventory(FItem Item)
+{
+	for (auto& slot : InventorySlots)
+	{
+		if(slot.bIsEmpty)
+		{
+			slot.Item = Item;
+			slot.bIsEmpty = false;
+
+			if(slot.ID == 0)
+				slot.bIsSelected = true;
+			else
+				slot.bIsSelected = false;
+			FilledSlotCount++;
+			break;
+		}
+	}
+
+	if(InventorySlots.Num() == FilledSlotCount)
+	{
+		bIsInventoryFull = true;
+	}
+	
+}
+
+void UInventoryComponent::InitializeInventory()
+{
+	for ( int i = 0; i < MaxInventorySlots; i++)
+	{
+		FInventorySlot Slot;
+		Slot.ID = i;
+		Slot.bIsEmpty = true;
+		InventorySlots.Add(Slot);
+
+		// InventorySlotWidget = CreateWidget<UUserWidget>(GetWorld(), InventorySlotWidgetClass);
+		//
+		// InventoryBoxWidget->InventorySlotsBox->AddChild(InventorySlotWidget);
+	}
+}
+
+void UInventoryComponent::Server_InitializeInventory_Implementation()
+{
+	InitializeInventory();
 }
 
 FInventorySlot UInventoryComponent::GetSlot(int ID)
@@ -84,9 +124,17 @@ FItem UInventoryComponent::GetItemInSlot(int ID)
 	return FItem();
 }
 
-void UInventoryComponent::AddItemToInventory(FItem Item)
+void UInventoryComponent::SelectSlot(int ID)
 {
-	
-	
+	for (auto& slot : InventorySlots)
+	{
+		if(slot.ID == ID)
+		{
+			slot.bIsSelected = true;
+		}
+		else
+		{
+			slot.bIsSelected = false;
+		}
+	}
 }
-

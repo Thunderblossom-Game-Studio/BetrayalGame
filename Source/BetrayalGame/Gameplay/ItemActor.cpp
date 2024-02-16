@@ -37,23 +37,13 @@ void AItemActor::OnInteract(AActor* Interactor)
 	FItem Item = *ItemData.DataTable->FindRow<FItem>(ItemData.RowName, "Paper");
 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
-
+	
 	if(Player->InventoryComponent->IsInventoryFull())
 		return;
 	
 	Player->InventoryComponent->Server_AddItemToInventory(Item);
 	
 	Destroy();
-	
-	//GEngine->AddOnScreenDebugMessage(-11, 3.0f, FColor::Red, "Player " + Player->GetName() + " picked up " + Item.Name.ToString());
-
-	// Debug player inventory
-	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Green, "Player " + Player->GetName() + " inventory: " + Player->InventoryComponent->GetName());
-	
-	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor->GetName() + " Interacted with " + Item.ItemDescription.ToString());
-	
-	//Destroy();
-	//GEngine->AddOnScreenDebugMessage(-10, 3.0f, FColor::Red, Interactor. + " Interacted with " + ItemData.DataTable.GetName());
 }
 
 // Called every frame

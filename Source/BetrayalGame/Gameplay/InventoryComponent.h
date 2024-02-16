@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InventorySlotWidget.h"
 #include "ItemActor.h"
 #include "PlayerCharacter.h"
 #include "Components/ActorComponent.h"
+#include "Components/WidgetComponent.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -47,39 +49,59 @@ private:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	
 
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
+	TArray<FInventorySlot> InventorySlots;
 
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int MaxInventorySlots;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
+	bool bIsInventoryFull;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
+	int FilledSlotCount;
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
+	TSubclassOf<UInventorySlotWidget> InventoryBoxWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere , Category = "Inventory|Widgets")
+	UInventorySlotWidget* InventoryBoxWidget;
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
+	TSubclassOf<UUserWidget> InventorySlotWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
+	UUserWidget* InventorySlotWidget;
+	
 	
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
-	TArray<FInventorySlot> InventorySlots;
-
 	UFUNCTION()
 	FInventorySlot GetSlot(int ID);
-
 	UFUNCTION()
 	FItem GetItemInSlot(int ID);
+
+	UFUNCTION()
+	void SelectSlot(int ID);
 	
 	UFUNCTION(Server, Reliable)
 	void Server_AddItemToInventory(FItem Item);
-
 	UFUNCTION()
 	void AddItemToInventory(FItem Item);
-	
-	UPROPERTY(EditAnywhere, Category = "Inventory")
-	int MaxInventorySlots;
-	
-	UPROPERTY()
-	bool bIsInventoryFull;
 
+	UFUNCTION(Server, Reliable)
+	void Server_InitializeInventory();
+	UFUNCTION()
+	void InitializeInventory();
+	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool IsInventoryFull() const { return bIsInventoryFull; }
 		
