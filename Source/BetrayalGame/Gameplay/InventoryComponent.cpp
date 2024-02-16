@@ -5,6 +5,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Widgets/InventorySlotWidget.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -38,12 +39,11 @@ void UInventoryComponent::BeginPlay()
 
 	for( int i = 0; i < MaxInventorySlots; i++)
 	{
-		UUserWidget* NewSlotWidget = CreateWidget<UUserWidget>(GetWorld(), InventorySlotWidgetClass);
+		UInventorySlotWidget* NewSlotWidget = CreateWidget<UInventorySlotWidget>(GetWorld(), InventorySlotWidgetClass);
 		if(NewSlotWidget && InventoryBoxWidget)
 		{
 			SlotWidgets.Add(NewSlotWidget);
 			InventoryBoxWidget->InventorySlotsBox->AddChild(NewSlotWidget);
-			//TODO - I stopped here
 		}
 	}
 	
@@ -87,7 +87,10 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 				slot.bIsSelected = true;
 			else
 				slot.bIsSelected = false;
+			
 			FilledSlotCount++;
+
+			SlotWidgets[slot.ID]->ItemImage->SetBrushFromTexture(slot.Item.Image);
 			break;
 		}
 	}

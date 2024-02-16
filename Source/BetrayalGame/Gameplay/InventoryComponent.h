@@ -11,6 +11,8 @@
 #include "InventoryComponent.generated.h"
 
 
+class UInventorySlotWidget;
+
 USTRUCT()
 struct FInventorySlot
 {
@@ -73,10 +75,10 @@ protected:
 	UInventoryHUD* InventoryBoxWidget;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UUserWidget> InventorySlotWidgetClass;
+	TSubclassOf<UInventorySlotWidget> InventorySlotWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
-	TArray<UUserWidget*> SlotWidgets;
+	TArray<UInventorySlotWidget*> SlotWidgets;
 	
 public:	
 	// Called every frame
