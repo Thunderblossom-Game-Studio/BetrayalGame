@@ -55,9 +55,18 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(ReplicatedUsing=OnRep_InventorySlots, VisibleAnywhere, Category = "Inventory")
 	TArray<FInventorySlot> InventorySlots;
 
+	UFUNCTION()
+	void OnRep_InventorySlots();
+
+	UPROPERTY(ReplicatedUsing=OnRep_InventoryInitialized, VisibleAnywhere, Category = "Inventory")
+	bool bIsInventoryInitialized = false;
+
+	UFUNCTION()
+	void OnRep_InventoryInitialized();
+	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int MaxInventorySlots;
 	
@@ -68,12 +77,12 @@ protected:
 	int FilledSlotCount;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventoryHUD> InventoryBoxWidgetClass;
+	TSubclassOf<UInventoryHUD> InventoryHUDWidget;
 	UPROPERTY(VisibleAnywhere , Category = "Inventory|Widgets")
-	UInventoryHUD* InventoryBoxWidget;
+	UInventoryHUD* InventoryHUD;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventorySlotHUD> InventorySlotWidgetClass;
+	TSubclassOf<UInventorySlotHUD> InventorySlotWidget;
 	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
 	TArray<UInventorySlotHUD*> SlotWidgets;
 	
@@ -101,5 +110,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool IsInventoryFull() const { return bIsInventoryFull; }
+
+
+	UFUNCTION()
+	void InitializeInventoryHUD();
 		
 };

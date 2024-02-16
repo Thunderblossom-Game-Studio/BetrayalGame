@@ -24,6 +24,7 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, InventorySlots);
 	DOREPLIFETIME(UInventoryComponent, FilledSlotCount);
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryFull);
+	DOREPLIFETIME(UInventoryComponent, bIsInventoryInitialized);
 }
 
 // Called when the game starts
@@ -31,34 +32,74 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InventoryBoxWidget = CreateWidget<UInventoryHUD>(GetWorld(), InventoryBoxWidgetClass);
-	if(InventoryBoxWidget)
-	{
-		InventoryBoxWidget->AddToViewport();
-	}
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
+	if(!PlayerCharacter)
+		return;
 
-	for( int i = 0; i < MaxInventorySlots; i++)
+	if(!PlayerCharacter->Controller)
+		return;
+	
+	if(PlayerCharacter->Controller->IsLocalController())
 	{
-		UInventorySlotHUD* NewSlotWidget = CreateWidget<UInventorySlotHUD>(GetWorld(), InventorySlotWidgetClass);
-		if(NewSlotWidget && InventoryBoxWidget)
-		{
-			SlotWidgets.Add(NewSlotWidget);
-			InventoryBoxWidget->InventorySlotHolderBox->AddChild(NewSlotWidget);
-		}
+		if(PlayerCharacter->HasAuthority())
+			InitializeInventoryHUD();
+		else
+			InitializeInventoryHUD();
 	}
 	
-	
-	if(GetOwnerRole() == ROLE_Authority)
+	if(GetOwnerRole() == ROLE_Authority  )
 	{
 		InitializeInventory();
+		
+		//InitializeInventoryHUD();
 	}
 	else if (GetOwnerRole() == ROLE_SimulatedProxy)
 	{
 		Server_InitializeInventory();
 	}
-	
 
+	if (GetOwnerRole() == ROLE_AutonomousProxy)
+	{
+		 //InitializeInventoryHUD();
+	}
 	
+}
+
+void UInventoryComponent::OnRep_InventorySlots()
+{
+	// if(!bIsInventoryInitialized)
+	// 	return;
+	
+	// for (auto slot : InventorySlots)
+	// {
+	// 	if(slot.bIsEmpty)
+	// 	{
+	// 		SlotWidgets[slot.ID]->ItemImage->SetVisibility(ESlateVisibility::Hidden);
+	// 	}
+	// 	else
+	// 	{
+	// 		SlotWidgets[slot.ID]->ItemImage->SetBrushFromTexture(slot.Item.Image);
+	// 		SlotWidgets[slot.ID]->ItemImage->SetVisibility(ESlateVisibility::Visible);
+	// 	}
+	// }
+}
+
+void UInventoryComponent::OnRep_InventoryInitialized()
+{
+	
+	// Cast to APlayerController
+	//InitializeInventoryHUD();
+	
+    	
+	// for( int i = 0; i < MaxInventorySlots; i++)
+	// {
+	// 	UInventorySlotHUD* NewSlotWidget = CreateWidget<UInventorySlotHUD>(GetWorld(), InventorySlotWidget);
+	// 	if(NewSlotWidget && InventoryHUD)
+	// 	{
+	// 		SlotWidgets.Add(NewSlotWidget);
+	// 		InventoryHUD->InventorySlotHolderBox->AddChild(NewSlotWidget);
+	// 	}
+	// }		
 }
 
 // Called every frame
@@ -89,8 +130,6 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 				slot.bIsSelected = false;
 			
 			FilledSlotCount++;
-
-			SlotWidgets[slot.ID]->ItemImage->SetBrushFromTexture(slot.Item.Image);
 			break;
 		}
 	}
@@ -110,6 +149,23 @@ void UInventoryComponent::InitializeInventory()
 		Slot.ID = i;
 		Slot.bIsEmpty = true;
 		InventorySlots.Add(Slot);
+	}
+	
+	bIsInventoryInitialized = true;
+
+}
+
+void UInventoryComponent::InitializeInventoryHUD()
+{
+	if(!bIsInventoryInitialized)
+		return;
+	
+	
+	InventoryHUD = CreateWidget<UInventoryHUD>(GetWorld(), InventoryHUDWidget);
+	if(InventoryHUD)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Inventory HUD Created"));
+		InventoryHUD->AddToViewport();
 	}
 }
 
