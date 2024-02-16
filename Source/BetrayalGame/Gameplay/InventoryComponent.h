@@ -69,16 +69,14 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
 	TSubclassOf<UInventorySlotWidget> InventoryBoxWidgetClass;
-	
 	UPROPERTY(VisibleAnywhere , Category = "Inventory|Widgets")
 	UInventorySlotWidget* InventoryBoxWidget;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
 	TSubclassOf<UUserWidget> InventorySlotWidgetClass;
-	
+
 	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
-	UUserWidget* InventorySlotWidget;
-	
+	TArray<UUserWidget*> SlotWidgets;
 	
 public:	
 	// Called every frame

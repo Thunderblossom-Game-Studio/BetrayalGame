@@ -29,20 +29,33 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InventoryBoxWidget = CreateWidget<UInventorySlotWidget>(GetWorld(), InventoryBoxWidgetClass);
+	if(InventoryBoxWidget)
+	{
+		InventoryBoxWidget->AddToViewport();
+	}
+
+	for( int i = 0; i < MaxInventorySlots; i++)
+	{
+		UUserWidget* NewSlotWidget = CreateWidget<UUserWidget>(GetWorld(), InventorySlotWidgetClass);
+		if(NewSlotWidget && InventoryBoxWidget)
+		{
+			SlotWidgets.Add(NewSlotWidget);
+			InventoryBoxWidget->InventorySlotsBox->AddChild(NewSlotWidget);
+			//TODO - I stopped here
+		}
+	}
+	
 	
 	if(GetOwnerRole() == ROLE_Authority)
 	{
 		InitializeInventory();
-		
 	}
 	else if (GetOwnerRole() == ROLE_SimulatedProxy)
 	{
 		Server_InitializeInventory();
 	}
-
-	InventoryBoxWidget = CreateWidget<UInventorySlotWidget>(GetWorld(), InventoryBoxWidgetClass);
-	if(InventoryBoxWidget)
-		InventoryBoxWidget->AddToViewport();
 	
 
 	
@@ -94,10 +107,6 @@ void UInventoryComponent::InitializeInventory()
 		Slot.ID = i;
 		Slot.bIsEmpty = true;
 		InventorySlots.Add(Slot);
-
-		// InventorySlotWidget = CreateWidget<UUserWidget>(GetWorld(), InventorySlotWidgetClass);
-		//
-		// InventoryBoxWidget->InventorySlotsBox->AddChild(InventorySlotWidget);
 	}
 }
 
