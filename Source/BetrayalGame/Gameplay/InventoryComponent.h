@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InventorySlotWidget.h"
+#include "Widgets\InventoryHUD.h"
 #include "ItemActor.h"
 #include "PlayerCharacter.h"
 #include "Components/ActorComponent.h"
@@ -68,9 +68,9 @@ protected:
 	int FilledSlotCount;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventorySlotWidget> InventoryBoxWidgetClass;
+	TSubclassOf<UInventoryHUD> InventoryBoxWidgetClass;
 	UPROPERTY(VisibleAnywhere , Category = "Inventory|Widgets")
-	UInventorySlotWidget* InventoryBoxWidget;
+	UInventoryHUD* InventoryBoxWidget;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
 	TSubclassOf<UUserWidget> InventorySlotWidgetClass;

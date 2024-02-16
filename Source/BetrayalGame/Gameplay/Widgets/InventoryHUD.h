@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/HorizontalBox.h"
-#include "InventorySlotWidget.generated.h"
+#include "InventoryHUD.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BETRAYALGAME_API UInventorySlotWidget : public UUserWidget
+class BETRAYALGAME_API UInventoryHUD : public UUserWidget
 {
 	GENERATED_BODY()
 	

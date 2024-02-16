@@ -30,7 +30,7 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InventoryBoxWidget = CreateWidget<UInventorySlotWidget>(GetWorld(), InventoryBoxWidgetClass);
+	InventoryBoxWidget = CreateWidget<UInventoryHUD>(GetWorld(), InventoryBoxWidgetClass);
 	if(InventoryBoxWidget)
 	{
 		InventoryBoxWidget->AddToViewport();
