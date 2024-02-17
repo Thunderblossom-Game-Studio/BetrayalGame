@@ -20,16 +20,16 @@ struct FInventorySlot
 		bIsSelected = true;
 	}
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	FItem Item;
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	int ID;
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsEmpty;
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsSelected;
 	
 };
