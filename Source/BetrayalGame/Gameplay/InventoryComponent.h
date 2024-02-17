@@ -45,8 +45,6 @@ private:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
-	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -54,7 +52,7 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	TArray<FInventorySlot> InventorySlots;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	FInventorySlot SelectedSlot;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
@@ -80,6 +78,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TArray<FInventorySlot> GetInventorySlots() const { return InventorySlots; }
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	FInventorySlot GetSelectedSlot() const { return SelectedSlot; }
 	
 	UFUNCTION()
 	void SelectSlot(int ID);

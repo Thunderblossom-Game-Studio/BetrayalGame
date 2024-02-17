@@ -88,6 +88,15 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	AActor* HeldItem;
+
+	UFUNCTION()
+	void SelectSlot1();
+	UFUNCTION()
+	void SelectSlot2();
+	UFUNCTION()
+	void SelectSlot3();
+	UFUNCTION()
+	void SelectSlot4();
 	
 private:	
 #pragma endregion 

@@ -92,6 +92,26 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+void APlayerCharacter::SelectSlot1()
+{
+	InventoryComponent->SelectSlot(0);
+}
+
+void APlayerCharacter::SelectSlot2()
+{
+	InventoryComponent->SelectSlot(1);
+}
+
+void APlayerCharacter::SelectSlot3()
+{
+	InventoryComponent->SelectSlot(2);
+}
+
+void APlayerCharacter::SelectSlot4()
+{
+	InventoryComponent->SelectSlot(3);
+}
+
 void APlayerCharacter::RunStart_Implementation()
 {
 	bIsRunning = true;
@@ -207,6 +227,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Run), ETriggerEvent::Completed, this, &APlayerCharacter::RunEnd);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Interact), ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory1), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot1);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory2), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot2);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory3), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot3);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory4), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot4);
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);

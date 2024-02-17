@@ -2,6 +2,8 @@
 
 
 #include "../Gameplay/InventoryComponent.h"
+
+#include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -22,23 +24,18 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, FilledSlotCount);
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryFull);
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryInitialized);
+	DOREPLIFETIME(UInventoryComponent, SelectedSlot);
 }
 
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
-
 	
 	if(GetOwnerRole() == ROLE_Authority)
 		InitializeInventory();
 	else if (GetOwnerRole() == ROLE_SimulatedProxy)
 		Server_InitializeInventory();
-
-
-	
 }
 
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -60,10 +57,7 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 			slot.Item = Item;
 			slot.bIsEmpty = false;
 
-			if(slot.ID == 0)
-				slot.bIsSelected = true;
-			else
-				slot.bIsSelected = false;
+			SelectSlot(slot.ID);
 			
 			FilledSlotCount++;
 			break;
@@ -119,6 +113,7 @@ void UInventoryComponent::SelectSlot(int ID)
 		if(slot.ID == ID)
 		{
 			slot.bIsSelected = true;
+			SelectedSlot = slot;
 		}
 		else
 		{
