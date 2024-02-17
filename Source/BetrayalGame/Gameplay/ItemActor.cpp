@@ -34,8 +34,8 @@ void AItemActor::OnInteract(AActor* Interactor)
 {
 	Super::OnInteract(Interactor);
 
-	FItem Item = *ItemData.DataTable->FindRow<FItem>(ItemData.RowName, "Paper");
-
+	FItem Item = *ItemData.DataTable->FindRow<FItem>(ItemData.RowName, "");
+	
 	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
 	
 	if(Player->InventoryComponent->IsInventoryFull())

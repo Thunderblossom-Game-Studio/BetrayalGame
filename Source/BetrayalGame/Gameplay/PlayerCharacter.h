@@ -97,6 +97,16 @@ public:
 	void SelectSlot3();
 	UFUNCTION()
 	void SelectSlot4();
+
+	UFUNCTION()
+	void EquipItem(AItemActor* Item);
+	UFUNCTION(Server, Reliable)
+	void Server_EquipItem(AItemActor* Item);
+
+	UFUNCTION()
+	void UnequipItem();
+	UFUNCTION(Server, Reliable)
+	void Server_UnequipItem();
 	
 private:	
 #pragma endregion 

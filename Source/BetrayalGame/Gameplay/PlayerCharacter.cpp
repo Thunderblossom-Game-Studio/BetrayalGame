@@ -31,6 +31,7 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::DebugInput()
 {
+	
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -97,24 +98,105 @@ void APlayerCharacter::SelectSlot1()
 	InventoryComponent->SelectSlot(0);
 
 	if(!InventoryComponent->GetItemInSlot(0).Actor)
-		return;;
-	
-	HeldItem = InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject();
+		return;
+
+	if(HasAuthority())
+	{
+		UnequipItem();
+		EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
+	}
+	else
+	{
+		Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
+	}
 }
 
 void APlayerCharacter::SelectSlot2()
 {
 	InventoryComponent->SelectSlot(1);
+
+	if(HasAuthority())
+	{
+		UnequipItem();
+		EquipItem(InventoryComponent->GetItemInSlot(1).Actor.GetDefaultObject());
+	}
+	else
+	{
+		Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetItemInSlot(1).Actor.GetDefaultObject());
+	}
 }
 
 void APlayerCharacter::SelectSlot3()
 {
 	InventoryComponent->SelectSlot(2);
+
+	if(HasAuthority())
+	{
+		UnequipItem();
+		EquipItem(InventoryComponent->GetItemInSlot(2).Actor.GetDefaultObject());
+	}
+	else
+	{
+		Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetItemInSlot(2).Actor.GetDefaultObject());
+	}
 }
 
 void APlayerCharacter::SelectSlot4()
 {
 	InventoryComponent->SelectSlot(3);
+
+	if(HasAuthority())
+	{
+		UnequipItem();
+		EquipItem(InventoryComponent->GetItemInSlot(3).Actor.GetDefaultObject());
+	}
+	else
+	{
+		Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetItemInSlot(3).Actor.GetDefaultObject());
+	}
+}
+
+void APlayerCharacter::EquipItem(AItemActor* Item)
+{
+	if(!Item)
+	{
+		HeldItem = nullptr;
+		return;
+	}
+	
+	HeldItem = Item;
+
+	//Spawn the item in the player's hand
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	if(HeldItem)
+	{
+		if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(HeldItem->GetClass(), SpawnParams))
+		{
+			ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("RightHand"));
+			ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+			ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+			HeldItem = ItemActor;
+		}
+	}
+}
+
+void APlayerCharacter::UnequipItem()
+{
+	if(HeldItem)
+		HeldItem->Destroy();
+}
+
+void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
+{
+	EquipItem(Item);
 }
 
 void APlayerCharacter::RunStart_Implementation()
@@ -127,6 +209,11 @@ void APlayerCharacter::RunEnd_Implementation()
 {
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+
+void APlayerCharacter::Server_UnequipItem_Implementation()
+{
+	UnequipItem();
 }
 
 void APlayerCharacter::TraceForInteractables()
