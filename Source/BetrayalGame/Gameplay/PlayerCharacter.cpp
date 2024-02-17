@@ -37,7 +37,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	
+	DOREPLIFETIME(APlayerCharacter, HeldItem);
 }
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
@@ -95,6 +95,11 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 void APlayerCharacter::SelectSlot1()
 {
 	InventoryComponent->SelectSlot(0);
+
+	if(!InventoryComponent->GetItemInSlot(0).Actor)
+		return;;
+	
+	HeldItem = InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject();
 }
 
 void APlayerCharacter::SelectSlot2()

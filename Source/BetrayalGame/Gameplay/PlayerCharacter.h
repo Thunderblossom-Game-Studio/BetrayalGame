@@ -37,7 +37,7 @@ public:
 
 	void DebugInput();
 	
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 #pragma region Camera
 public:
@@ -87,7 +87,7 @@ public:
 	class UInventoryComponent* InventoryComponent;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
-	AActor* HeldItem;
+	AItemActor* HeldItem;
 
 	UFUNCTION()
 	void SelectSlot1();
