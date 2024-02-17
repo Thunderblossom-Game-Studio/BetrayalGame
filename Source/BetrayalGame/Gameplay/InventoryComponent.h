@@ -4,14 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "ItemActor.h"
-#include "PlayerCharacter.h"
 #include "Components/ActorComponent.h"
-#include "Components/WidgetComponent.h"
-#include "Widgets/InventoryHUD.h"
-#include "Widgets/InventorySlotHUD.h"
 #include "InventoryComponent.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FInventorySlot
 {
 	GENERATED_BODY()
@@ -55,17 +51,14 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(ReplicatedUsing=OnRep_InventorySlots, VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	TArray<FInventorySlot> InventorySlots;
 
-	UFUNCTION()
-	void OnRep_InventorySlots();
-
-	UPROPERTY(ReplicatedUsing=OnRep_InventoryInitialized, VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	FInventorySlot SelectedSlot;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	bool bIsInventoryInitialized = false;
-
-	UFUNCTION()
-	void OnRep_InventoryInitialized();
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int MaxInventorySlots;
@@ -76,25 +69,18 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	int FilledSlotCount;
 	
-	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventoryHUD> InventoryHUDWidget;
-	UPROPERTY(VisibleAnywhere , Category = "Inventory|Widgets")
-	UInventoryHUD* InventoryHUD;
-	
-	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventorySlotHUD> InventorySlotWidget;
-	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
-	TArray<UInventorySlotHUD*> SlotWidgets;
-	
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FInventorySlot GetSlot(int ID);
-	UFUNCTION()
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FItem GetItemInSlot(int ID);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FInventorySlot> GetInventorySlots() const { return InventorySlots; }
+	
 	UFUNCTION()
 	void SelectSlot(int ID);
 	
@@ -112,7 +98,6 @@ public:
 	bool IsInventoryFull() const { return bIsInventoryFull; }
 
 
-	UFUNCTION()
-	void InitializeInventoryHUD();
+	
 		
 };

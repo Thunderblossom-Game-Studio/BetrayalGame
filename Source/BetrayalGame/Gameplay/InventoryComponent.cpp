@@ -2,10 +2,7 @@
 
 
 #include "../Gameplay/InventoryComponent.h"
-
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "Widgets/InventoryHUD.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -32,82 +29,21 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
-	if(!PlayerCharacter)
-		return;
+	
 
-	if(!PlayerCharacter->Controller)
-		return;
 	
-	if(PlayerCharacter->Controller->IsLocalController())
-	{
-		if(PlayerCharacter->HasAuthority())
-			InitializeInventoryHUD();
-		else
-			InitializeInventoryHUD();
-	}
-	
-	if(GetOwnerRole() == ROLE_Authority  )
-	{
+	if(GetOwnerRole() == ROLE_Authority)
 		InitializeInventory();
-		
-		//InitializeInventoryHUD();
-	}
 	else if (GetOwnerRole() == ROLE_SimulatedProxy)
-	{
 		Server_InitializeInventory();
-	}
 
-	if (GetOwnerRole() == ROLE_AutonomousProxy)
-	{
-		 //InitializeInventoryHUD();
-	}
+
 	
 }
 
-void UInventoryComponent::OnRep_InventorySlots()
-{
-	// if(!bIsInventoryInitialized)
-	// 	return;
-	
-	// for (auto slot : InventorySlots)
-	// {
-	// 	if(slot.bIsEmpty)
-	// 	{
-	// 		SlotWidgets[slot.ID]->ItemImage->SetVisibility(ESlateVisibility::Hidden);
-	// 	}
-	// 	else
-	// 	{
-	// 		SlotWidgets[slot.ID]->ItemImage->SetBrushFromTexture(slot.Item.Image);
-	// 		SlotWidgets[slot.ID]->ItemImage->SetVisibility(ESlateVisibility::Visible);
-	// 	}
-	// }
-}
-
-void UInventoryComponent::OnRep_InventoryInitialized()
-{
-	
-	// Cast to APlayerController
-	//InitializeInventoryHUD();
-	
-    	
-	// for( int i = 0; i < MaxInventorySlots; i++)
-	// {
-	// 	UInventorySlotHUD* NewSlotWidget = CreateWidget<UInventorySlotHUD>(GetWorld(), InventorySlotWidget);
-	// 	if(NewSlotWidget && InventoryHUD)
-	// 	{
-	// 		SlotWidgets.Add(NewSlotWidget);
-	// 		InventoryHUD->InventorySlotHolderBox->AddChild(NewSlotWidget);
-	// 	}
-	// }		
-}
-
-// Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 void UInventoryComponent::Server_AddItemToInventory_Implementation(FItem Item)
@@ -138,7 +74,6 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 	{
 		bIsInventoryFull = true;
 	}
-	
 }
 
 void UInventoryComponent::InitializeInventory()
@@ -152,21 +87,6 @@ void UInventoryComponent::InitializeInventory()
 	}
 	
 	bIsInventoryInitialized = true;
-
-}
-
-void UInventoryComponent::InitializeInventoryHUD()
-{
-	if(!bIsInventoryInitialized)
-		return;
-	
-	
-	InventoryHUD = CreateWidget<UInventoryHUD>(GetWorld(), InventoryHUDWidget);
-	if(InventoryHUD)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Inventory HUD Created"));
-		InventoryHUD->AddToViewport();
-	}
 }
 
 void UInventoryComponent::Server_InitializeInventory_Implementation()

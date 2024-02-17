@@ -31,17 +31,12 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::DebugInput()
 {
-	//APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
-
-	
-	//Server_SpawnItemActor(ActorItem);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	//DOREPLIFETIME(APlayerCharacter, ActorItem);
+	
 	
 }
 
@@ -136,8 +131,6 @@ void APlayerCharacter::TraceForInteractables()
 	{
 		InteractableInFocus = nullptr;
 	}
-	
-	//DrawDebugLine(GetWorld(),TraceStart,TraceEnd,FColor::Blue,false,0.1f,-1,1.0f);
 }
 
 void APlayerCharacter::LocalInteract()
