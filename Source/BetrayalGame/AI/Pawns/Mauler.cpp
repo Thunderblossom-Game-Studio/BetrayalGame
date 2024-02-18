@@ -35,10 +35,10 @@ void AMauler::Tick(float DeltaSeconds)
 
 	if (ValidTargets.Num() == 0)
 		return;
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(TargetTest);
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(TargetCharacter);
 	if (!PlayerCharacter)
 	{
-		TargetTest = FindClosestCharacter();		
+		TargetCharacter = FindClosestCharacter();		
 		return;
 	}
 	FHitResult HitResult;
@@ -48,10 +48,9 @@ void AMauler::Tick(float DeltaSeconds)
 		return;
 	if (ValidTargets.Contains(PlayerCharacter))
 	{
-		TargetTest = nullptr;
-		TargetTest = FindClosestCharacter();
+		TargetCharacter = nullptr;
+		TargetCharacter = FindClosestCharacter();
 	}
-	GLog->Log("Sasdsakdlasdna");
 }
 
 void AMauler::Attack(AActor* Target)
@@ -88,11 +87,10 @@ APlayerCharacter* AMauler::FindClosestCharacter()
 		if (GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), Character->GetActorLocation(), ECollisionChannel::ECC_Visibility, CollisionParams))
 			continue;
 		const float Distance = FVector::Distance(Character->GetActorLocation(), GetActorLocation());
-		if (Distance < SmallestDistance)
-		{
-			ClosestCharacter = Character;
-			SmallestDistance = Distance;
-		}
+		if (Distance >= SmallestDistance)
+			continue;
+		ClosestCharacter = Character;
+		SmallestDistance = Distance;
 	}
 	
 	return ClosestCharacter;
@@ -103,22 +101,13 @@ void AMauler::OverlapEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 {
 	if (!OtherActor)
 		return;
-	if (OtherActor->IsA(APlayerCharacter::StaticClass()))
-	{
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-		if (PlayerCharacter && !ValidTargets.Contains(PlayerCharacter))
-		{
-			//FHitResult HitResult;
-			FCollisionQueryParams CollisionParams;
-			CollisionParams.AddIgnoredActor(this);
-			ValidTargets.Add(PlayerCharacter);
-			TargetTest = FindClosestCharacter();
-			// if (!GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), PlayerCharacter->GetActorLocation(), ECollisionChannel::ECC_Visibility, CollisionParams))
-			// {
-			//
-			// }
-		}
-	}
+	if (!OtherActor->IsA(APlayerCharacter::StaticClass()))
+		return;
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (!PlayerCharacter || ValidTargets.Contains(PlayerCharacter))
+		return;
+	ValidTargets.Add(PlayerCharacter);
+	TargetCharacter = FindClosestCharacter();
 }
 
 void AMauler::OverlapExit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -126,13 +115,11 @@ void AMauler::OverlapExit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 {
 	if (!OtherActor)
 		return;	
-	if (OtherActor->IsA(APlayerCharacter::StaticClass()))
-	{
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-		if (ValidTargets.Contains(PlayerCharacter))
-		{
-			ValidTargets.Remove(PlayerCharacter);			
-			TargetTest = FindClosestCharacter();
-		}
-	}
+	if (!OtherActor->IsA(APlayerCharacter::StaticClass()))
+		return;
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (!ValidTargets.Contains(PlayerCharacter))
+		return;
+	ValidTargets.Remove(PlayerCharacter);			
+	TargetCharacter = FindClosestCharacter();
 }

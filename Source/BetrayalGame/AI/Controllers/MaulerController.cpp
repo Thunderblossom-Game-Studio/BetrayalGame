@@ -6,14 +6,14 @@
 #include "NavigationPath.h"
 #include "BetrayalGame/AI/Pawns/Mauler.h"
 #include "NavigationSystem.h"
+#include "BetrayalGame/Gameplay/PlayerCharacter.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 
 AMaulerController::AMaulerController()
-	: MaulerState()
+	: MaulerState(), Mauler(nullptr), World(nullptr), NavigationSystem(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void AMaulerController::BeginPlay()
@@ -26,18 +26,14 @@ void AMaulerController::BeginPlay()
 		return;
 	NavigationSystem = UNavigationSystemV1::GetCurrent(World);
 	AnchorPoint = Mauler->GetActorLocation();
-
-	// temp test
-	TargetActor = Mauler->TargetTest;
+	TargetActor = Mauler->GetTargetCharacter();
 }
 
 void AMaulerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 	if (!World || !NavigationSystem)
-		return;
-	
+		return;	
 	MaulerState = Evaluation();	
 	switch (MaulerState)
 	{
@@ -58,30 +54,25 @@ void AMaulerController::Tick(float DeltaSeconds)
 TEnumAsByte<EMaulerState> AMaulerController::Evaluation()
 {
 	TEnumAsByte<EMaulerState> EvaluatedState = Evaluating;
-
-	TargetActor = Mauler->TargetTest;
+	TargetActor = Mauler->GetTargetCharacter();
 	const float AnchorDistance = FVector::Distance(Mauler->GetActorLocation(), AnchorPoint);
 	if (TargetActor)
 		EvaluatedState = Acting;
 	else if (!TargetActor && AnchorDistance > 50)
 		EvaluatedState = Standby;
 	else
-		EvaluatedState = Evaluating;
-	
+		EvaluatedState = Evaluating;	
 	return EvaluatedState;
 }
 
 void AMaulerController::EvaluatingState()
 {
-	GLog->Log("Evaluating");
 }
 
 void AMaulerController::StandbyState()
 {	
 	UNavigationPath* Path = NavigationSystem->FindPathToLocationSynchronously(World, Mauler->GetActorLocation(), AnchorPoint);
-	
 	MoveAlongPath(Path);
-	GLog->Log("Standby");
 }
 
 void AMaulerController::ActingState()
@@ -91,32 +82,18 @@ void AMaulerController::ActingState()
 		MaulerState = Standby;
 		return;
 	}
-
 	UNavigationPath* Path = NavigationSystem->FindPathToActorSynchronously(World, Mauler->GetActorLocation(), TargetActor);
-	
 	MoveAlongPath(Path);
-	GLog->Log("Acting");
 }
 
 void AMaulerController::MoveAlongPath(UNavigationPath* Path)
 {
 	const FNavPathSharedPtr PathPoints = Path->GetPath();
-	if (!Path->IsValid() || PathPoints->GetPathPoints().Num() <= 1)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid path provided!"));
+	if (!Path->IsValid() || PathPoints->GetPathPoints().Num() <= 1 || !GetPawn())
 		return;
-	}
 
-	const APawn* ControlledPawn = GetPawn();
-	if (!ControlledPawn)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No controlled pawn found for AI controller!"));
-		return;
-	}
-
-	MovePosition = PathPoints->GetPathPointLocation(PosIndex).Position;
+	MovePosition = PathPoints->GetPathPointLocation(PosIndex).Position;	
 	
-	// Command AI pawn to move along the path
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MovePosition);
 	if (GetMoveStatus() == EPathFollowingStatus::Type::Idle)
 	{

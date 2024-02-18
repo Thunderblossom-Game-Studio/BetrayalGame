@@ -22,17 +22,14 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-
 	
 #pragma region State Machine
+// Variables
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", meta = (AllowPrivateAccess = "true"))
 	TEnumAsByte<EMaulerState> MaulerState;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "State|Evaluations", meta = (AllowPrivateAccess = "true"))
-	float StandbyRadius;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "State|Evaluations", meta = (AllowPrivateAccess = "true"))
-	float ActingRadius;
 
+// State Functions
 protected:
 	virtual TEnumAsByte<EMaulerState> Evaluation();
 	
@@ -40,22 +37,26 @@ protected:
 	virtual void StandbyState();
 	virtual void ActingState();
 
+// Getters
 public:
 	const TEnumAsByte<EMaulerState>& GetMaulerState() const { return MaulerState; }
 	
 #pragma endregion
 
 #pragma region Movement
+// Variables
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FVector AnchorPoint;
 
+// Functions
 protected:
 	virtual void MoveAlongPath(class UNavigationPath* Path);
 	
 #pragma endregion
 
 private:
+	// Cached Variables
 	UPROPERTY()
 	class AMauler* Mauler;
 	UPROPERTY()

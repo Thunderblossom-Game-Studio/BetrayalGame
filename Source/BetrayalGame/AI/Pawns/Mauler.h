@@ -26,25 +26,41 @@ protected:
 	class USphereComponent* SphereComponent;
 	
 #pragma endregion
-	
+
+#pragma region Movement
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FVector AnchorPoint;
 	
+#pragma endregion
+	
+#pragma region Attacking	
 public:	
 	virtual void Attack(AActor* Target) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	AActor* TargetTest;
+#pragma endregion
 
+#pragma region Targetting	
+protected:
+	UPROPERTY()
+	class APlayerCharacter* TargetCharacter;
+	UPROPERTY()
+	TArray<class APlayerCharacter*> ValidTargets;
+	
+public:
 	UFUNCTION()
 	class APlayerCharacter* FindClosestCharacter();
 	
+protected:
 	UFUNCTION()
 	void OverlapEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void OverlapExit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	UPROPERTY()
-	TArray<class APlayerCharacter*> ValidTargets;
+
+public:
+	class APlayerCharacter* GetTargetCharacter() const { return TargetCharacter; }
+	
+#pragma endregion
+	
 };
