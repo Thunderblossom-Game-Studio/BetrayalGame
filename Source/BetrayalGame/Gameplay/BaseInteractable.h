@@ -18,7 +18,7 @@ public:
 	
 	virtual void OnInteract(class AActor* Interactor);
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
 	void InteractEvent(class AActor* Interactor);
 	
 	UFUNCTION()

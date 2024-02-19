@@ -28,12 +28,7 @@ void ABaseInteractable::OnInteract(AActor* Interactor)
 	if(ActorHasTag("Door"))
 		Destroy();
 	
-	
-}
-
-void ABaseInteractable::InteractEvent_Implementation(AActor* Interactor)
-{
-	OnInteract(Interactor);
+	InteractEvent(Interactor);
 }
 
 void ABaseInteractable::OnBeginFocus(AActor* Interactor)
