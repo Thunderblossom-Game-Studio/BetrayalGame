@@ -6,15 +6,14 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BetrayalGame/AI/Pawns/Chaser.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BetrayalGame/Gameplay/PlayerCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Engine/Engine.h"
 #include "Perception/AIPerceptionComponent.h"
 
 AChaserController::AChaserController()
-{
-	PrimaryActorTick.bCanEverTick = true;
-	
+{	
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception"));
 	
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
@@ -63,8 +62,11 @@ void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus S
 	{
 		World->GetTimerManager().ClearTimer(LOSTimerHandle);
 
+		if (!UpdatedActor->IsA(APlayerCharacter::StaticClass()))
+			return;
 		if (TargetActor)
 			return;
+		
 		
 		TargetActor = UpdatedActor;
 		Blackboard->SetValueAsObject("TargetActor", TargetActor);
