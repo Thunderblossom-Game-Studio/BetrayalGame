@@ -3,7 +3,7 @@
 
 #include "../Gameplay/InventoryComponent.h"
 
-#include "Kismet/GameplayStatics.h"
+#include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -23,6 +23,8 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, InventorySlots);
 	DOREPLIFETIME(UInventoryComponent, FilledSlotCount);
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryFull);
+	DOREPLIFETIME(UInventoryComponent, bIsInventoryInitialized);
+	DOREPLIFETIME(UInventoryComponent, SelectedSlot);
 }
 
 // Called when the game starts
@@ -31,29 +33,14 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	if(GetOwnerRole() == ROLE_Authority)
-	{
 		InitializeInventory();
-		
-	}
 	else if (GetOwnerRole() == ROLE_SimulatedProxy)
-	{
 		Server_InitializeInventory();
-	}
-
-	InventoryBoxWidget = CreateWidget<UInventorySlotWidget>(GetWorld(), InventoryBoxWidgetClass);
-	if(InventoryBoxWidget)
-		InventoryBoxWidget->AddToViewport();
-	
-
-	
 }
 
-// Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 void UInventoryComponent::Server_AddItemToInventory_Implementation(FItem Item)
@@ -70,10 +57,8 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 			slot.Item = Item;
 			slot.bIsEmpty = false;
 
-			if(slot.ID == 0)
-				slot.bIsSelected = true;
-			else
-				slot.bIsSelected = false;
+			SelectSlot(slot.ID);
+			
 			FilledSlotCount++;
 			break;
 		}
@@ -83,7 +68,6 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 	{
 		bIsInventoryFull = true;
 	}
-	
 }
 
 void UInventoryComponent::InitializeInventory()
@@ -94,11 +78,9 @@ void UInventoryComponent::InitializeInventory()
 		Slot.ID = i;
 		Slot.bIsEmpty = true;
 		InventorySlots.Add(Slot);
-
-		// InventorySlotWidget = CreateWidget<UUserWidget>(GetWorld(), InventorySlotWidgetClass);
-		//
-		// InventoryBoxWidget->InventorySlotsBox->AddChild(InventorySlotWidget);
 	}
+	
+	bIsInventoryInitialized = true;
 }
 
 void UInventoryComponent::Server_InitializeInventory_Implementation()
@@ -131,6 +113,7 @@ void UInventoryComponent::SelectSlot(int ID)
 		if(slot.ID == ID)
 		{
 			slot.bIsSelected = true;
+			SelectedSlot = slot;
 		}
 		else
 		{

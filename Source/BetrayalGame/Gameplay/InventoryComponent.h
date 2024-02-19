@@ -3,15 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InventorySlotWidget.h"
 #include "ItemActor.h"
-#include "PlayerCharacter.h"
 #include "Components/ActorComponent.h"
-#include "Components/WidgetComponent.h"
 #include "InventoryComponent.generated.h"
 
-
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FInventorySlot
 {
 	GENERATED_BODY()
@@ -24,16 +20,16 @@ struct FInventorySlot
 		bIsSelected = true;
 	}
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	FItem Item;
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	int ID;
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsEmpty;
 	
-	UPROPERTY(EditAnywhere, Category = "Slot")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsSelected;
 	
 };
@@ -49,8 +45,6 @@ private:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
-	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -58,6 +52,12 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	TArray<FInventorySlot> InventorySlots;
 
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
+	FInventorySlot SelectedSlot;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
+	bool bIsInventoryInitialized = false;
+	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int MaxInventorySlots;
 	
@@ -67,28 +67,21 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	int FilledSlotCount;
 	
-	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UInventorySlotWidget> InventoryBoxWidgetClass;
-	
-	UPROPERTY(VisibleAnywhere , Category = "Inventory|Widgets")
-	UInventorySlotWidget* InventoryBoxWidget;
-	
-	UPROPERTY(EditAnywhere, Category = "Inventory|Widgets")
-	TSubclassOf<UUserWidget> InventorySlotWidgetClass;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Inventory|Widgets")
-	UUserWidget* InventorySlotWidget;
-	
-	
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FInventorySlot GetSlot(int ID);
-	UFUNCTION()
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FItem GetItemInSlot(int ID);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FInventorySlot> GetInventorySlots() const { return InventorySlots; }
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	FInventorySlot GetSelectedSlot() const { return SelectedSlot; }
+	
 	UFUNCTION()
 	void SelectSlot(int ID);
 	
@@ -104,5 +97,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool IsInventoryFull() const { return bIsInventoryFull; }
+
+
+	
 		
 };
