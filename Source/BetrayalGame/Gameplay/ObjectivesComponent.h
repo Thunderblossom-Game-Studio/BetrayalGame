@@ -28,7 +28,7 @@ struct FEventObjective : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	FString Description;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	UPROPERTY(BlueprintReadOnly, Category = "Objective")
 	bool bIsCompleted;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
@@ -51,7 +51,7 @@ struct FHauntObjective : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	FString Description;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	UPROPERTY(BlueprintReadOnly, Category = "Objective")
 	bool bIsCompleted;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
@@ -66,17 +66,28 @@ class BETRAYALGAME_API UObjectivesComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	UObjectivesComponent();
+private:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Objectives")
+	FEventObjective CurrentEventObjective;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Objectives")
+	FHauntObjective CurrentHauntObjective;
+
+public:
+	UObjectivesComponent();
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION()
+	void SetEventObjective(FEventObjective NewObjective);
+
+	UFUNCTION()
+	void SetHauntObjective(FHauntObjective NewObjective);
 
 		
 };

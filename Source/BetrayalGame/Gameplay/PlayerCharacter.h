@@ -130,6 +130,15 @@ public:
 private:
 #pragma endregion 
 
+#pragma region Objectives
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Objectives")
+	class UObjectivesComponent* ObjectivesComponent;
+
+	
+private:
+#pragma endregion 
+	
 protected:
 	virtual void BeginPlay() override;
 

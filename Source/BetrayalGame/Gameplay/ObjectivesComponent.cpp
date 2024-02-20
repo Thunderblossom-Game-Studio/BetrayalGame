@@ -3,6 +3,8 @@
 
 #include "../Gameplay/ObjectivesComponent.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values for this component's properties
 UObjectivesComponent::UObjectivesComponent()
 {
@@ -13,6 +15,14 @@ UObjectivesComponent::UObjectivesComponent()
 	SetIsReplicatedByDefault(true);
 }
 
+
+void UObjectivesComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UObjectivesComponent, CurrentEventObjective);
+	DOREPLIFETIME(UObjectivesComponent, CurrentHauntObjective);
+}
 
 // Called when the game starts
 void UObjectivesComponent::BeginPlay()
@@ -30,5 +40,13 @@ void UObjectivesComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UObjectivesComponent::SetEventObjective(FEventObjective NewObjective)
+{
+}
+
+void UObjectivesComponent::SetHauntObjective(FHauntObjective NewObjective)
+{
 }
 
