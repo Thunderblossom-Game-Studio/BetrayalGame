@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Monster.h"
+#include "BetrayalGame/AI/MaulerAnimInstance.h"
 #include "Mauler.generated.h"
 
 /**
@@ -17,6 +18,7 @@ class BETRAYALGAME_API AMauler : public AMonster
 public:
 	AMauler();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -35,9 +37,15 @@ protected:
 #pragma endregion
 	
 #pragma region Attacking	
+protected:
+	UPROPERTY(Replicated)
+	bool bAttacking;
+
 public:	
 	virtual void Attack(AActor* Target) override;
-
+	bool IsAttacking() const { return bAttacking; }
+	void ResetAttack() { bAttacking = false; }
+	
 #pragma endregion
 
 #pragma region Targetting	
@@ -62,5 +70,9 @@ public:
 	class APlayerCharacter* GetTargetCharacter() const { return TargetCharacter; }
 	
 #pragma endregion
+
+protected:
+	UPROPERTY()
+	class UMaulerAnimInstance* MaulerAnim;
 	
 };

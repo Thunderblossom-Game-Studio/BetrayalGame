@@ -2,9 +2,10 @@
 
 
 #include "Mauler.h"
-
+#include "../MaulerAnimInstance.h"
 #include "BetrayalGame/Gameplay/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AMauler::AMauler()
 {
@@ -17,9 +18,19 @@ AMauler::AMauler()
 	}
 }
 
+void AMauler::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMauler, bAttacking);
+}
+
 void AMauler::BeginPlay()
 {
 	Super::BeginPlay();
+	if (const USkeletalMeshComponent* MeshComponent = GetMesh())
+		MaulerAnim = Cast<UMaulerAnimInstance>(MeshComponent->GetAnimInstance());
+	
 	if (SphereComponent)
 	{
 		SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AMauler::OverlapEnter);
@@ -32,7 +43,6 @@ void AMauler::BeginPlay()
 void AMauler::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 	if (ValidTargets.Num() == 0)
 		return;
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(TargetCharacter);
@@ -54,11 +64,18 @@ void AMauler::Tick(float DeltaSeconds)
 }
 
 void AMauler::Attack(AActor* Target)
-{
+{	
 	if (!Target)
 		return;
 	Super::Attack(Target);
-		
+	bAttacking = true;
+	if (!Target->IsA<ABaseCharacter>())
+		return;
+	if (ABaseCharacter* Character = Cast<ABaseCharacter>(Target))
+	{
+		Character->SetCurrentHealth(1);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, "Health: " + FString::SanitizeFloat(Character->GetCurrentHealth()));
+	}
 }
 
 APlayerCharacter* AMauler::FindClosestCharacter()

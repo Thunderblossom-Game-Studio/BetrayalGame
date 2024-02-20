@@ -82,12 +82,23 @@ void AMaulerController::ActingState()
 		MaulerState = Standby;
 		return;
 	}
-	UNavigationPath* Path = NavigationSystem->FindPathToActorSynchronously(World, Mauler->GetActorLocation(), TargetActor);
-	MoveAlongPath(Path);
+	const float Distance = FVector::Distance(Mauler->GetActorLocation(), TargetActor->GetActorLocation());
+	if (Distance < 200 && !Mauler->IsAttacking())
+	{
+		StopMovement();
+		Mauler->Attack(TargetActor);
+	}
+	else if (!Mauler->IsAttacking())
+	{
+		UNavigationPath* Path = NavigationSystem->FindPathToActorSynchronously(World, Mauler->GetActorLocation(), TargetActor);
+    	MoveAlongPath(Path);		
+	}	
 }
 
 void AMaulerController::MoveAlongPath(UNavigationPath* Path)
 {
+	if (Mauler->IsAttacking())
+		return;
 	const FNavPathSharedPtr PathPoints = Path->GetPath();
 	if (!Path->IsValid() || PathPoints->GetPathPoints().Num() <= 1 || !GetPawn())
 		return;
