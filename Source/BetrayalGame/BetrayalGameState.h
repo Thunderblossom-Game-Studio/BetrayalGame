@@ -37,6 +37,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	int Countdown = 30;
 
+public:
+	UFUNCTION(BlueprintCallable)
+	bool IsValidCountdown() const { return (Countdown >= 0); }
+	
 // Getters/Setters
 public:
 	const TEnumAsByte<EMatchStage>& GetMatchStage() const { return MatchStage; }
