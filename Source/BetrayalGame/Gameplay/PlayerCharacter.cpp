@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -183,6 +184,12 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 			ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("RightHand"));
 			ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 			ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+
+			if (UAIPerceptionStimuliSourceComponent* Stimuli = ItemActor->GetAIStimuliSourceComponent())
+			{
+				Stimuli->UnregisterFromPerceptionSystem();
+			}
+			
 			HeldItem = ItemActor;
 		}
 	}

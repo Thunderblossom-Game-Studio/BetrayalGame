@@ -17,9 +17,11 @@ class BETRAYALGAME_API AAIPlayerController : public AAIController
 public:
 	AAIPlayerController();
 
+	void EnableAIPlayer();
+	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-		
+
 #pragma region Components
 // Variables
 protected:
@@ -79,12 +81,21 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Player | Perception | Sight", meta = (AllowPrivateAccess = "true"))
 	float LineOfSightTimer = 4.0f;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FTimerHandle LOSTimerHandle;
-
+	FTimerHandle MonsterLOSTimerHandle;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FTimerHandle ItemLOSTimerHandle;
+	
 	// Exposed Functions/Events
 public:
+	UFUNCTION()
+	void SeeMonster(AActor* UpdatedActor, struct FAIStimulus Stimulus);
 	UFUNCTION(BlueprintCallable)
-	void LOSRecaptureFail();
+	void MonsterLOSRecaptureFail();
+	
+	UFUNCTION()
+	void SeeItem(AActor* UpdatedActor, struct FAIStimulus Stimulus);
+	UFUNCTION(BlueprintCallable)
+	void ItemLOSRecaptureFail();
 
 #pragma endregion
 	

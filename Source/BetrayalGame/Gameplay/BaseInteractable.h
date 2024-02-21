@@ -12,6 +12,17 @@ class BETRAYALGAME_API ABaseInteractable : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
+#pragma region Components
+// Components
+protected:
+	// Needed for A.I perception system.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	class UAIPerceptionStimuliSourceComponent* AIStimuliSourceComponent;
+	
+public:
+	UAIPerceptionStimuliSourceComponent* GetAIStimuliSourceComponent() const { return AIStimuliSourceComponent; }
+	
+#pragma endregion	
 	
 #pragma region Interaction
 public:
@@ -40,6 +51,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void PostInitializeComponents() override;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

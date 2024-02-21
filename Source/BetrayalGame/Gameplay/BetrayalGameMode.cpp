@@ -3,6 +3,9 @@
 
 #include "../Gameplay/BetrayalGameMode.h"
 
+#include "BetrayalGame/AI/Controllers/AIPlayerController.h"
+#include "Kismet/GameplayStatics.h"
+
 
 ABetrayalGameMode::ABetrayalGameMode()
 {
@@ -79,6 +82,14 @@ void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 	}
 	else if (MatchStage == Exploring)
 	{
+		TArray<AActor*> AIPlayerControllers;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIPlayerController::StaticClass(), AIPlayerControllers);
+		for (AActor* ControllerActor : AIPlayerControllers)
+		{
+			if (AAIPlayerController* AIPlayerController = Cast<AAIPlayerController>(ControllerActor))
+				AIPlayerController->EnableAIPlayer();
+		}
+		
 		MaxStageTimer = ExploreStage.TimeLength;		
 		SetStageUseTimer(ExploreStage.bUsesTimer);
 		OnExploringStageStart();

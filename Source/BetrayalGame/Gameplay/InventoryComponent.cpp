@@ -97,6 +97,15 @@ FInventorySlot UInventoryComponent::GetSlot(int ID)
 	return FInventorySlot();
 }
 
+FInventorySlot UInventoryComponent::GetItemSlot(FItem Item)
+{
+	for (auto slot : InventorySlots)
+		if(slot.Item.Name.ToString() == Item.Name.ToString())
+			return slot;
+
+	return FInventorySlot();	
+}
+
 FItem UInventoryComponent::GetItemInSlot(int ID)
 {
 	for (auto slot : InventorySlots)
