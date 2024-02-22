@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Menu_PlayerController.h"
 #include "../StaticUtils.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineSubsystemTypes.h"
 #include "Interfaces/OnlineIdentityInterface.h"
-#include "Menu_PlayerController.h"
 
 AMenu_PlayerController::AMenu_PlayerController()
 {
