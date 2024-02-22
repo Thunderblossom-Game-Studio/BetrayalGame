@@ -66,6 +66,9 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		// Session password
 		SessionSettings->Set(PASSWORD, Password, EOnlineDataAdvertisementType::ViaOnlineService);
 
+		// Session server list name
+		SessionSettings->Set(SERVERLIST_NAME, LobbyListName, EOnlineDataAdvertisementType::ViaOnlineService);
+
 		if (!_GameInstance->LevelToLoad.IsEmpty())
 		{
 			const FString MapName = _GameInstance->LevelToLoad;

@@ -12,6 +12,7 @@ class UBetrayalGameInstance;
 
 // Type Definitions
 const FName PASSWORD = "PASSWORD";
+const FName SERVERLIST_NAME = "SESSION_NAME";
 
 UCLASS()
 class BETRAYALGAME_API UBetrayalGameNetworkSubsystem : public UGameInstanceSubsystem
@@ -29,8 +30,11 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
-	int MAX_PLAYERS = 4; // Max number of players in a session
+	int MAX_PLAYERS = 5; // Max number of players in a session
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
+	FString LobbyListName = "BetrayalGameSession";
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
 	FName LevelToLoad = "";
 
