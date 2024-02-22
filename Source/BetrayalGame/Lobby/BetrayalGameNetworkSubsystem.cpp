@@ -178,9 +178,10 @@ void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> 
 		SessionSearch = MakeShareable(new FOnlineSessionSearch());
 
 		SessionSearch->bIsLanQuery = bIsLAN;
-		SessionSearch->MaxSearchResults = 10000;
-		SessionSearch->PingBucketSize = 50;
+		//SessionSearch->MaxSearchResults = 10000;
+		//SessionSearch->PingBucketSize = 50;
 		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
+		SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 
 		TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
 
