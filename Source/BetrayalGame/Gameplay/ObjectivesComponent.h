@@ -37,5 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Objectives")
 	void SetHauntObjective(FObjective NewObjective) { CurrentHauntObjective = NewObjective; }
 
+	UFUNCTION(BlueprintCallable, Category="Objectives")
+	FObjective GetEventObjective() { return CurrentEventObjective; };
+
+	UFUNCTION(BlueprintCallable, Category="Objectives")
+	FObjective GetHauntObjective() { return CurrentHauntObjective; };
 		
 };
