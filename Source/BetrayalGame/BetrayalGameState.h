@@ -128,7 +128,6 @@ public:
 	
 #pragma endregion
 
-
 #pragma region Haunt Tracking
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
@@ -139,6 +138,8 @@ public:
 	
 	UFUNCTION()
 	void StartHaunt();
-	
+
+	UFUNCTION(NetMulticast, Reliable)
+	void AddObjectivesToPlayers();	
 #pragma endregion 
 };

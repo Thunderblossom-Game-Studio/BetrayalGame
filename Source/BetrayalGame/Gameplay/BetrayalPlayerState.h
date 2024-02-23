@@ -22,7 +22,7 @@ class BETRAYALGAME_API ABetrayalPlayerState : public APlayerState
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 protected:
-	UPROPERTY(ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "Player State")
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "Player State")
 	bool bIsTraitor = false;
 
 public:

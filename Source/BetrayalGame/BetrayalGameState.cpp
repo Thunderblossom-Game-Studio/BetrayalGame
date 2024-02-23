@@ -4,7 +4,9 @@
 #include "BetrayalGameState.h"
 
 #include "GameFramework/GameSession.h"
+#include "Gameplay/BetrayalPlayerState.h"
 #include "Gameplay/ObjectivesComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 ABetrayalGameState::ABetrayalGameState()
@@ -28,29 +30,59 @@ void ABetrayalGameState::StartHaunt()
 	if(!HauntData)
 		return;
 	
-	const int32 NumRows = HauntData->GetTableData().Num();
+	const int32 NumRows = HauntData->GetRowMap().Num();
 	
-	const int32 RandomIndex = FMath::RandRange(1, NumRows - 1);
+	int32 RandomIndex = FMath::RandRange(1, NumRows - 1);
 
-	const FName RandomRowName = HauntData->GetRowNames()[RandomIndex - 1];
+	if(RandomIndex == 0)
+		RandomIndex = FMath::RandRange(1, NumRows - 1);
+	
+	FName RandomRowName = HauntData->GetRowNames()[RandomIndex - 1];
 	
 	FHaunt* Haunt = HauntData->FindRow<FHaunt>(RandomRowName, "");
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Haunt: %s"), *Haunt->Name));
 	
 	if(Haunt)
 		CurrentHaunt = *Haunt;
+
+	// Set random player as traitor
+
+	// Get random player from player array
+	const int32 NumPlayers = PlayerArray.Num();
+
+	const int32 RandomPlayerIndex = FMath::RandRange(0, NumPlayers - 1);
+
+	ABetrayalPlayerState* BetrayalPlayerState = Cast<ABetrayalPlayerState>(PlayerArray[RandomPlayerIndex]);
+	if(!BetrayalPlayerState)
+		return;
+
+	BetrayalPlayerState->SetIsTraitor(true);
 	
-	//FObjective InnocentObjective = *CurrentHaunt.InnocentObjective.DataTable->FindRow<FObjective>(CurrentHaunt.InnocentObjective.RowName, "");
-	// FObjective TraitorObjective = *CurrentHaunt.TraitorObjective.DataTable->FindRow<FObjective>(CurrentHaunt.TraitorObjective.RowName, "");
-	//
-	// for (auto Player : PlayerArray)
-	// {
-	// 	APlayerCharacter* Character = Cast<APlayerCharacter>(Player);
-	// 	if(Character)
-	// 		Character->ObjectivesComponent->SetHauntObjective(InnocentObjective);
-	// 	
-	// }
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Player %s is the traitor"), *BetrayalPlayerState->GetActorLabel()));
+	
+	//AddObjectivesToPlayers();
+}
+
+void ABetrayalGameState::AddObjectivesToPlayers_Implementation()
+{
+	FObjective* InnocentObjective = CurrentHaunt.InnocentObjective.DataTable->FindRow<FObjective>(CurrentHaunt.InnocentObjective.RowName, "");
+	FObjective* TraitorObjective = CurrentHaunt.TraitorObjective.DataTable->FindRow<FObjective>(CurrentHaunt.TraitorObjective.RowName, "");
+	if(!InnocentObjective || !TraitorObjective)
+		return;
+	
+	
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if(!PlayerCharacter)
+		return;
+
+	ABetrayalPlayerState* BetrayalPlayerState = Cast<ABetrayalPlayerState>(PlayerCharacter->GetPlayerState());
+	if(!BetrayalPlayerState)
+		return;
+
+	if(BetrayalPlayerState->IsTraitor())
+		PlayerCharacter->ObjectivesComponent->SetHauntObjective(*TraitorObjective);
+	else
+		PlayerCharacter->ObjectivesComponent->SetHauntObjective(*InnocentObjective);
+	
 }
 
 
@@ -66,7 +98,8 @@ void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage Ne
 		break;
 	case Haunting:
 		OnHauntingStageStart();
-		HauntEvent.Broadcast();
+		if(HasAuthority())
+			StartHaunt();
 		break;
 	case Finishing:
 		OnFinishingStageStart();
