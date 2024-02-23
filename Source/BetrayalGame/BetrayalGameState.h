@@ -48,6 +48,8 @@ struct FObjective : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	TEnumAsByte<EObjectiveType> Type;
+
+	
 };
 
 USTRUCT()
@@ -90,19 +92,25 @@ protected:
 	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Game|Match Stage")
 	int Countdown = 30;
 
+	
+	
 public:
 	UFUNCTION(BlueprintCallable)
 	bool IsValidCountdown() const { return (Countdown >= 0); }
 
 	UFUNCTION(NetMulticast, Reliable)
 	void OnMatchStageChanged(const EMatchStage NewStage);
-
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnLobbyStageStart();
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnExploringStageStart();
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHauntingStageStart();
+	DECLARE_EVENT(MatchStage, FHauntEvent)
+	FHauntEvent& OnHaunt() { return HauntEvent; }
+	FHauntEvent HauntEvent;
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnFinishingStageStart();
 	
@@ -124,9 +132,9 @@ public:
 #pragma region Haunt Tracking
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
-	FDataTableRowHandle HauntTable;
+	UDataTable* HauntData;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	FHaunt CurrentHaunt;
 	
 	UFUNCTION()
