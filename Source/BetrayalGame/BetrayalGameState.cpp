@@ -32,17 +32,16 @@ void ABetrayalGameState::StartHaunt()
 	
 	const int32 RandomIndex = FMath::RandRange(1, NumRows - 1);
 
-	const FName RandomRowName = HauntData->GetRowNames()[RandomIndex];
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, RandomRowName.ToString());
+	const FName RandomRowName = HauntData->GetRowNames()[RandomIndex - 1];
 	
-	//
-	// FHaunt* Haunt = HauntData->FindRow<FHaunt>(RandomRowName, "");
-	//
-	// if(Haunt)
-	// 	CurrentHaunt = *Haunt;
-	//
-	// FObjective InnocentObjective = *CurrentHaunt.InnocentObjective.DataTable->FindRow<FObjective>(CurrentHaunt.InnocentObjective.RowName, "");
+	FHaunt* Haunt = HauntData->FindRow<FHaunt>(RandomRowName, "");
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Haunt: %s"), *Haunt->Name));
+	
+	if(Haunt)
+		CurrentHaunt = *Haunt;
+	
+	//FObjective InnocentObjective = *CurrentHaunt.InnocentObjective.DataTable->FindRow<FObjective>(CurrentHaunt.InnocentObjective.RowName, "");
 	// FObjective TraitorObjective = *CurrentHaunt.TraitorObjective.DataTable->FindRow<FObjective>(CurrentHaunt.TraitorObjective.RowName, "");
 	//
 	// for (auto Player : PlayerArray)
