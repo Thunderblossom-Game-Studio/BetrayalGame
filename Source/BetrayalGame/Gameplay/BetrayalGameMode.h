@@ -47,7 +47,7 @@ public:
 protected:
 	// Match Stage's Information
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
-	FStageInfo PrepareStage;
+	FStageInfo LobbyStage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
 	FStageInfo ExploreStage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
@@ -57,7 +57,7 @@ protected:
 
 	// Stage Functionality
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
-	TEnumAsByte<EMatchStage> MatchStage = Preparing;
+	TEnumAsByte<EMatchStage> MatchStage = Lobby;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
 	float MaxStageTimer = 30;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
@@ -70,16 +70,7 @@ public:
 	// Allows anything authoritative to change stage.
 	UFUNCTION(BlueprintCallable)
 	void SetNextStage();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnPreparingStageStart();
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnExploringStageStart();
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnHauntingStageStart();
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnFinishingStageStart();
-
+	
 // Class Functions
 protected:
 	void RunMatchTimer(float DeltaSeconds);

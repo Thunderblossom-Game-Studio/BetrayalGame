@@ -3,22 +3,75 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
 #include "GameFramework/GameState.h"
+#include "Gameplay/PlayerCharacter.h"
 #include "BetrayalGameState.generated.h"
 
 UENUM()
 enum EMatchStage
 {
-	Preparing,
-	Exploring,
-	Haunting,
-	Finishing
+	Lobby UMETA(DisplayName = "Lobby"),
+	Exploring UMETA(DisplayName = "Exploring"),
+	Haunting UMETA(DisplayName = "Haunting"),
+	Finishing UMETA(DisplayName = "Finishing"),
 };
 
-/**
- * 
- */
+UENUM()
+enum EObjectiveState
+{
+	NotStarted UMETA(DisplayName = "Not Started"),
+	Started UMETA(DisplayName = "Started"),
+	Finished UMETA(DisplayName = "Finished")
+};
+
+UENUM()
+enum EObjectiveType
+{
+	Event UMETA(DisplayName = "Event"),
+	Innocent UMETA(DisplayName = "Innocent"),
+	Traitor UMETA(DisplayName = "Traitor")
+};
+
+USTRUCT()
+struct FObjective : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	FString Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	FString Description;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Objective")
+	TEnumAsByte<EObjectiveState> State;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	TEnumAsByte<EObjectiveType> Type;
+};
+
+USTRUCT()
+struct FHaunt : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
+	FString Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
+	FString Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
+	FDataTableRowHandle TraitorObjective;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
+	FDataTableRowHandle InnocentObjective;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
+	float Duration;
+};
+
+
 UCLASS()
 class BETRAYALGAME_API ABetrayalGameState : public AGameState
 {
@@ -32,14 +85,26 @@ public:
 #pragma region Match Stage Variable Replication
 // Replicated Variables
 protected:
-	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TEnumAsByte<EMatchStage> MatchStage = Preparing;
-	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Game|Match Stage")
+	TEnumAsByte<EMatchStage> MatchStage = Lobby;
+	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Game|Match Stage")
 	int Countdown = 30;
 
 public:
 	UFUNCTION(BlueprintCallable)
 	bool IsValidCountdown() const { return (Countdown >= 0); }
+
+	UFUNCTION(NetMulticast, Reliable)
+	void OnMatchStageChanged(const EMatchStage NewStage);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLobbyStageStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnExploringStageStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHauntingStageStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnFinishingStageStart();
 	
 // Getters/Setters
 public:
@@ -49,5 +114,23 @@ public:
 	void SetCountdown(const int NewTime) { Countdown = NewTime; }
 	
 #pragma endregion
+
+#pragma region Objective Tracking
+
 	
+#pragma endregion
+
+
+#pragma region Haunt Tracking
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
+	FDataTableRowHandle HauntTable;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
+	FHaunt CurrentHaunt;
+	
+	UFUNCTION()
+	void StartHaunt();
+	
+#pragma endregion 
 };

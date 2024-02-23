@@ -13,7 +13,7 @@ void ABetrayalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	BetrayalGameState = GetGameState<ABetrayalGameState>();
-	SetMatchStage(Preparing);
+	SetMatchStage(Lobby);
 }
 
 void ABetrayalGameMode::SetNextStage()
@@ -71,30 +71,30 @@ void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 	MatchStage = NewStage;
 	StageTimer = 0;
 	
-	if (MatchStage == Preparing)
+	if (MatchStage == Lobby)
 	{
-		MaxStageTimer = PrepareStage.TimeLength;
-		SetStageUseTimer(PrepareStage.bUsesTimer);
-		OnPreparingStageStart();
+		MaxStageTimer = LobbyStage.TimeLength;
+		SetStageUseTimer(LobbyStage.bUsesTimer);
+		BetrayalGameState->OnMatchStageChanged(MatchStage);
 	}
 	else if (MatchStage == Exploring)
 	{
 		MaxStageTimer = ExploreStage.TimeLength;		
 		SetStageUseTimer(ExploreStage.bUsesTimer);
-		OnExploringStageStart();
+		BetrayalGameState->OnMatchStageChanged(MatchStage);
 		StartMatch();
 	}
 	else if (MatchStage == Haunting)
 	{
 		MaxStageTimer = HauntStage.TimeLength;		
 		SetStageUseTimer(HauntStage.bUsesTimer);
-		OnHauntingStageStart();
+		BetrayalGameState->OnMatchStageChanged(MatchStage);
 	}
 	else if (MatchStage == Finishing)
 	{
 		MaxStageTimer = FinishStage.TimeLength;		
 		SetStageUseTimer(FinishStage.bUsesTimer);
-		OnFinishingStageStart();
+		BetrayalGameState->OnMatchStageChanged(MatchStage);
 		EndMatch();
 	}
 

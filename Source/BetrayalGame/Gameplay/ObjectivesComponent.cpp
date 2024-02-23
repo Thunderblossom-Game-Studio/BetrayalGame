@@ -42,11 +42,5 @@ void UObjectivesComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	// ...
 }
 
-void UObjectivesComponent::SetEventObjective(FEventObjective NewObjective)
-{
-}
 
-void UObjectivesComponent::SetHauntObjective(FHauntObjective NewObjective)
-{
-}
 
