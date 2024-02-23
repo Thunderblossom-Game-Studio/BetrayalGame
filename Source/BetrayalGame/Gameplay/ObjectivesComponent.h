@@ -4,61 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "ItemActor.h"
+#include "BetrayalGame/BetrayalGameState.h"
 #include "Components/ActorComponent.h"
 #include "ObjectivesComponent.generated.h"
-
-UENUM()
-enum ERewardType
-{
-	RT_None UMETA(DisplayName = "None"),
-	RT_Item UMETA(DisplayName = "Item"),
-	RT_RandomItem UMETA(DisplayName = "Random Item"),
-};
-
-USTRUCT(BlueprintType)
-struct FEventObjective : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	int ID;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	FString Description;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Objective")
-	bool bIsCompleted;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	TEnumAsByte<ERewardType> RewardType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	AItemActor* RewardItem;
-};
-
-USTRUCT()
-struct FHauntObjective : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	int ID;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	FString Description;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Objective")
-	bool bIsCompleted;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	bool bIsTraitorObjective;
-	
-};
-
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -73,21 +21,26 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Objectives")
-	FEventObjective CurrentEventObjective;
+	FObjective CurrentEventObjective;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Objectives")
-	FHauntObjective CurrentHauntObjective;
+	FObjective CurrentHauntObjective;
 
 public:
 	UObjectivesComponent();
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION()
-	void SetEventObjective(FEventObjective NewObjective);
+	UFUNCTION(BlueprintCallable, Category="Objectives")
+	void SetEventObjective(FObjective NewObjective) { CurrentEventObjective = NewObjective; };
 
-	UFUNCTION()
-	void SetHauntObjective(FHauntObjective NewObjective);
+	UFUNCTION(BlueprintCallable, Category="Objectives")
+	void SetHauntObjective(FObjective NewObjective) { CurrentHauntObjective = NewObjective; }
 
+	UFUNCTION(BlueprintCallable, Category="Objectives")
+	FObjective GetEventObjective() { return CurrentEventObjective; };
+
+	UFUNCTION(BlueprintCallable, Category="Objectives")
+	FObjective GetHauntObjective() { return CurrentHauntObjective; };
 		
 };
