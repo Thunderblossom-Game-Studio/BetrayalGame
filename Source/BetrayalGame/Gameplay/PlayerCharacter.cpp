@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InventoryComponent.h"
+#include "ObjectivesComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -28,6 +29,8 @@ APlayerCharacter::APlayerCharacter()
 	InteractableInFocus = nullptr;
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
+
+	ObjectivesComponent = CreateDefaultSubobject<UObjectivesComponent>(TEXT("Objectives Component"));
 }
 
 void APlayerCharacter::DebugInput()
@@ -119,13 +122,13 @@ void APlayerCharacter::SelectSlot2()
 
 	if(HasAuthority())
 	{
-		UnequipItem();
-		EquipItem(InventoryComponent->GetItemInSlot(1).Actor.GetDefaultObject());
+		//UnequipItem();
+		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		Server_UnequipItem();
-		Server_EquipItem(InventoryComponent->GetItemInSlot(1).Actor.GetDefaultObject());
+		//Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
 
@@ -135,13 +138,13 @@ void APlayerCharacter::SelectSlot3()
 
 	if(HasAuthority())
 	{
-		UnequipItem();
-		EquipItem(InventoryComponent->GetItemInSlot(2).Actor.GetDefaultObject());
+		//UnequipItem();
+		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		Server_UnequipItem();
-		Server_EquipItem(InventoryComponent->GetItemInSlot(2).Actor.GetDefaultObject());
+		//Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
 
@@ -151,49 +154,51 @@ void APlayerCharacter::SelectSlot4()
 
 	if(HasAuthority())
 	{
-		UnequipItem();
-		EquipItem(InventoryComponent->GetItemInSlot(3).Actor.GetDefaultObject());
+		//UnequipItem();
+		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		Server_UnequipItem();
-		Server_EquipItem(InventoryComponent->GetItemInSlot(3).Actor.GetDefaultObject());
+		//Server_UnequipItem();
+		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
 
 void APlayerCharacter::EquipItem(AItemActor* Item)
 {
 	if(!Item)
+		return;
+
+	if(HeldItem && Item->GetClass() == HeldItem->GetClass())
 	{
+		UnequipItem();
 		HeldItem = nullptr;
 		return;
 	}
+	else
+	{
+		UnequipItem();
+	}
+		
 	
-	HeldItem = Item;
-
 	//Spawn the item in the player's hand
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	if(HeldItem)
+	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item->GetClass(), SpawnParams))
 	{
-		if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(HeldItem->GetClass(), SpawnParams))
-		{
-			ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("RightHand"));
-			ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-			ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-
-			// if (UAIPerceptionStimuliSourceComponent* Stimuli = ItemActor->GetAIStimuliSourceComponent())
-			// {
-			// 	Stimuli->UnregisterFromPerceptionSystem();
-			// }
-			
-			HeldItem = ItemActor;
-			HeldItem->SetCanPickup(false);
-		}
+		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("RightHand"));
+		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+		HeldItem = ItemActor;
+    HeldItem->SetCanPickup(false);
 	}
+
+	
+	
+	
 }
 
 void APlayerCharacter::UnequipItem()
@@ -329,10 +334,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Interact), ETriggerEvent::Started, this, &APlayerCharacter::LocalInteract);
 
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory1), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot1);
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory2), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot2);
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory3), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot3);
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory4), ETriggerEvent::Triggered, this, &APlayerCharacter::SelectSlot4);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory1), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot1);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory2), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot2);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory3), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot3);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory4), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot4);
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);
