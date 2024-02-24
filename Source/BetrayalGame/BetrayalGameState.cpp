@@ -6,6 +6,7 @@
 #include "GameFramework/GameSession.h"
 #include "Gameplay/ObjectivesComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/DataTable.h"
 
 ABetrayalGameState::ABetrayalGameState()
 {
@@ -28,7 +29,9 @@ void ABetrayalGameState::StartHaunt()
 	if(!HauntData)
 		return;
 	
-	const int32 NumRows = HauntData->GetTableData().Num();
+	const int32 NumRows = HauntData->GetRowNames().Num();
+
+	//GLog->Log(FString::FromInt(NumRows));
 	
 	const int32 RandomIndex = FMath::RandRange(1, NumRows - 1);
 
