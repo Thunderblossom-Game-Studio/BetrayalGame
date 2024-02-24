@@ -5,6 +5,8 @@
 
 #include "BaseCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 
 // Sets default values
@@ -15,6 +17,12 @@ ABaseInteractable::ABaseInteractable()
 	
 	SetReplicates(true);
 	//bAlwaysRelevant = true;
+	
+	AIStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AI Stimuli Source Component"));
+	if (AIStimuliSourceComponent)
+	{
+		AIStimuliSourceComponent->bAutoRegister = true;
+	}
 }
 
 void ABaseInteractable::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -47,7 +55,18 @@ void ABaseInteractable::BeginPlay()
 	//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Local Role for " + this->GetName() + " is: " + FString::FromInt(GetLocalRole()));
 	
 	//GEngine->AddOnScreenDebugMessage(-11, 10.0f, FColor::Green, "Remote Role for " + this->GetName() + " is: " + FString::FromInt(GetRemoteRole()));
+
+}
+
+void ABaseInteractable::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
 	
+	if (AIStimuliSourceComponent)
+	{		
+		AIStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+		AIStimuliSourceComponent->RegisterWithPerceptionSystem();
+	}
 }
 
 // Called every frame

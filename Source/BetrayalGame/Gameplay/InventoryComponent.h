@@ -72,6 +72,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FInventorySlot GetSlot(int ID);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	FInventorySlot GetItemSlot(FItem Item);
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FItem GetItemInSlot(int ID);
