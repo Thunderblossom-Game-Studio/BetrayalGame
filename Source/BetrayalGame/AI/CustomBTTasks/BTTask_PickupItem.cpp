@@ -19,12 +19,9 @@ UBTTask_PickupItem::UBTTask_PickupItem(FObjectInitializer const& ObjectInitializ
 
 EBTNodeResult::Type UBTTask_PickupItem::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	if (!Controller)
-		Controller = OwnerComp.GetAIOwner();
-	if (!Blackboard)
-		Blackboard = Controller->GetBlackboardComponent();
-	if (!Character)
-		Character = Controller->GetPawn<APlayerCharacter>();
+	Controller = OwnerComp.GetAIOwner();
+	Blackboard = Controller->GetBlackboardComponent();
+	Character = Controller->GetPawn<APlayerCharacter>();
 	if (!Blackboard || !Character)
 		return EBTNodeResult::Failed;
 	
@@ -33,6 +30,7 @@ EBTNodeResult::Type UBTTask_PickupItem::ExecuteTask(UBehaviorTreeComponent& Owne
 	{
 		Character->InteractableInFocus = TargetActor;
 		Character->Server_Interact(Character, TargetActor);
+		//GLog->Log(Character->GetName() + ": Item Picked up...");
 		if (!bAutoEquip)
 			return EBTNodeResult::Succeeded;
 		
@@ -55,10 +53,17 @@ EBTNodeResult::Type UBTTask_PickupItem::ExecuteTask(UBehaviorTreeComponent& Owne
 			break;
 		default:
 			break;
-		}
-		
-		
+		}	
+		//GLog->Log("Item Auto Equipped..");
 		return EBTNodeResult::Succeeded;
-	}	
+	}
+	else
+	{
+		// if (IsValid((KeyValue)))
+		// 	GLog->Log(Character->GetName() + ": " + KeyValue->GetName() + "failed to pick up...");
+		// else
+		// 	GLog->Log(Character->GetName() + ": Null failed to pick up...");
+
+	}
 	return EBTNodeResult::Failed;
 }

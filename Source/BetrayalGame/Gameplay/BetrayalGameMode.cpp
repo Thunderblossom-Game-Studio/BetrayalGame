@@ -69,6 +69,17 @@ void ABetrayalGameMode::SetStageUseTimer(const bool bUseTimer)
 		BetrayalGameState->SetCountdown(-1);
 }
 
+void ABetrayalGameMode::EnableAIPlayerControllers()
+{
+	TArray<AActor*> AIPlayerControllers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIPlayerController::StaticClass(), AIPlayerControllers);
+	for (AActor* ControllerActor : AIPlayerControllers)
+	{
+		if (AAIPlayerController* AIPlayerController = Cast<AAIPlayerController>(ControllerActor))
+			AIPlayerController->EnableAIPlayer();
+	}
+}
+
 void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 {
 	MatchStage = NewStage;
@@ -82,13 +93,7 @@ void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 	}
 	else if (MatchStage == Exploring)
 	{
-		TArray<AActor*> AIPlayerControllers;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIPlayerController::StaticClass(), AIPlayerControllers);
-		for (AActor* ControllerActor : AIPlayerControllers)
-		{
-			if (AAIPlayerController* AIPlayerController = Cast<AAIPlayerController>(ControllerActor))
-				AIPlayerController->EnableAIPlayer();
-		}
+		EnableAIPlayerControllers();
 		
 		MaxStageTimer = ExploreStage.TimeLength;		
 		SetStageUseTimer(ExploreStage.bUsesTimer);

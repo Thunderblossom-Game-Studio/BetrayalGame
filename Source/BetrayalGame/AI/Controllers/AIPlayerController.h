@@ -107,5 +107,6 @@ private:
 	class ABetrayalGameMode* BetrayalGameMode;	
 	UPROPERTY()
 	class APlayerCharacter* PlayerCharacter;
-	
+	UPROPERTY()
+	class AItemActor* TargetItem;
 };

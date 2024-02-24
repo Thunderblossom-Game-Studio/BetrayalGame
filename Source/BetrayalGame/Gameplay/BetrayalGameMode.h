@@ -95,4 +95,11 @@ protected:
 	ABetrayalGameState* BetrayalGameState;
 	
 #pragma endregion
+
+#pragma region AI Players
+public:
+	UFUNCTION(BlueprintCallable)
+	void EnableAIPlayerControllers();
+
+#pragma endregion
 };

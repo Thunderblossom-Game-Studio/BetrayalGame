@@ -54,13 +54,13 @@ void AAIPlayerController::EnableAIPlayer()
 {
 	if (GetLocalRole() == ROLE_Authority)
 	{
+		if (BehaviourTree)
+		{
+			RunBehaviorTree(BehaviourTree);						
+		}
 		if (PerceptionComponent)
 		{
 			PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AAIPlayerController::OnSenseTargetUpdated);
-		}
-		if (BehaviourTree)
-		{
-			RunBehaviorTree(BehaviourTree);			
 		}
 	}
 }
@@ -73,8 +73,6 @@ void AAIPlayerController::BeginPlay()
 	if (World)
 		BetrayalGameMode = World->GetAuthGameMode<ABetrayalGameMode>();	
 	PlayerCharacter = GetPawn<APlayerCharacter>();
-	
-	//EnableAIPlayer();
 }
 
 void AAIPlayerController::Tick(float DeltaSeconds)
@@ -155,23 +153,31 @@ void AAIPlayerController::MonsterLOSRecaptureFail()
 void AAIPlayerController::SeeItem(AActor* UpdatedActor, FAIStimulus Stimulus)
 {
 	AItemActor* Item = Cast<AItemActor>(UpdatedActor);
-	if (!Item || !PlayerCharacter)
+	if (!Item)
 		return;
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		//World->GetTimerManager().ClearTimer(ItemLOSTimerHandle);		
-		if (Item == PlayerCharacter->HeldItem || Blackboard->GetValueAsObject("Item"))
+		if (!PlayerCharacter)
 			return;
-		Blackboard->SetValueAsObject("Item", Item);
+		//World->GetTimerManager().ClearTimer(ItemLOSTimerHandle);		
+		if (!Item->GetCanPickup() || TargetItem)
+			return;
+		TargetItem = Item;
+		Blackboard->SetValueAsObject("Item", TargetItem);
 	}
-	else if (Item && Item == Blackboard->GetValueAsObject("Item"))
+	else if (TargetItem && TargetItem == Item)
 	{
-		ItemLOSRecaptureFail();
+		FTimerDelegate LoseDelegate;
+		LoseDelegate.BindUFunction(this, FName("ItemLOSRecaptureFail"), UpdatedActor);
+		World->GetTimerManager().SetTimer(ItemLOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
 	}
 	return;
 }
 
 void AAIPlayerController::ItemLOSRecaptureFail()
 {
+	if (!Blackboard)
+		return;
+	TargetItem = nullptr;
 	Blackboard->ClearValue("Item");
 }

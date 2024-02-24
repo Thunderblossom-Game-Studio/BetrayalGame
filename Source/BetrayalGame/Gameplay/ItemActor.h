@@ -72,13 +72,18 @@ private:
 #pragma endregion
 	
 #pragma region Item
-public:
-	
+public:	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FDataTableRowHandle ItemData;
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
+	bool bCanPickup = true;
+
+public:
+	bool GetCanPickup() const { return bCanPickup; }
+	void SetCanPickup(const bool CanPickup) { bCanPickup = CanPickup; }
 	
-private:
 #pragma endregion 
 
 };
