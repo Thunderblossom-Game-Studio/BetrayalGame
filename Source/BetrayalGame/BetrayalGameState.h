@@ -48,8 +48,6 @@ struct FObjective : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	TEnumAsByte<EObjectiveType> Type;
-
-	
 };
 
 USTRUCT()
@@ -123,23 +121,26 @@ public:
 	
 #pragma endregion
 
-#pragma region Objective Tracking
+#pragma region Objectives
+	//UFUNCTION(BlueprintCallable)
+	//void GetCompletedObjectives(TArray<FObjective>& OutObjectives, const EObjectiveType Type);
 
+	
 	
 #pragma endregion
 
 #pragma region Haunt Tracking
-
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	UDataTable* HauntData;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	FHaunt CurrentHaunt;
-	
+public:
 	UFUNCTION()
 	void StartHaunt();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void AddObjectivesToPlayers();	
+	void AddObjectivesToPlayers();
 #pragma endregion 
 };
