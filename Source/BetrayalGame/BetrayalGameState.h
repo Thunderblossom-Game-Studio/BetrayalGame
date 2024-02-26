@@ -98,7 +98,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void OnMatchStageChanged(const EMatchStage NewStage);
-	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnLobbyStageStart();
 	UFUNCTION(BlueprintImplementableEvent)
@@ -140,7 +139,7 @@ public:
 	UFUNCTION()
 	void StartHaunt();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void AddObjectivesToPlayers();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
+	void OnTraitorChosen(APlayerCharacter* Traitor);
 #pragma endregion 
 };

@@ -34,9 +34,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Objectives")
 	void SetEventObjective(FObjective NewObjective) { CurrentEventObjective = NewObjective; };
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetEventObjective(FObjective NewObjective);
+	
 	UFUNCTION(BlueprintCallable, Category="Objectives")
 	void SetHauntObjective(FObjective NewObjective) { CurrentHauntObjective = NewObjective; }
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetHauntObjective(FObjective NewObjective);
+	
 	UFUNCTION(BlueprintCallable, Category="Objectives")
 	FObjective GetEventObjective() { return CurrentEventObjective; };
 

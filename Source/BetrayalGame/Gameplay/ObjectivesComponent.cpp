@@ -42,5 +42,17 @@ void UObjectivesComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	// ...
 }
 
+void UObjectivesComponent::Server_SetEventObjective_Implementation(FObjective NewObjective)
+{
+	
+}
+
+void UObjectivesComponent::Server_SetHauntObjective_Implementation(FObjective NewObjective)
+{
+	SetHauntObjective(NewObjective);
+}
+
+
+
 
 
