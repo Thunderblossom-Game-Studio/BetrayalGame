@@ -14,6 +14,4 @@ class BETRAYALGAME_API AMenu_GameMode : public AGameMode
 {
 	GENERATED_BODY()
 
-	APlayerController* Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
-	
 };
