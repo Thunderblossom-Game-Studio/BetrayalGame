@@ -25,6 +25,14 @@ private:
 	UBetrayalGameInstance* _GameInstance;
 	
 	const TSharedPtr<const FUniqueNetId> GetNetID();
+
+	IOnlineSessionPtr GetSessionInterface();
+
+	void SetupNotifications();
+
+	FOnSessionParticipantsChangeDelegate OnSessionParticipantsChangeDelegate;
+	FDelegateHandle OnSessionParticipantsChangeDelegateHandle;
+	void HandleParticipantChanged(FName SessionName, const FUniqueNetId& ID, bool bJoined);
 	
 public:
 	// Initialize
@@ -36,9 +44,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
 	FString LobbyListName = "BetrayalGameSession";
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
-	FName LevelToLoad = "";
-
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
 	bool bIsHost = false;
 
