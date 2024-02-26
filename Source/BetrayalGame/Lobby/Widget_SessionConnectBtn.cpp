@@ -89,7 +89,10 @@ void UWidget_SessionConnectBtn::UpdateDisplayedData()
 	Print("Updating data!");
 	
 	// Set the displayed data
-	_SessionName = FName(*_SessionData.Session.OwningUserName);
+	const auto ListedName = _SessionData.Session.SessionSettings.Settings.FindRef(SERVERLIST_NAME).Data;
+	FString Name = "";
+	ListedName.GetValue(Name);
+	_SessionName = FName(*Name); 
 
 	// Connected players
 	_ConnectedPlayers += _SessionData.Session.SessionSettings.NumPublicConnections - _SessionData.Session.NumOpenPublicConnections;
