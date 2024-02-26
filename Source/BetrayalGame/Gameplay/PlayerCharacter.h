@@ -130,6 +130,9 @@ public:
 	float InteractDistance = 600.0f;
 	
 	void TraceForInteractables();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Interaction")
+	void OnItemPickedUp(AItemActor* Item);
 	
 	void LocalInteract();
 	
