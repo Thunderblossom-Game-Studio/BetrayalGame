@@ -30,9 +30,12 @@ private:
 
 	void SetupNotifications();
 
-	FOnSessionParticipantsChangeDelegate OnSessionParticipantsChangeDelegate;
-	FDelegateHandle OnSessionParticipantsChangeDelegateHandle;
-	void HandleParticipantChanged(FName SessionName, const FUniqueNetId& ID, bool bJoined);
+	//FDelegateHandle OnSessionParticipantsChangeDelegateHandle;
+	//void HandleParticipantChanged(FName SessionName, const FUniqueNetId& ID, bool bJoined);
+
+	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
+
+	void OnClientDisconnected(FName SessionName, const FUniqueNetId& ID, EOnSessionParticipantLeftReason Reason);
 	
 public:
 	// Initialize

@@ -9,6 +9,8 @@
 #include "OnlineSessionSettings.h"
 #include "Widget_SessionConnectBtn.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
+#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
+#include "GameFramework/GameSession.h"
 #include "Online/OnlineSessionNames.h"
 
 const TSharedPtr<const FUniqueNetId> UBetrayalGameNetworkSubsystem::GetNetID()
@@ -46,14 +48,8 @@ void UBetrayalGameNetworkSubsystem::SetupNotifications()
 
 	if (Sessions.IsValid())
 	{
-		auto result = Sessions->AddOnSessionParticipantsChangeDelegate_Handle(
-			FOnSessionParticipantsChangeDelegate::CreateUObject(
-				this, &UBetrayalGameNetworkSubsystem::HandleParticipantChanged));
-
-		if (!result.IsValid())
-		{
-			Print("UBetrayalGameNetworkSubsystem::SetupNotifications(): Failed to bind delegate!");
-		}
+		Sessions->OnSessionParticipantJoinedDelegates.AddUObject(this, &UBetrayalGameNetworkSubsystem::OnClientConnected);
+		Sessions->OnSessionParticipantLeftDelegates.AddUObject(this, &UBetrayalGameNetworkSubsystem::OnClientDisconnected);
 	}
 	else
 	{
@@ -61,18 +57,20 @@ void UBetrayalGameNetworkSubsystem::SetupNotifications()
 	}
 }
 
-void UBetrayalGameNetworkSubsystem::HandleParticipantChanged(FName SessionName, const FUniqueNetId& ID, bool bJoined)
+void UBetrayalGameNetworkSubsystem::OnClientConnected(FName SessionName, const FUniqueNetId& ID)
 {
-	Print("HandleParticipantChanged() called!");
-	
-	if(bJoined)
-	{
-		Print("Player joined: " + ID.ToString());
-	}
-	else
-	{
-		Print("Player left: " + ID.ToString());
-	}
+	auto PlrController = GetPlayerControllerFromNetId(GetWorld(), ID);
+	auto PlrState = PlrController->GetPlayerState<ABetrayalPlayerState>();
+	auto PlrName = PlrState->GetPlayerName();
+	Print("Client connected: " + PlrName);
+}
+
+void UBetrayalGameNetworkSubsystem::OnClientDisconnected(FName SessionName, const FUniqueNetId& ID, EOnSessionParticipantLeftReason Reason)
+{
+	auto PlrController = GetPlayerControllerFromNetId(GetWorld(), ID);
+	auto PlrState = PlrController->GetPlayerState<ABetrayalPlayerState>();
+	auto PlrName = PlrState->GetPlayerName();
+	Print("Client disconnected: " + PlrName);
 }
 
 void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
@@ -217,6 +215,7 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 			Level = "L_Map";
 		
 		UGameplayStatics::OpenLevel(GetWorld(), Level, true, "listen");
+		SetupNotifications();
 	}
 }
 
@@ -337,6 +336,7 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		{
 			Print(SessionName.ToString() + " resolved to: " + TravelURL);
 			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			SetupNotifications();
 		}
 		else
 		{
@@ -433,9 +433,6 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	{
 		SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(
 			this, &UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted);
-
-		SessionInterface->OnSessionParticipantsChangeDelegates.AddUObject(
-			this, &UBetrayalGameNetworkSubsystem::HandleParticipantChanged);
 	}
 	else
 	{
