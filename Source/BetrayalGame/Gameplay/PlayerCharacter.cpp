@@ -193,7 +193,10 @@ void APlayerCharacter::UnequipItem()
 {
 	if(!HeldItem)
 		return;
+	
 	HeldItem->Destroy();
+
+	OnItemUnequipped();
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
