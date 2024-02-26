@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameDelegates.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "BetrayalGameNetworkSubsystem.generated.h"
@@ -38,11 +39,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
 	FName LevelToLoad = "";
 
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	bool bIsHost = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	bool bIsReady = false;
+
 	// Found sessions
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
 	TArray<UUserWidget*> FoundSessionButtons;
 
-	#pragma region Session Creation
+	// Reset session search
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void ResetSessionSearch();
+
+#pragma region Session Creation
 	// Session created delegate
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
 
@@ -181,7 +192,24 @@ private:
 
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void BP_DestroySession();
+
+	// Delegate to handle a disconnect from a session
+	FHandleDisconnectDelegate OnHandleDisconnectDelegate;
+
+	// Handle to registered delegate for handling a disconnect from a session
+	FDelegateHandle OnHandleDisconnectDelegateHandle;
+
+	void OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	
 #pragma endregion
-	
+
+#pragma region ReadyState
+
+	// Server Update Ready State
+	UFUNCTION(Server, Reliable, Category = "Networking")
+	void Server_UpdateReadyState(bool bReady);
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Networking")
+	void Multicast_UpdateReadyState(int32 PlayerID, bool bReady);
+#pragma endregion 
 };

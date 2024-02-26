@@ -16,6 +16,43 @@ const TSharedPtr<const FUniqueNetId> UBetrayalGameNetworkSubsystem::GetNetID()
 	return GetGameInstance()->GetFirstGamePlayer()->GetPreferredUniqueNetId().GetUniqueNetId();
 }
 
+void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
+{
+	// Cleanup all session search results
+	for (auto button : FoundSessionButtons)
+	{
+		button->RemoveFromParent();
+	}
+
+	// Clear the list of found session buttons
+	if(FoundSessionButtons.Num() > 0)
+		FoundSessionButtons.Empty();
+
+	// Clear the session search results
+	if(SessionSearch.IsValid() && SessionSearch->SearchResults.Num() > 0)
+	{
+		SessionSearch->SearchResults.Empty();
+		SessionSearch = nullptr;
+	}
+
+	if(OnFindSessionsCompleteDelegateHandle.IsValid())
+	{
+		// Clear the session search complete delegate
+		OnFindSessionsCompleteDelegateHandle.Reset();
+	}
+	
+	if (OnJoinSessionCompleteDelegateHandle.IsValid())
+	{
+		// Clear the session join complete delegate
+		OnJoinSessionCompleteDelegateHandle.Reset();
+	}
+
+	if(!_GameInstance->SessionPassword.IsEmpty())
+	{
+		_GameInstance->SessionPassword = "";
+	}
+}
+
 bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN,
                                                 bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate,
                                                 FString Password)
@@ -166,6 +203,8 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 
 void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
 {
+	ResetSessionSearch();
+	
 	// Get the Online Subsystem
 	IOnlineSubsystem* const OnlineSubsystem = IOnlineSubsystem::Get();
 	if (!OnlineSubsystem)
@@ -182,8 +221,6 @@ void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> 
 		SessionSearch = MakeShareable(new FOnlineSessionSearch());
 
 		SessionSearch->bIsLanQuery = bIsLAN;
-		//SessionSearch->MaxSearchResults = 10000;
-		//SessionSearch->PingBucketSize = 50;
 		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
 		SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 
@@ -342,6 +379,8 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 	{
 		Print("No Player Controller found!");
 	}
+
+	ResetSessionSearch();
 }
 
 void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId,
@@ -396,6 +435,22 @@ void UBetrayalGameNetworkSubsystem::BP_DestroySession()
 			OnDestroySessionCompleteDelegate);
 		SessionInterface->DestroySession(NAME_GameSession);
 	}
+}
+
+void UBetrayalGameNetworkSubsystem::OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	
+}
+
+void UBetrayalGameNetworkSubsystem::Multicast_UpdateReadyState_Implementation(int32 PlayerID, bool bReady)
+{
+	
+}
+
+void UBetrayalGameNetworkSubsystem::Server_UpdateReadyState_Implementation(bool bReady)
+{
+	bIsReady = bReady;
+	//Multicast_UpdateReadyState(, bReady);
 }
 
 void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collection)
