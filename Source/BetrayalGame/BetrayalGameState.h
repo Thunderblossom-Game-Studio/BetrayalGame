@@ -48,6 +48,15 @@ struct FObjective : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	TEnumAsByte<EObjectiveType> Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	bool bHasObjectiveItem;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective|Objective Item", meta = (EditCondition = "bHasObjectiveItem"))
+	FDataTableRowHandle ObjectiveItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective|Objective Item", meta = (EditCondition = "bHasObjectiveItem"))
+	int Amount;
 };
 
 USTRUCT()
@@ -82,6 +91,8 @@ public:
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void BeginPlay() override;
+	
 #pragma region Match Stage Variable Replication
 // Replicated Variables
 protected:
@@ -136,6 +147,10 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	FHaunt CurrentHaunt;
 public:
+
+	UFUNCTION()
+	void InitializeHaunt();
+	
 	UFUNCTION()
 	void StartHaunt();
 

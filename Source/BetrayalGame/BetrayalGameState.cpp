@@ -4,6 +4,7 @@
 #include "BetrayalGameState.h"
 
 #include "GameFramework/GameSession.h"
+#include "Gameplay/BetrayalGameMode.h"
 #include "Gameplay/BetrayalPlayerState.h"
 #include "Gameplay/ObjectivesComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,7 +26,15 @@ void ABetrayalGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(ABetrayalGameState, CurrentHaunt);
 }
 
-void ABetrayalGameState::StartHaunt()
+void ABetrayalGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(HasAuthority())
+		InitializeHaunt();
+}
+
+void ABetrayalGameState::InitializeHaunt()
 {
 	// Get haunt data from data table and choose a random one
 	{
@@ -44,6 +53,25 @@ void ABetrayalGameState::StartHaunt()
 			CurrentHaunt = *Haunt;
 	}
 
+	// Set haunt stage timer
+	{
+		if(CurrentHaunt.Duration > 0)
+		{
+			ABetrayalGameMode* BetrayalGameMode = Cast<ABetrayalGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+			if(BetrayalGameMode)
+			{
+				BetrayalGameMode->HauntStage.bUsesTimer = true;
+				BetrayalGameMode->HauntStage.TimeLength = CurrentHaunt.Duration;
+			}
+		}
+			
+			
+	}
+	
+}
+
+void ABetrayalGameState::StartHaunt()
+{
 	// Set random player as traitor
 	{
 		const int32 NumPlayers = PlayerArray.Num();
@@ -55,7 +83,7 @@ void ABetrayalGameState::StartHaunt()
 			return;
 
 		BetrayalPlayerState->SetIsTraitor(true);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Player %s is the traitor"), *BetrayalPlayerState->GetActorLabel()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Player %s is the traitor"), *BetrayalPlayerState->GetActorLabel()));
 		
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(BetrayalPlayerState->GetPawn());
 		if(!PlayerCharacter)

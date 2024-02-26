@@ -178,7 +178,6 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 	{
 		UnequipItem();
 	}
-		
 	
 	//Spawn the item in the player's hand
 	FActorSpawnParameters SpawnParams;
@@ -193,10 +192,6 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;
 	}
-
-	
-	
-	
 }
 
 void APlayerCharacter::UnequipItem()
@@ -230,7 +225,7 @@ void APlayerCharacter::Server_UnequipItem_Implementation()
 void APlayerCharacter::TraceForInteractables()
 {
 	FVector TraceStart = CameraComponent->GetComponentLocation();
-	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * 1000.0f); // TODO - Make 1000.0f a variable
+	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * InteractDistance);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, this);
 
@@ -269,8 +264,6 @@ void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, cl
 	if(Interactable)
 		Interactable->OnInteract(NewOwner);
 	
-	//GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Owner: " + NewOwner->GetActorLabel());
-	
 	NetMulticast_Interact(NewOwner,Interactable);
 }
 
@@ -292,26 +285,7 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	if (Controller && Controller->IsLocalPlayerController())
-	{
-		if(HasAuthority())
-		{
-			if(!InteractableInFocus)
-				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "InteractableInFocus is null");
-			else
-				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "InteractableInFocus is not null");
-		}
-		else
-		{
-			if(!InteractableInFocus)
-				GEngine->AddOnScreenDebugMessage(0, 0.0f, FColor::Red, "InteractableInFocus is null");
-			else
-				GEngine->AddOnScreenDebugMessage(0, 0.0f, FColor::Green, "InteractableInFocus is not null");
-		}
-	}
-
-
+	
 	TraceForInteractables();
 }
 

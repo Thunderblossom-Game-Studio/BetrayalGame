@@ -77,6 +77,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FDataTableRowHandle ItemData;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
+	bool bIsObjectiveItem;
+
 	
 private:
 #pragma endregion 
