@@ -36,29 +36,10 @@ void ABaseCharacter::NetDebugging()
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, "You are the Server!");
 			
-			const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
-			GEngine->AddOnScreenDebugMessage(-2, 0.0f, FColor::White, healthMessage);
-			
-			const FString speedMessage = FString::Printf(TEXT("Your current speed is: %f"),GetCharacterMovement()->MaxWalkSpeed);
-			GEngine->AddOnScreenDebugMessage(-3, 0.0f, FColor::White, speedMessage);
-			
-			GEngine->AddOnScreenDebugMessage(-4, 0.0f, FColor::White, "Is Running: " + FString(bIsRunning ? "true" : "false"));
-				
-			GEngine->AddOnScreenDebugMessage(-5, 0.0f, FColor::White, "Is Dead: " + FString(bIsDead ? "true" : "false"));
 		}
 		else
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, "You are the Client!");
-
-			const FString healthMessage = FString::Printf(TEXT("You have %f health remaining."), CurrentHealth);
-			GEngine->AddOnScreenDebugMessage(-2, 0.0f, FColor::White, healthMessage);
-			
-			const FString speedMessage = FString::Printf(TEXT("Your current speed is: %f"),GetCharacterMovement()->MaxWalkSpeed);
-			GEngine->AddOnScreenDebugMessage(-3, 0.0f, FColor::White, speedMessage);
-			
-			GEngine->AddOnScreenDebugMessage(-4, 0.0f, FColor::White, "Is Running: " + FString(bIsRunning ? "true" : "false"));
-				
-			GEngine->AddOnScreenDebugMessage(-5, 0.0f, FColor::White, "Is Dead: " + FString(bIsDead ? "true" : "false"));
 		}
 	}
 }
@@ -73,41 +54,44 @@ void ABaseCharacter::Move(const FVector2D Value)
 	
 }
 
-void ABaseCharacter::OnRep_CurrentHealth()
+void ABaseCharacter::TakeDamage(float Damage)
 {
-	OnHealthUpdate();
-}
-
-void ABaseCharacter::OnHealthUpdate()
-{
-	// Runs on every machine
+	CurrentHealth -= Damage;
+	
 	if(CurrentHealth <= 0.0f)
-		bIsDead = true;
-	
-	
-	if(IsLocallyControlled()) // Not sure if this is necessary
 	{
-		// Runs just on the server
-		if(HasAuthority())
-		{
-			if(bIsDead)
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead! and Server");
-		}
-		else
-		{
-			if(bIsDead)
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "You are dead! and Client");
-		}
+		CurrentHealth = 0.0f;
+		bIsDead = true;
+		OnDeath();
+		return;
 	}
+	
+	OnDamageTaken(Damage);
 }
 
-void ABaseCharacter::SetCurrentHealth(float NewCurrentHealth)
+void ABaseCharacter::Heal(float Amount)
 {
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		CurrentHealth = FMath::Clamp(NewCurrentHealth, 0.0f, MaxHealth);
-		OnHealthUpdate();
-	}
+	if(CurrentHealth + Amount > MaxHealth)
+		CurrentHealth = MaxHealth;
+	else
+		CurrentHealth += Amount;
+
+	OnHeal(Amount);
+}
+
+void ABaseCharacter::Server_Heal_Implementation(float Amount)
+{
+	Heal(Amount);
+}
+
+void ABaseCharacter::Server_TakeDamage_Implementation(float Damage)
+{
+	TakeDamage(Damage);
+}
+
+void ABaseCharacter::Server_SetMaxHealth_Implementation(float NewMaxHealth)
+{
+	SetMaxHealth(NewMaxHealth);
 }
 
 // Called when the game starts or when spawned

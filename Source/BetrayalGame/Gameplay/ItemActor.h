@@ -68,6 +68,8 @@ public:
 	
 	virtual void OnInteract(class AActor* Interactor) override;
 
+
+
 private:
 #pragma endregion
 	
@@ -79,13 +81,21 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	bool bIsObjectiveItem;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Interactable")
+	void OnPickup(class AActor* Interactor);
+
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Item")
 	bool bCanPickup = true;
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Item")
 	bool GetCanPickup() const { return bCanPickup; }
+	
 	void SetCanPickup(const bool CanPickup) { bCanPickup = CanPickup; }
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetCanPickup(const bool CanPickup);
 	
 #pragma endregion 
 

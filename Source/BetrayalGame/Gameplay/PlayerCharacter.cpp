@@ -101,17 +101,12 @@ void APlayerCharacter::SelectSlot1()
 {
 	InventoryComponent->SelectSlot(0);
 
-	if(!InventoryComponent->GetItemInSlot(0).Actor)
-		return;
-
 	if(HasAuthority())
 	{
-		UnequipItem();
 		EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
 	else
 	{
-		Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
 }
@@ -122,12 +117,10 @@ void APlayerCharacter::SelectSlot2()
 
 	if(HasAuthority())
 	{
-		//UnequipItem();
 		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		//Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
@@ -138,12 +131,10 @@ void APlayerCharacter::SelectSlot3()
 
 	if(HasAuthority())
 	{
-		//UnequipItem();
 		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		//Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
@@ -154,12 +145,10 @@ void APlayerCharacter::SelectSlot4()
 
 	if(HasAuthority())
 	{
-		//UnequipItem();
 		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		//Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
@@ -192,8 +181,12 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;
-    HeldItem->SetCanPickup(false);
+		
 	}
+
+	HeldItem->Server_SetCanPickup(false);
+	
+	OnItemEquipped(Item, InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::UnequipItem()
