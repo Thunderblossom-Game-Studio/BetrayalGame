@@ -39,8 +39,6 @@ private:
 	bool bIsDead;
 
 public:
-
-	
 	UFUNCTION()
 	void OnRep_CurrentHealth(); // This runs when the CurrentHealth variable is updated on the server
 
