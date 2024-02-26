@@ -76,6 +76,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FDataTableRowHandle ItemData;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
+	bool bIsObjectiveItem;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
 	bool bCanPickup = true;

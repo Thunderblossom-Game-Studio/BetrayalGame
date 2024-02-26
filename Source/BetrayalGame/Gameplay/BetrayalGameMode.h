@@ -39,12 +39,12 @@ public:
 	
 	virtual void StartMatch() override;
 	virtual void EndMatch() override;
-	
+private:	
 #pragma endregion 
 
 #pragma region Match Stage Handling
 // Exposed Variables
-protected:
+public:
 	// Match Stage's Information
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
 	FStageInfo LobbyStage;
@@ -54,7 +54,7 @@ protected:
 	FStageInfo HauntStage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stages", meta = (AllowPrivateAccess = true))
 	FStageInfo FinishStage;
-
+protected:
 	// Stage Functionality
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stages|Debug", meta = (AllowPrivateAccess = true))
 	TEnumAsByte<EMatchStage> MatchStage = Lobby;

@@ -49,7 +49,14 @@ struct FObjective : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	TEnumAsByte<EObjectiveType> Type;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
+	bool bHasObjectiveItem;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective|Objective Item", meta = (EditCondition = "bHasObjectiveItem"))
+	FDataTableRowHandle ObjectiveItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective|Objective Item", meta = (EditCondition = "bHasObjectiveItem"))
+	int Amount;
 };
 
 USTRUCT()
@@ -84,6 +91,8 @@ public:
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void BeginPlay() override;
+	
 #pragma region Match Stage Variable Replication
 // Replicated Variables
 protected:
@@ -100,7 +109,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void OnMatchStageChanged(const EMatchStage NewStage);
-	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnLobbyStageStart();
 	UFUNCTION(BlueprintImplementableEvent)
@@ -123,22 +131,30 @@ public:
 	
 #pragma endregion
 
-#pragma region Objective Tracking
+#pragma region Objectives
+	//UFUNCTION(BlueprintCallable)
+	//void GetCompletedObjectives(TArray<FObjective>& OutObjectives, const EObjectiveType Type);
 
+	
 	
 #pragma endregion
 
-
 #pragma region Haunt Tracking
-
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	UDataTable* HauntData;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	FHaunt CurrentHaunt;
+public:
+
+	UFUNCTION()
+	void InitializeHaunt();
 	
 	UFUNCTION()
 	void StartHaunt();
-	
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
+	void OnTraitorChosen(APlayerCharacter* Traitor);
 #pragma endregion 
 };

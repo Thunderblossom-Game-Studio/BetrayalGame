@@ -116,6 +116,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
 	class ABaseInteractable* InteractableInFocus;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
+	float InteractDistance = 600.0f;
 	
 	void TraceForInteractables();
 	
