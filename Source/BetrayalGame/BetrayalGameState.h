@@ -44,10 +44,10 @@ struct FObjective : public FTableRowBase
 	FString Description;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Objective")
-	TEnumAsByte<EObjectiveState> State;
+	TEnumAsByte<EObjectiveState> State = NotStarted;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
-	TEnumAsByte<EObjectiveType> Type;
+	TEnumAsByte<EObjectiveType> Type = Event;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Objective")
 	bool bHasObjectiveItem;
@@ -77,7 +77,7 @@ struct FHaunt : public FTableRowBase
 	FDataTableRowHandle InnocentObjective;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	float Duration;
+	float Duration = 0.0f;
 };
 
 
@@ -156,5 +156,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
 	void OnTraitorChosen(APlayerCharacter* Traitor);
+
+	
 #pragma endregion 
 };
