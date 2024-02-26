@@ -9,6 +9,7 @@
 #include "Gameplay/ObjectivesComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/DataTable.h"
 
 ABetrayalGameState::ABetrayalGameState()
 {
@@ -41,16 +42,16 @@ void ABetrayalGameState::InitializeHaunt()
 		if(!HauntData)
 			return;
 	
-		const int32 NumRows = HauntData->GetRowMap().Num();
+	const int32 NumRows = HauntData->GetRowNames().Num();
 	
-		int32 RandomIndex = FMath::RandRange(0, NumRows - 1);
+	int32 RandomIndex = FMath::RandRange(0, NumRows - 1);
 	
-		FName RandomRowName = HauntData->GetRowNames()[RandomIndex];
+	FName RandomRowName = HauntData->GetRowNames()[RandomIndex];
 	
-		FHaunt* Haunt = HauntData->FindRow<FHaunt>(RandomRowName, "");
+	FHaunt* Haunt = HauntData->FindRow<FHaunt>(RandomRowName, "");
 	
-		if(Haunt)
-			CurrentHaunt = *Haunt;
+	if(Haunt)
+		CurrentHaunt = *Haunt;
 	}
 
 	// Set haunt stage timer

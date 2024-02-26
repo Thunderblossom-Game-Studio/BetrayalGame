@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -191,13 +192,15 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;
+    HeldItem->SetCanPickup(false);
 	}
 }
 
 void APlayerCharacter::UnequipItem()
 {
-	if(HeldItem)
-		HeldItem->Destroy();
+	if(!HeldItem)
+		return;
+	HeldItem->Destroy();
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)

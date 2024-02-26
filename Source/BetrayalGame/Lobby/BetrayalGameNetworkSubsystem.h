@@ -12,6 +12,7 @@ class UBetrayalGameInstance;
 
 // Type Definitions
 const FName PASSWORD = "PASSWORD";
+const FName SERVERLIST_NAME = "SESSION_NAME";
 
 UCLASS()
 class BETRAYALGAME_API UBetrayalGameNetworkSubsystem : public UGameInstanceSubsystem
@@ -29,8 +30,11 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
-	int MAX_PLAYERS = 4; // Max number of players in a session
+	int MAX_PLAYERS = 5; // Max number of players in a session
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
+	FString LobbyListName = "BetrayalGameSession";
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
 	FName LevelToLoad = "";
 
@@ -173,7 +177,11 @@ private:
 	 *	@param	SessionName		Name of session this callback is for
 	 *	@param	bWasSuccessful	true if the async action completed without error, false if there was an error
 	 */
-	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful); 
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void BP_DestroySession();
+	
 #pragma endregion
 	
 };
