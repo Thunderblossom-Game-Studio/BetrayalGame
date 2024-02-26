@@ -67,4 +67,5 @@ private:
 	FVector MovePosition;
 	UPROPERTY()
 	int PosIndex = 0;
+	
 };

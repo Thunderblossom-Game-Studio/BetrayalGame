@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BetrayalGame/AI/Pawns/Chaser.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
 #include "BetrayalGame/Gameplay/PlayerCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -58,6 +59,9 @@ void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus S
 {
 	if (!UpdatedActor || !HasAuthority())
 		return;	
+	if (!ChaserPawn)
+		ChaserPawn = GetPawn<AChaser>();
+	
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		World->GetTimerManager().ClearTimer(LOSTimerHandle);
@@ -65,6 +69,11 @@ void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus S
 		if (!UpdatedActor->IsA(APlayerCharacter::StaticClass()))
 			return;
 		if (TargetActor)
+			return;
+		
+		const APlayerCharacter* TargetCharacter = Cast<APlayerCharacter>(UpdatedActor);		
+		const ABetrayalPlayerState* BetrayalPlayerState = TargetCharacter->GetPlayerState<ABetrayalPlayerState>();
+		if (BetrayalPlayerState->IsTraitor())
 			return;
 		
 		

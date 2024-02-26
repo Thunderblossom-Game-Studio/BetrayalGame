@@ -3,6 +3,7 @@
 
 #include "Mauler.h"
 #include "../MaulerAnimInstance.h"
+#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
 #include "BetrayalGame/Gameplay/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -122,7 +123,11 @@ void AMauler::OverlapEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 		return;
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (!PlayerCharacter || ValidTargets.Contains(PlayerCharacter))
+		return;			
+	const ABetrayalPlayerState* BetrayalPlayerState = PlayerCharacter->GetPlayerState<ABetrayalPlayerState>();
+	if (BetrayalPlayerState->IsTraitor())
 		return;
+	
 	ValidTargets.Add(PlayerCharacter);
 	TargetCharacter = FindClosestCharacter();
 }

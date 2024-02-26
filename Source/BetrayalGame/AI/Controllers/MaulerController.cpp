@@ -22,9 +22,9 @@ void AMaulerController::BeginPlay()
 
 	Mauler = GetPawn<AMauler>();
 	World = GetWorld();
+	NavigationSystem = UNavigationSystemV1::GetCurrent(World);
 	if (!Mauler)
 		return;
-	NavigationSystem = UNavigationSystemV1::GetCurrent(World);
 	AnchorPoint = Mauler->GetActorLocation();
 	TargetActor = Mauler->GetTargetCharacter();
 }
@@ -32,6 +32,15 @@ void AMaulerController::BeginPlay()
 void AMaulerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (!Mauler)
+	{
+		Mauler = GetPawn<AMauler>();
+		AnchorPoint = Mauler->GetActorLocation();
+		TargetActor = Mauler->GetTargetCharacter();		
+		return;
+	}
+	
 	if (!World || !NavigationSystem)
 		return;	
 	MaulerState = Evaluation();	

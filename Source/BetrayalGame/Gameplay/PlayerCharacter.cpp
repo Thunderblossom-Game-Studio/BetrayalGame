@@ -5,6 +5,7 @@
 
 #include "BaseInteractable.h"
 #include "BetrayalGameMode.h"
+#include "BetrayalPlayerState.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InventoryComponent.h"
@@ -14,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "../AI/Pawns/Monster.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -262,6 +264,52 @@ void APlayerCharacter::LocalInteract()
 	}
 }
 
+void APlayerCharacter::CycleSelectedMonster()
+{
+	Server_CycleSelectedMonster_Implementation();
+}
+
+void APlayerCharacter::Server_CycleSelectedMonster_Implementation()
+{
+	const ABetrayalPlayerState* BetrayalPlayerState = GetPlayerState<ABetrayalPlayerState>();
+	if (!BetrayalPlayerState->IsTraitor() || Monsters.Num() == 0)
+		return;
+	if (SelectedMonsterIndex == INDEX_NONE)
+		return;
+	if (SelectedMonsterIndex == Monsters.Num() - 1)
+		SelectedMonsterIndex = 0;
+	else
+		SelectedMonsterIndex++;
+}
+
+void APlayerCharacter::SpawnMonster()
+{
+	Server_SpawnMonster_Implementation();
+}
+
+void APlayerCharacter::Server_SpawnMonster_Implementation()
+{
+	const ABetrayalPlayerState* BetrayalPlayerState = GetPlayerState<ABetrayalPlayerState>();
+	if (!BetrayalPlayerState->IsTraitor())
+		return;
+	if (Monsters[SelectedMonsterIndex].Count >= Monsters[SelectedMonsterIndex].MaxAmount)
+		return;
+
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+	FVector Location = GetActorLocation();
+	//Location.Y += 30;
+	const FRotator Rotation = GetActorRotation();
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
+	if (AMonster* Monster = World->SpawnActor<AMonster>(Monsters[SelectedMonsterIndex].Monster, Location, Rotation, SpawnInfo))
+	{
+		Monster->SpawnDefaultController();
+		Monsters[SelectedMonsterIndex].Count++;
+	}
+}
+
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
 {
 	if(Interactable)
@@ -312,6 +360,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory2), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot2);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory3), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot3);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory4), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot4);
+		
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorCycleMonster), ETriggerEvent::Started, this, &APlayerCharacter::CycleSelectedMonster);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnMonster);
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);
