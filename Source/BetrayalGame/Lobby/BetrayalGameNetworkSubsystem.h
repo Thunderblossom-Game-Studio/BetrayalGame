@@ -177,7 +177,11 @@ private:
 	 *	@param	SessionName		Name of session this callback is for
 	 *	@param	bWasSuccessful	true if the async action completed without error, false if there was an error
 	 */
-	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful); 
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void BP_DestroySession();
+	
 #pragma endregion
 	
 };

@@ -95,8 +95,9 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 	return false;
 }
 
-void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers,
-	bool bIsPrivate, FString Password)
+void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence,
+                                                   int32 MaxNumPlayers,
+                                                   bool bIsPrivate, FString Password)
 {
 	HostSession(GetNetID(), NAME_GameSession, bIsLAN, bIsPresence, MaxNumPlayers, bIsPrivate, Password);
 }
@@ -122,7 +123,7 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 	if (bWasSuccessful)
 	{
 		Print("Session started successfully!");
-		
+
 		// Set the delegate to the handle of the session start function
 		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
 
@@ -233,13 +234,14 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	for (auto result : SessionSearch->SearchResults)
 	{
 		// Create new button for each session
-		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_GameInstance, _GameInstance->WB_SessionConnectBtnClass);
+		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_GameInstance,
+		                                                             _GameInstance->WB_SessionConnectBtnClass);
 
-		if(SessionButton)
+		if (SessionButton)
 		{
 			// Set the session data
 			SessionButton->SetSessionData(result);
-			
+
 			// Add the button to the list of found sessions
 			FoundSessionButtons.Add(SessionButton);
 		}
@@ -291,7 +293,7 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(FName SessionName, const FOnline
 
 	IOnlineSessionPtr Sessions = OnlineSubsystem->GetSessionInterface();
 
-	if(Sessions.IsValid() && GetNetID().IsValid())
+	if (Sessions.IsValid() && GetNetID().IsValid())
 	{
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
@@ -343,9 +345,11 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 }
 
 void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId,
-	TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult)
+                                                                TSharedPtr<const FUniqueNetId> UserId,
+                                                                const FOnlineSessionSearchResult& InviteResult)
 {
-	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " + InviteResult.GetSessionIdStr());
+	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " +
+		InviteResult.GetSessionIdStr());
 	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
 }
 
@@ -376,11 +380,29 @@ void UBetrayalGameNetworkSubsystem::OnDestroySessionComplete(FName SessionName, 
 	}
 }
 
+void UBetrayalGameNetworkSubsystem::BP_DestroySession()
+{
+	auto Subsystem = IOnlineSubsystem::Get();
+	if (!Subsystem)
+	{
+		Print("UBetrayalGameNetworkSubsystem::BP_DestroySession(): No Online Subsystem found!");
+		return;
+	}
+
+	auto SessionInterface = Subsystem->GetSessionInterface();
+	if (SessionInterface.IsValid())
+	{
+		OnDestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(
+			OnDestroySessionCompleteDelegate);
+		SessionInterface->DestroySession(NAME_GameSession);
+	}
+}
+
 void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	
+
 	// Session creation function binding
 	OnCreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(
 		this, &UBetrayalGameNetworkSubsystem::OnCreateSessionComplete);
@@ -402,10 +424,10 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	// Invite accepted function binding
 	OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(
 		this, &UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted);
-	
+
 	// Get the game instance
 	_GameInstance = Cast<UBetrayalGameInstance>(GetGameInstance());
-	if(!_GameInstance)
+	if (!_GameInstance)
 	{
 		Print("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): Game instance is null!");
 	}
@@ -413,7 +435,8 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	const auto SessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
 	if (SessionInterface.IsValid())
 	{
-		SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(this, &UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted);
+		SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(
+			this, &UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted);
 	}
 	else
 	{
