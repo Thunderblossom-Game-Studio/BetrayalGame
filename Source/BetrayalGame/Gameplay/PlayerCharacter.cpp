@@ -266,7 +266,7 @@ void APlayerCharacter::LocalInteract()
 
 void APlayerCharacter::CycleSelectedMonster()
 {
-	Server_CycleSelectedMonster_Implementation();
+	Server_CycleSelectedMonster();
 }
 
 void APlayerCharacter::Server_CycleSelectedMonster_Implementation()
@@ -284,7 +284,7 @@ void APlayerCharacter::Server_CycleSelectedMonster_Implementation()
 
 void APlayerCharacter::SpawnMonster()
 {
-	Server_SpawnMonster_Implementation();
+	Server_SpawnMonster();
 }
 
 void APlayerCharacter::Server_SpawnMonster_Implementation()
