@@ -16,6 +16,14 @@ class UBetrayalGameInstance;
 const FName PASSWORD = "PASSWORD";
 const FName SERVERLIST_NAME = "SESSION_NAME";
 
+UENUM(BlueprintType)
+enum class ESessionSearchResult : uint8
+{
+	SSR_Success,
+	SSR_NoResults,
+	SSR_Failure 
+};
+
 UCLASS()
 class BETRAYALGAME_API UBetrayalGameNetworkSubsystem : public UGameInstanceSubsystem
 {
@@ -122,8 +130,8 @@ public:
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
 
 	// Blueprint callable function to find sessions
-	UFUNCTION(BlueprintCallable, Category = "Networking")
-	void BP_FindSessions(bool bIsLAN, bool bIsPresence);
+	UFUNCTION(BlueprintCallable, Category = "Networking", Meta = (ExpandEnumAsExecs="Result"))
+	void BP_FindSessions(bool bIsLAN, bool bIsPresence, TEnumAsByte<ESessionSearchResult>& Result);
 
 	// Delegate for searching for sessions
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;

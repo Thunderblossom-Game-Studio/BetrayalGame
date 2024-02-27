@@ -263,7 +263,7 @@ void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> 
 	}
 }
 
-void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresence)
+void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresence, TEnumAsByte<ESessionSearchResult>& Result)
 {
 	FindSessions(GetNetID(), bIsLAN, bIsPresence);
 }
