@@ -88,9 +88,9 @@ void ABetrayalGameState::StartHaunt()
 		
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(BetrayalPlayerState->GetPawn());
 		if(!PlayerCharacter)
-			return;
-		
+			return;		
 		OnTraitorChosen(PlayerCharacter);
+		
 	}
 	
 	// Assign objectives to players based on if they are traitor or not

@@ -23,7 +23,22 @@ enum EInputActionValue
 	IAV_Inventory1 UMETA(DisplayName = "Inventory1"),
 	IAV_Inventory2 UMETA(DisplayName = "Inventory2"),
 	IAV_Inventory3 UMETA(DisplayName = "Inventory3"),
-	IAV_Inventory4 UMETA(DisplayName = "Inventory4")
+	IAV_Inventory4 UMETA(DisplayName = "Inventory4"),
+	IAV_TraitorCycleMonster UMETA(DisplayName = "TraitorCycleMonster"),
+	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster")
+};
+
+USTRUCT(Blueprintable)
+struct FMonsterSpawnInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Monster")
+	TSubclassOf<class AMonster> Monster;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Monster")
+	int MaxAmount = 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Monster")
+	int Count = 0;
 };
 
 UCLASS()
@@ -133,6 +148,25 @@ public:
 private:
 #pragma endregion 
 
+#pragma region Traitor Actions
+protected:
+	UFUNCTION()
+	void CycleSelectedMonster();
+	UFUNCTION(Server, Reliable)
+	void Server_CycleSelectedMonster();
+	
+	UFUNCTION()
+	void SpawnMonster();
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnMonster();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Traitor", meta = (AllowPrivateAccess))
+	TArray<FMonsterSpawnInfo> Monsters;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Traitor", meta = (AllowPrivateAccess = "true"))
+	int SelectedMonsterIndex = 0;
+	
+#pragma endregion
+	
 #pragma region Objectives
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Objectives")

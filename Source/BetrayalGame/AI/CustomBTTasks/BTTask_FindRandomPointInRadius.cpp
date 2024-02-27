@@ -20,14 +20,10 @@ UBTTask_FindRandomPointInRadius::UBTTask_FindRandomPointInRadius(FObjectInitiali
 
 EBTNodeResult::Type UBTTask_FindRandomPointInRadius::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	if (!Controller)
-		Controller = OwnerComp.GetAIOwner();
-	if (!Pawn)
-		Pawn = Controller->GetPawn();
-	if (!World)
-		World = GetWorld();
-	if (!Blackboard)
-		Blackboard = OwnerComp.GetBlackboardComponent();
+	Controller = OwnerComp.GetAIOwner();
+	Pawn = Controller->GetPawn();
+	World = GetWorld();
+	Blackboard = OwnerComp.GetBlackboardComponent();
 	
 	FVector Destination = FVector::Zero();	
 	const UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(World);
