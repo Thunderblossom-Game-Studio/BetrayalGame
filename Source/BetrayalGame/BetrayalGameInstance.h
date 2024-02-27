@@ -125,6 +125,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
 	void OnSessionSearchComplete();
+
 #pragma endregion
 	
 };

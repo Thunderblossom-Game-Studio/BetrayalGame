@@ -2,14 +2,9 @@
 
 #include "BetrayalGameInstance.h"
 #include "StaticUtils.h"
-#include "OnlineSessionSettings.h"
-#include "Online/OnlineSessionNames.h"
-#include "Interfaces/OnlineSessionInterface.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
 #include "Components/EditableText.h"
-#include "Kismet/GameplayStatics.h"
-//#include "Steam/steam_api.h"
+#include "Net/Core/Connection/NetEnums.h"
 
 #pragma region General
 
@@ -204,4 +199,12 @@ void UBetrayalGameInstance::CheckPlayerProfile()
 {
 }
 
+
+
 #pragma endregion Save/Load
+
+#pragma region Networking
+
+
+
+#pragma endregion

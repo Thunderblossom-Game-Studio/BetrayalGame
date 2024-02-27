@@ -6,6 +6,7 @@
 #include "GameDelegates.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Net/Core/Connection/NetEnums.h"
 #include "BetrayalGameNetworkSubsystem.generated.h"
 
 // Forward Declarations
@@ -30,12 +31,15 @@ private:
 
 	void SetupNotifications();
 
+	void CleanupNotifications();
 	//FDelegateHandle OnSessionParticipantsChangeDelegateHandle;
 	//void HandleParticipantChanged(FName SessionName, const FUniqueNetId& ID, bool bJoined);
 
 	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
 
 	void OnClientDisconnected(FName SessionName, const FUniqueNetId& ID, EOnSessionParticipantLeftReason Reason);
+
+	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 	
 public:
 	// Initialize
@@ -208,7 +212,7 @@ private:
 	FDelegateHandle OnHandleDisconnectDelegateHandle;
 
 	void OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-	
+
 #pragma endregion
 
 #pragma region ReadyState
