@@ -29,12 +29,16 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 	DOREPLIFETIME(AItemActor, ItemData);
 	DOREPLIFETIME(AItemActor, bIsObjectiveItem);
+	DOREPLIFETIME(AItemActor, bCanPickup);
 }
 
 void AItemActor::OnInteract(AActor* Interactor)
 {
 	Super::OnInteract(Interactor);
 
+	if(!bCanPickup)
+		return;
+	
 	FItem Item = *ItemData.DataTable->FindRow<FItem>(ItemData.RowName, "");
 	
 	APlayerCharacter* Player = Cast<APlayerCharacter>(Interactor);
@@ -43,8 +47,15 @@ void AItemActor::OnInteract(AActor* Interactor)
 		return;
 	
 	Player->InventoryComponent->Server_AddItemToInventory(Item);
+
+	OnPickup(Player);
 	
 	Destroy();
+}
+
+void AItemActor::Server_SetCanPickup_Implementation(const bool CanPickup)
+{
+	SetCanPickup(CanPickup);
 }
 
 // Called every frame

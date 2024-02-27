@@ -59,6 +59,9 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 
 			SelectSlot(slot.ID);
 			
+			LastItemAdded = Item;
+			LastSlotAddedID = slot.ID;
+			
 			FilledSlotCount++;
 			break;
 		}
@@ -68,6 +71,25 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 	{
 		bIsInventoryFull = true;
 	}
+}
+
+void UInventoryComponent::RemoveItemFromInventory(int ID)
+{
+	for (auto& slot : InventorySlots)
+	{
+		if(slot.ID == ID)
+		{
+			slot.Item = FItem();
+			slot.bIsEmpty = true;
+			FilledSlotCount--;
+			break;
+		}
+	}
+}
+
+void UInventoryComponent::Server_RemoveItemFromInventory_Implementation(int ID)
+{
+	RemoveItemFromInventory(ID);
 }
 
 void UInventoryComponent::InitializeInventory()

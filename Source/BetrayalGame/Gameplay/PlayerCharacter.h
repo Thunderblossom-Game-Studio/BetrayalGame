@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
+#include "InventoryComponent.h"
 #include "../Gameplay/BaseCharacter.h"
 #include "ItemActor.h"
 #include "PlayerCharacter.generated.h"
@@ -106,22 +107,33 @@ public:
 
 	UFUNCTION()
 	void SelectSlot1();
+	
 	UFUNCTION()
 	void SelectSlot2();
+	
 	UFUNCTION()
 	void SelectSlot3();
+	
 	UFUNCTION()
 	void SelectSlot4();
 
 	UFUNCTION()
 	void EquipItem(AItemActor* Item);
 	UFUNCTION(Server, Reliable)
+	
 	void Server_EquipItem(AItemActor* Item);
 
 	UFUNCTION()
 	void UnequipItem();
+	
 	UFUNCTION(Server, Reliable)
 	void Server_UnequipItem();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	void OnItemEquipped(AItemActor* Item, int SlotID);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	void OnItemUnequipped();
 	
 private:	
 #pragma endregion 
@@ -136,6 +148,9 @@ public:
 	float InteractDistance = 600.0f;
 	
 	void TraceForInteractables();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Interaction")
+	void OnItemPickedUp(AItemActor* Item);
 	
 	void LocalInteract();
 	

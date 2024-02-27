@@ -32,32 +32,51 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float MaxHealth;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Health")
 	float CurrentHealth;
 
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Health")
 	bool bIsDead;
 
 public:
-	UFUNCTION()
-	void OnRep_CurrentHealth(); // This runs when the CurrentHealth variable is updated on the server
-
 	void OnHealthUpdate();
 	
 	UFUNCTION(BlueprintPure, Category = "Health")
 	float GetMaxHealth() const { return MaxHealth; }
-
-	//TODO: Implement this
-	//UFUNCTION(BlueprintCallable, Category = "Health")
-	//void SetMaxHealth(float NewMaxHealth);
-
+	
 	UFUNCTION(BlueprintPure, Category = "Health")
 	float GetCurrentHealth() const { return CurrentHealth; }
 	
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void SetCurrentHealth(float NewCurrentHealth);
+	UFUNCTION()
+	void SetMaxHealth(float NewMaxHealth) { MaxHealth = NewMaxHealth; }
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetMaxHealth(float NewMaxHealth);
+
+	UFUNCTION(BlueprintCallable)
+	void TakeDamage(float Damage);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TakeDamage(float Damage);
+
+	UFUNCTION(BlueprintCallable)
+	void Heal(float Amount);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Heal(float Amount);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	void OnHeal(float Amount);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	void OnDamageTaken(float Damage);
+
+	UFUNCTION(BlueprintPure, Category = "Health")
 	bool IsDead() const { return bIsDead; }
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	void OnDeath();
+	
 
 #pragma endregion
 

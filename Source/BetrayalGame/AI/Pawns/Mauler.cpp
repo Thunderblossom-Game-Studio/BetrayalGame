@@ -74,7 +74,8 @@ void AMauler::Attack(AActor* Target)
 		return;
 	if (ABaseCharacter* Character = Cast<ABaseCharacter>(Target))
 	{
-		Character->SetCurrentHealth(1);
+		const int DamageToTake = Character->GetCurrentHealth() - 1;
+		Character->Server_TakeDamage(DamageToTake);
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, "Health: " + FString::SanitizeFloat(Character->GetCurrentHealth()));
 	}
 }

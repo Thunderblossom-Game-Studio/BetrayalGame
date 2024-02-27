@@ -103,17 +103,12 @@ void APlayerCharacter::SelectSlot1()
 {
 	InventoryComponent->SelectSlot(0);
 
-	if(!InventoryComponent->GetItemInSlot(0).Actor)
-		return;
-
 	if(HasAuthority())
 	{
-		UnequipItem();
 		EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
 	else
 	{
-		Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
 }
@@ -124,12 +119,10 @@ void APlayerCharacter::SelectSlot2()
 
 	if(HasAuthority())
 	{
-		//UnequipItem();
 		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		//Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
@@ -140,12 +133,10 @@ void APlayerCharacter::SelectSlot3()
 
 	if(HasAuthority())
 	{
-		//UnequipItem();
 		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		//Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
@@ -156,12 +147,10 @@ void APlayerCharacter::SelectSlot4()
 
 	if(HasAuthority())
 	{
-		//UnequipItem();
 		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 	else
 	{
-		//Server_UnequipItem();
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
 }
@@ -194,15 +183,22 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;
-    HeldItem->SetCanPickup(false);
+		
 	}
+
+	HeldItem->Server_SetCanPickup(false);
+	
+	OnItemEquipped(Item, InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::UnequipItem()
 {
 	if(!HeldItem)
 		return;
+	
 	HeldItem->Destroy();
+
+	OnItemUnequipped();
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
@@ -313,7 +309,14 @@ void APlayerCharacter::Server_SpawnMonster_Implementation()
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
 {
 	if(Interactable)
+	{
 		Interactable->OnInteract(NewOwner);
+
+		AItemActor* Item = Cast<AItemActor>(Interactable);
+		if(Item)
+			OnItemPickedUp(Item);
+	}
+		
 	
 	NetMulticast_Interact(NewOwner,Interactable);
 }

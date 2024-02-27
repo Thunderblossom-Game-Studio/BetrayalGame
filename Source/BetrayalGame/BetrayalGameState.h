@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "Gameplay/BetrayalGameMode.h"
 #include "Gameplay/PlayerCharacter.h"
 #include "BetrayalGameState.generated.h"
 
@@ -146,6 +147,8 @@ protected:
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
 	FHaunt CurrentHaunt;
+
+	
 public:
 
 	UFUNCTION()
@@ -157,6 +160,13 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
 	void OnTraitorChosen(APlayerCharacter* Traitor);
 
-	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
+	void OnTraitorWin();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
+	void OnInnocentWin();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
+	void OnTimerExpired();
 #pragma endregion 
 };

@@ -119,6 +119,16 @@ void ABetrayalGameState::StartHaunt()
 	}
 }
 
+void ABetrayalGameState::OnInnocentWin_Implementation()
+{
+	
+}
+
+void ABetrayalGameState::OnTraitorWin_Implementation()
+{
+	
+}
+
 void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage NewStage)
 {
 	switch (NewStage)
