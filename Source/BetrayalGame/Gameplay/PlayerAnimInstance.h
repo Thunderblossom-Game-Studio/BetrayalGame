@@ -22,7 +22,7 @@ public:
 #pragma region Animation Conditions
 	// Exposed Variables
 protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Interp, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Monster | Animation", meta = (AllowPrivateAccess = "true"))
 	bool bSprinting;
