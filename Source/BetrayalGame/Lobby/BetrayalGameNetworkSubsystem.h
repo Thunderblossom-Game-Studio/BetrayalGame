@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameDelegates.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Net/Core/Connection/NetEnums.h"
 #include "BetrayalGameNetworkSubsystem.generated.h"
 
 // Forward Declarations
@@ -13,6 +15,13 @@ class UBetrayalGameInstance;
 // Type Definitions
 const FName PASSWORD = "PASSWORD";
 const FName SERVERLIST_NAME = "SESSION_NAME";
+
+UENUM(BlueprintType)
+enum class ESessionSearchResult : uint8
+{
+	SSR_Success UMETA(DisplayName = "Success"),
+	SSR_Failure UMETA(DisplayName = "Failure") 
+};
 
 UCLASS()
 class BETRAYALGAME_API UBetrayalGameNetworkSubsystem : public UGameInstanceSubsystem
@@ -24,6 +33,18 @@ private:
 	UBetrayalGameInstance* _GameInstance;
 	
 	const TSharedPtr<const FUniqueNetId> GetNetID();
+
+	IOnlineSessionPtr GetSessionInterface();
+
+	void SetupNotifications();
+
+	void CleanupNotifications();
+
+	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
+
+	void OnClientDisconnected(FName SessionName, const FUniqueNetId& ID, EOnSessionParticipantLeftReason Reason);
+
+	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 	
 public:
 	// Initialize
@@ -35,14 +56,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
 	FString LobbyListName = "BetrayalGameSession";
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
-	FName LevelToLoad = "";
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	bool bIsHost = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	bool bIsReady = false;
 
 	// Found sessions
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
 	TArray<UUserWidget*> FoundSessionButtons;
 
-	#pragma region Session Creation
+	// Reset session search
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void ResetSessionSearch();
+
+#pragma region Session Creation
 	// Session created delegate
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
 
@@ -96,11 +124,11 @@ public:
 	*	@Param		bIsLan			Are we searching LAN matches
 	*	@Param		bIsPresence		Are we searching presence sessions
 	*/
-	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
+	ESessionSearchResult FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
 
 	// Blueprint callable function to find sessions
-	UFUNCTION(BlueprintCallable, Category = "Networking")
-	void BP_FindSessions(bool bIsLAN, bool bIsPresence);
+	UFUNCTION(BlueprintCallable, Category = "Networking", Meta = (ExpandEnumAsExecs="Result"))
+	void BP_FindSessions(bool bIsLAN, bool bIsPresence, ESessionSearchResult& Result);
 
 	// Delegate for searching for sessions
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
@@ -181,7 +209,24 @@ private:
 
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void BP_DestroySession();
-	
+
+	// Delegate to handle a disconnect from a session
+	FHandleDisconnectDelegate OnHandleDisconnectDelegate;
+
+	// Handle to registered delegate for handling a disconnect from a session
+	FDelegateHandle OnHandleDisconnectDelegateHandle;
+
+	void OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
 #pragma endregion
-	
+
+#pragma region ReadyState
+
+	// Server Update Ready State
+	UFUNCTION(Server, Reliable, Category = "Networking")
+	void Server_UpdateReadyState(bool bReady);
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Networking")
+	void Multicast_UpdateReadyState(int32 PlayerID, bool bReady);
+#pragma endregion 
 };

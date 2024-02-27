@@ -2,13 +2,9 @@
 
 #include "BetrayalGameInstance.h"
 #include "StaticUtils.h"
-#include "OnlineSessionSettings.h"
-#include "Online/OnlineSessionNames.h"
-#include "Interfaces/OnlineSessionInterface.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
-#include "Kismet/GameplayStatics.h"
-//#include "Steam/steam_api.h"
+#include "Components/EditableText.h"
+#include "Net/Core/Connection/NetEnums.h"
 
 #pragma region General
 
@@ -34,6 +30,12 @@ void UBetrayalGameInstance::Init()
 	if (!WB_Lobby && WB_LobbyClass)
 	{
 		WB_Lobby = CreateWidget<UUserWidget>(GetWorld(), WB_LobbyClass);
+	}
+
+	// Create lobby room widget
+	if (!WB_LobbyRoom && WB_LobbyRoomClass)
+	{
+		WB_LobbyRoom = CreateWidget<UUserWidget>(GetWorld(), WB_LobbyRoomClass);
 	}
 }
 
@@ -138,8 +140,12 @@ void UBetrayalGameInstance::ShowPasswordField()
 	{
 		FInputModeUIOnly InputMode;
 
-		if (const UWidget* PasswordField = WB_PasswordField->GetWidgetFromName("Txt_Password"))
+		if (UWidget* PasswordField = WB_PasswordField->GetWidgetFromName("Passwd"))
+		{
 			InputMode.SetWidgetToFocus(PasswordField->GetCachedWidget());
+			UEditableText* pw = Cast<UEditableText>(PasswordField);
+			pw->SetText(FText::FromString(""));
+		}
 		else
 			Print("UBetrayalGameInstance::ShowPasswordField(): Password field not found!");
 
@@ -150,10 +156,34 @@ void UBetrayalGameInstance::ShowPasswordField()
 void UBetrayalGameInstance::HidePasswordField()
 {
 	if (WB_PasswordField)
+	{
 		WB_PasswordField->RemoveFromParent();
+		UEditableText* pw = Cast<UEditableText>(WB_PasswordField->GetWidgetFromName("Passwd"));
+		if(pw) pw->SetText(FText::FromString(""));
+	}
 	else
 		Print("UBetrayalGameInstance::HidePasswordField(): WB_PasswordField is null!");
 }
+
+void UBetrayalGameInstance::ShowLobbyRoom()
+{
+	if (WB_LobbyRoom)
+		WB_LobbyRoom->AddToViewport();
+	else
+	{
+		Print("UBetrayalGameInstance::ShowLobbyRoom(): WB_LobbyRoom is null!");
+		return;
+	}
+}
+
+void UBetrayalGameInstance::HideLobbyRoom()
+{
+	if (WB_LobbyRoom)
+		WB_LobbyRoom->RemoveFromParent();
+	else
+		Print("UBetrayalGameInstance::HideLobbyRoom(): WB_LobbyRoom is null!");
+}
+
 #pragma endregion UI
 
 #pragma region Save/Load
@@ -169,4 +199,12 @@ void UBetrayalGameInstance::CheckPlayerProfile()
 {
 }
 
+
+
 #pragma endregion Save/Load
+
+#pragma region Networking
+
+
+
+#pragma endregion

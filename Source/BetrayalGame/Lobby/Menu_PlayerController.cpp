@@ -43,9 +43,6 @@ void AMenu_PlayerController::Login()
 		{
 			Print("User: " + User->GetDisplayName());
 		}
-
-		// Sign user out
-		Identity->Logout(0);
 	}
 
 	LoginDelegateHandle = Identity->AddOnLoginCompleteDelegate_Handle(0,

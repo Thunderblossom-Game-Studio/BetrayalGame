@@ -47,6 +47,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WB_SessionConnectBtnClass;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WB_LobbyRoomClass;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UUserWidget* WB_MainMenu;
@@ -55,8 +58,11 @@ public:
 	UUserWidget* WB_Lobby;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	UUserWidget* WB_PasswordField;
+	UUserWidget* WB_LobbyRoom;
 
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UUserWidget* WB_PasswordField;
+	
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowMainMenu();
 
@@ -74,6 +80,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void HidePasswordField();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowLobbyRoom();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HideLobbyRoom();
+	
+
+	
 #pragma endregion
 
 #pragma region Save/Load
@@ -102,7 +117,7 @@ public:
 #pragma region Networking	
 public:
 	UPROPERTY(EditAnywhere, Category = "Networking")
-	FString LevelToLoad = "";
+	FName LevelToLoad = "";
 
 	// Session password value
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
@@ -110,6 +125,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
 	void OnSessionSearchComplete();
+
 #pragma endregion
 	
 };

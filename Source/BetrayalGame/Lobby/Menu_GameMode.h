@@ -13,5 +13,5 @@ UCLASS()
 class BETRAYALGAME_API AMenu_GameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+
 };
