@@ -19,9 +19,8 @@ const FName SERVERLIST_NAME = "SESSION_NAME";
 UENUM(BlueprintType)
 enum class ESessionSearchResult : uint8
 {
-	SSR_Success,
-	SSR_NoResults,
-	SSR_Failure 
+	SSR_Success UMETA(DisplayName = "Success"),
+	SSR_Failure UMETA(DisplayName = "Failure") 
 };
 
 UCLASS()
@@ -40,8 +39,6 @@ private:
 	void SetupNotifications();
 
 	void CleanupNotifications();
-	//FDelegateHandle OnSessionParticipantsChangeDelegateHandle;
-	//void HandleParticipantChanged(FName SessionName, const FUniqueNetId& ID, bool bJoined);
 
 	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
 
@@ -127,11 +124,11 @@ public:
 	*	@Param		bIsLan			Are we searching LAN matches
 	*	@Param		bIsPresence		Are we searching presence sessions
 	*/
-	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
+	ESessionSearchResult FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
 
 	// Blueprint callable function to find sessions
 	UFUNCTION(BlueprintCallable, Category = "Networking", Meta = (ExpandEnumAsExecs="Result"))
-	void BP_FindSessions(bool bIsLAN, bool bIsPresence, TEnumAsByte<ESessionSearchResult>& Result);
+	void BP_FindSessions(bool bIsLAN, bool bIsPresence, ESessionSearchResult& Result);
 
 	// Delegate for searching for sessions
 	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;

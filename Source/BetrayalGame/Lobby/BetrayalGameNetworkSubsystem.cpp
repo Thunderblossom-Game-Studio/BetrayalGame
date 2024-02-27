@@ -234,9 +234,12 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 	}
 }
 
-void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
+ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
 {
 	ResetSessionSearch();
+
+	// Set lobby menu to inactive during search
+	_GameInstance->WB_Lobby->SetIsEnabled(false);
 
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
@@ -255,21 +258,27 @@ void UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> 
 			OnFindSessionsCompleteDelegate);
 
 		Sessions->FindSessions(*UserId, SearchSettingsRef);
+		return ESessionSearchResult::SSR_Success;
 	}
 	else
 	{
 		Print("No Session Interface found!");
 		OnFindSessionsComplete(false);
+		return ESessionSearchResult::SSR_Failure;
 	}
 }
 
-void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresence, TEnumAsByte<ESessionSearchResult>& Result)
+void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresence, ESessionSearchResult& Result)
 {
-	FindSessions(GetNetID(), bIsLAN, bIsPresence);
+	Result = FindSessions(GetNetID(), bIsLAN, bIsPresence);
+	//Result = ESessionSearchResult::SSR_Success;
 }
 
 void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
+	// Re-enable the lobby menu
+	_GameInstance->WB_Lobby->SetIsEnabled(true);
+	
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
 	Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
