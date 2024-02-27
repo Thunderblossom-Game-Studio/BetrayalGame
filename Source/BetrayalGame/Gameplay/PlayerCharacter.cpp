@@ -193,7 +193,10 @@ void APlayerCharacter::UnequipItem()
 {
 	if(!HeldItem)
 		return;
+	
 	HeldItem->Destroy();
+
+	OnItemUnequipped();
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
@@ -258,7 +261,14 @@ void APlayerCharacter::LocalInteract()
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
 {
 	if(Interactable)
+	{
 		Interactable->OnInteract(NewOwner);
+
+		AItemActor* Item = Cast<AItemActor>(Interactable);
+		if(Item)
+			OnItemPickedUp(Item);
+	}
+		
 	
 	NetMulticast_Interact(NewOwner,Interactable);
 }

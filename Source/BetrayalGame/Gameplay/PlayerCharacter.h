@@ -116,6 +116,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
 	void OnItemEquipped(AItemActor* Item, int SlotID);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	void OnItemUnequipped();
 	
 private:	
 #pragma endregion 
@@ -130,6 +133,9 @@ public:
 	float InteractDistance = 600.0f;
 	
 	void TraceForInteractables();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Interaction")
+	void OnItemPickedUp(AItemActor* Item);
 	
 	void LocalInteract();
 	
