@@ -54,6 +54,12 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	FInventorySlot SelectedSlot;
+
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	FItem LastItemAdded;
+
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	int LastSlotAddedID;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	bool bIsInventoryInitialized = false;
@@ -101,7 +107,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool IsInventoryFull() const { return bIsInventoryFull; }
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	FItem GetLastItemAdded() const { return LastItemAdded; }
 
-	
-		
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int GetLastSlotAddedtID() const { return LastSlotAddedID; }
 };
