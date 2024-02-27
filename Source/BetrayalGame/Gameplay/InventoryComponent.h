@@ -100,6 +100,11 @@ public:
 	void AddItemToInventory(FItem Item);
 
 	UFUNCTION(Server, Reliable)
+	void Server_RemoveItemFromInventory(int ID);
+	UFUNCTION()
+	void RemoveItemFromInventory(int ID);
+
+	UFUNCTION(Server, Reliable)
 	void Server_InitializeInventory();
 	UFUNCTION()
 	void InitializeInventory();

@@ -73,6 +73,25 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 	}
 }
 
+void UInventoryComponent::RemoveItemFromInventory(int ID)
+{
+	for (auto& slot : InventorySlots)
+	{
+		if(slot.ID == ID)
+		{
+			slot.Item = FItem();
+			slot.bIsEmpty = true;
+			FilledSlotCount--;
+			break;
+		}
+	}
+}
+
+void UInventoryComponent::Server_RemoveItemFromInventory_Implementation(int ID)
+{
+	RemoveItemFromInventory(ID);
+}
+
 void UInventoryComponent::InitializeInventory()
 {
 	for ( int i = 0; i < MaxInventorySlots; i++)

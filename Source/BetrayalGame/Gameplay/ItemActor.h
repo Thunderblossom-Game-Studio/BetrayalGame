@@ -15,14 +15,14 @@ struct FItem : public FTableRowBase
 
 	FItem()
 	{
-		Name = FText::FromString("None");
+		Name = "None";
 		Description = FText::FromString("None");
 		Image = nullptr;
 		Actor = nullptr;
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	FText Name;
+	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText Description;
