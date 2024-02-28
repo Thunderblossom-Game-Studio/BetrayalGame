@@ -76,6 +76,7 @@ void AMauler::Attack(AActor* Target)
 	{
 		const int DamageToTake = Character->GetCurrentHealth() - 1;
 		Character->Server_TakeDamage(DamageToTake);
+		
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, "Health: " + FString::SanitizeFloat(Character->GetCurrentHealth()));
 	}
 }
@@ -125,9 +126,11 @@ void AMauler::OverlapEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (!PlayerCharacter || ValidTargets.Contains(PlayerCharacter))
 		return;			
-	const ABetrayalPlayerState* BetrayalPlayerState = PlayerCharacter->GetPlayerState<ABetrayalPlayerState>();
-	if (BetrayalPlayerState->IsTraitor())
-		return;
+	if (ABetrayalPlayerState* BetrayalPlayerState = PlayerCharacter->GetPlayerState<ABetrayalPlayerState>())
+	{
+		if (BetrayalPlayerState->IsTraitor())
+			return;
+	}
 	
 	ValidTargets.Add(PlayerCharacter);
 	TargetCharacter = FindClosestCharacter();

@@ -44,6 +44,7 @@ protected:
 public:	
 	virtual void Attack(AActor* Target) override;
 	bool IsAttacking() const { return bAttacking; }
+	void SetAttacking(bool Attacking) { bAttacking = Attacking; }
 	void ResetAttack() { bAttacking = false; }
 	
 #pragma endregion
