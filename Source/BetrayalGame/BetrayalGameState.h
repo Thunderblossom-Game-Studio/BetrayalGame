@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "Gameplay/BetrayalGameMode.h"
 #include "Gameplay/PlayerCharacter.h"
 #include "BetrayalGameState.generated.h"
 
@@ -166,7 +165,5 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
 	void OnInnocentWin();
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnTimerExpired();
 #pragma endregion 
 };
