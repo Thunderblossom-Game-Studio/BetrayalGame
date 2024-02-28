@@ -71,10 +71,12 @@ void AChaserController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus S
 		if (TargetActor)
 			return;
 		
-		const APlayerCharacter* TargetCharacter = Cast<APlayerCharacter>(UpdatedActor);		
-		const ABetrayalPlayerState* BetrayalPlayerState = TargetCharacter->GetPlayerState<ABetrayalPlayerState>();
-		if (BetrayalPlayerState->IsTraitor())
-			return;
+		const APlayerCharacter* TargetCharacter = Cast<APlayerCharacter>(UpdatedActor);
+		if (ABetrayalPlayerState* BetrayalPlayerState = TargetCharacter->GetPlayerState<ABetrayalPlayerState>())
+		{
+			if (BetrayalPlayerState->IsTraitor())
+				return;
+		}
 		
 		
 		TargetActor = UpdatedActor;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "AIPlayerController.generated.h"
 
 /**
@@ -27,10 +28,18 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* BehaviourTree;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Componnents, meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* HauntInnocentTree;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Componnents, meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* HauntTraitorTree;
 	
-// Getters
+// Getters/Setters
 public:
 	const UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
+
+	UFUNCTION()
+	void SetHauntBehaviours(UBehaviorTree* Innocent, UBehaviorTree* Traitor);
 	
 #pragma endregion
 	
