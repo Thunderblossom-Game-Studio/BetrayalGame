@@ -78,26 +78,16 @@ void AAIPlayerController::BeginPlay()
 void AAIPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+}
 
-	if (!HasAuthority())
-		return;
-	if (BetrayalGameMode && Blackboard)
-	{
-		if (BetrayalGameMode->GetMatchStage() == Haunting)
-		{
-			Blackboard->SetValueAsBool("Haunt", true);
-			
-			if (PlayerCharacter)
-				PlayerCharacter->RunStart();
-		}
-		else
-		{
-			Blackboard->SetValueAsBool("Haunt", false);
-			
-			if (PlayerCharacter)
-				PlayerCharacter->RunEnd();
-		}
-	}
+void AAIPlayerController::SetHauntBehaviours(UBehaviorTree* Innocent, UBehaviorTree* Traitor)
+{
+	if (Innocent)
+		HauntInnocentTree = Innocent;
+	if (Traitor)
+		HauntTraitorTree = Traitor;	
+	if (Blackboard)
+		Blackboard->SetValueAsBool("Haunt", true);
 }
 
 void AAIPlayerController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)
