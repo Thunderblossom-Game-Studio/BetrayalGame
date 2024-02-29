@@ -1,0 +1,23 @@
+﻿{
+  "FileVersion" : 3,
+  "FriendlyNane" : "Betrayal Game Extensions",
+  "Version" : 1,
+  "VersionNane" : "1.0",
+  "EngineVersion" : "5.3",
+  "Description" : "Tool for Betrayal Game ",
+  "Category" : "Gameplay",
+  "EnabledByDefault" : true,
+  
+  "Modules": 
+  [
+    {
+      "Name" : "BetrayalGameExtensionsRuntime",
+      "Type" : "Runtime",
+      "LoadingPhase": "PreDefault"
+    },
+    {
+      "Name" : "BetrayalGameExtensionsEditor",
+      "Type" : "Editor"
+    }
+  ]
+}
