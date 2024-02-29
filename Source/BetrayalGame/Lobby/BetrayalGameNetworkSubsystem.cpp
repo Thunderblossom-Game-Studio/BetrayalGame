@@ -79,6 +79,10 @@ void UBetrayalGameNetworkSubsystem::OnClientConnected(FName SessionName, const F
 {
 	// Print name of connecting player
 	Print("Player connected: " + ID.ToString());
+
+	// Call all bound callbacks
+	OnClientConnectedDelegate.Broadcast();
+	OnClientsChangedDelegate.Broadcast();
 }
 
 void UBetrayalGameNetworkSubsystem::OnClientDisconnected(FName SessionName, const FUniqueNetId& ID,
@@ -86,6 +90,10 @@ void UBetrayalGameNetworkSubsystem::OnClientDisconnected(FName SessionName, cons
 {
 	// Print name of disconnecting player
 	Print("Player disconnected: " + ID.ToString());
+
+	// Call all bound callbacks
+	OnClientDisconnectedDelegate.Broadcast();
+	OnClientsChangedDelegate.Broadcast();
 }
 
 void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
@@ -127,6 +135,37 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 	_GameInstance->HidePasswordField();
 }
 
+void UBetrayalGameNetworkSubsystem::LockSession()
+{
+	auto Session = GetSessionInterface();
+	if(!Session)
+		return;
+
+	if(SessionSettings.IsValid())
+	{
+		SessionSettings->bAllowInvites = false;
+		SessionSettings->bUsesPresence = false;
+		SessionSettings->bAllowJoinInProgress = false;
+		SessionSettings->bAllowJoinViaPresence = false;
+		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+		SessionSettings->bShouldAdvertise = false;
+	}
+	Session->UpdateSession(NAME_GameSession, *SessionSettings, true);
+}
+
+void UBetrayalGameNetworkSubsystem::ChangeMapByName(FName MapName)
+{
+	const FString TravelURL = MapName.ToString() + "?listen";
+	GetWorld()->ServerTravel(TravelURL);
+}
+
+void UBetrayalGameNetworkSubsystem::ChangeMapByReference(FSoftWorldReference Map)
+{
+	const FString MapName = Map.WorldAsset.GetAssetName();
+	const FString TravelURL = MapName + "?listen";
+	GetWorld()->ServerTravel(TravelURL);
+}
+
 bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN,
                                                 bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate,
                                                 FString Password)
@@ -161,8 +200,14 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		SessionSettings->bUseLobbiesIfAvailable = true;
 
 		// Session password
+		if (Password.IsEmpty())
+			Password = "";
+		
 		SessionSettings->Set(PASSWORD, Password, EOnlineDataAdvertisementType::ViaOnlineService);
 
+		// Update session name
+		LobbyListName = SessionName.ToString(); 
+		
 		// Session server list name
 		SessionSettings->Set(SERVERLIST_NAME, LobbyListName, EOnlineDataAdvertisementType::ViaOnlineService);
 
@@ -182,11 +227,10 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 }
 
 void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence,
-                                                   int32 MaxNumPlayers,
                                                    bool bIsPrivate, FString Password)
 {
 	// TODO: Add session name support
-	HostSession(GetNetID(), NAME_GameSession, bIsLAN, bIsPresence, MaxNumPlayers, bIsPrivate, Password);
+	HostSession(GetNetID(), SessionName, bIsLAN, bIsPresence, MAX_PLAYERS, bIsPrivate, Password);
 }
 
 void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -223,12 +267,7 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 		// Travel to the lobby
 		Print("Server travelling to map...");
 
-		FName Level = "";
-		if (_GameInstance)
-			Level = _GameInstance->LevelToLoad;
-		else
-			Level = "L_Map";
-
+		FName Level = "L_Lobby";
 		UGameplayStatics::OpenLevel(GetWorld(), Level, true, "listen");
 		SetupNotifications();
 	}
