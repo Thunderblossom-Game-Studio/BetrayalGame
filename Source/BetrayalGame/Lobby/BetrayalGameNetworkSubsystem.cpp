@@ -198,6 +198,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		SessionSettings->bAllowJoinViaPresence = true;
 		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
 		SessionSettings->bUseLobbiesIfAvailable = true;
+		SessionSettings->bUseLobbiesVoiceChatIfAvailable = true;
 
 		// Session password
 		if (Password.IsEmpty())
