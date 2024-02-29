@@ -86,6 +86,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void HideLobbyRoom();
+
+	UFUNCTION()
+	void DelayedUpdatePlayerList();
+	
+	UFUNCTION()
+	void UpdatePlayerList();
 	
 
 	

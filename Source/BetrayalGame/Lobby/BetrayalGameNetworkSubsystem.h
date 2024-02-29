@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameDelegates.h"
+#include "Engine/SoftWorldReference.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Net/Core/Connection/NetEnums.h"
@@ -28,7 +29,10 @@ class BETRAYALGAME_API UBetrayalGameNetworkSubsystem : public UGameInstanceSubsy
 {
 	GENERATED_BODY()
 
-private:
+public:
+	// Initialize
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 	UPROPERTY()
 	UBetrayalGameInstance* _GameInstance;
 	
@@ -40,16 +44,21 @@ private:
 
 	void CleanupNotifications();
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientConnectedDelegate);
+	FOnClientConnectedDelegate OnClientConnectedDelegate;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientDisconnectedDelegate);
+	FOnClientDisconnectedDelegate OnClientDisconnectedDelegate;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientsChangedDelegate);
+	FOnClientsChangedDelegate OnClientsChangedDelegate;
+	
 	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
 
 	void OnClientDisconnected(FName SessionName, const FUniqueNetId& ID, EOnSessionParticipantLeftReason Reason);
 
 	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 	
-public:
-	// Initialize
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
 	int MAX_PLAYERS = 5; // Max number of players in a session
 
@@ -70,6 +79,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void ResetSessionSearch();
 
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void LockSession();
+
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void ChangeMapByName(FName MapName);
+
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void ChangeMapByReference(FSoftWorldReference Map);
+	
 #pragma region Session Creation
 	// Session created delegate
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
@@ -97,7 +115,7 @@ public:
 
 	// Blueprint callable function to start a session
 	UFUNCTION(BlueprintCallable, Category = "Networking")
-	void BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate, FString Password);
+	void BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence, bool bIsPrivate, FString Password);
 
 	/**
 	*	Delegate function fired on creating session

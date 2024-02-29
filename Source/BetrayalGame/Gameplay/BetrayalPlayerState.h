@@ -25,6 +25,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "Player State")
 	bool bIsTraitor = false;
 
+#pragma region Lobby
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player State", Replicated)
+	bool bIsReady = false;
+	
+#pragma endregion
 public:
 	
 	UFUNCTION()
@@ -35,6 +41,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetIsTraitor(bool bNewIsTraitor) { bIsTraitor = bNewIsTraitor; }
+
+#pragma region Lobby
+
+	UFUNCTION()
+	bool IsReady() const { return bIsReady; }
+
+	UFUNCTION()
+	void SetIsReady(bool bNewIsReady) { bIsReady = bNewIsReady; }
+
+#pragma endregion
 };
 
 

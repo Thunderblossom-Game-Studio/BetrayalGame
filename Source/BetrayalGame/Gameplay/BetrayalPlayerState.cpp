@@ -38,6 +38,7 @@ void ABetrayalPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABetrayalPlayerState, bIsTraitor);
+	DOREPLIFETIME(ABetrayalPlayerState, bIsReady);
 }
 
 void ABetrayalPlayerState::OnRep_IsTraitor()
