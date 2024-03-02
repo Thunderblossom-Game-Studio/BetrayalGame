@@ -119,8 +119,8 @@ public:
 
 	UFUNCTION()
 	void EquipItem(AItemActor* Item);
-	UFUNCTION(Server, Reliable)
 	
+	UFUNCTION(Server, Reliable)
 	void Server_EquipItem(AItemActor* Item);
 
 	UFUNCTION()
@@ -153,6 +153,8 @@ public:
 	void OnItemPickedUp(AItemActor* Item);
 	
 	void LocalInteract();
+
+	void InputInteract();
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Interact(class AActor* NewOwner, class ABaseInteractable* Interactable);

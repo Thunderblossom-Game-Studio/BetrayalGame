@@ -256,6 +256,10 @@ void APlayerCharacter::LocalInteract()
 {
 	if(InteractableInFocus)
 	{
+		AItemActor* Item = Cast<AItemActor>(InteractableInFocus);
+		if(Item)
+			OnItemPickedUp(Item);
+		
 		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
 	}
 }
@@ -309,14 +313,7 @@ void APlayerCharacter::Server_SpawnMonster_Implementation()
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
 {
 	if(Interactable)
-	{
 		Interactable->OnInteract(NewOwner);
-
-		AItemActor* Item = Cast<AItemActor>(Interactable);
-		if(Item)
-			OnItemPickedUp(Item);
-	}
-		
 	
 	NetMulticast_Interact(NewOwner,Interactable);
 }
