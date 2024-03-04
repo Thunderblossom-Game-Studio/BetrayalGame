@@ -59,28 +59,6 @@ struct FObjective : public FTableRowBase
 	int Amount;
 };
 
-USTRUCT()
-struct FHaunt : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FString Description;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FDataTableRowHandle TraitorObjective;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FDataTableRowHandle InnocentObjective;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	float Duration = 0.0f;
-};
-
-
 UCLASS()
 class BETRAYALGAME_API ABetrayalGameState : public AGameState
 {
@@ -140,30 +118,7 @@ public:
 #pragma endregion
 
 #pragma region Haunt Tracking
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
-	UDataTable* HauntData;
-	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
-	FHaunt CurrentHaunt;
 
-	
-public:
-
-	UFUNCTION()
-	void InitializeHaunt();
-	
-	UFUNCTION()
-	void StartHaunt();
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnTraitorChosen(APlayerCharacter* Traitor);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnTraitorWin();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnInnocentWin();
 
 #pragma endregion 
 };

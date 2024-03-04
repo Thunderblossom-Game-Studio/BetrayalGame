@@ -24,43 +24,41 @@ class BETRAYALGAME_API UBaseHaunt : public UObject
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	
 	
 protected:
-	UPROPERTY(EditAnywhere, Category = "Haunt")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Haunt")
 	FName HauntName;
 	
-	UPROPERTY(EditAnywhere, Category = "Haunt", meta = (MultiLine = true));
+	UPROPERTY(Replicated, EditAnywhere, Category = "Haunt", meta = (MultiLine = true));
 	FText HauntDescription;
 	
-	UPROPERTY(EditAnywhere, Category = "Haunt")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Haunt")
 	TEnumAsByte<EHauntCategory> HauntCategory;
 	
 	UPROPERTY(EditAnywhere, Category = "Haunt")
 	bool bHasTimer;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Haunt", meta = (EditCondition = "bHasTimer"))
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Haunt", meta = (EditCondition = "bHasTimer"))
 	float HauntDuration = 0.0f;
 
 #pragma region Traitor Properties
 	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
 	bool bHasTraitor;
 	
-	UPROPERTY(EditAnywhere,
+	UPROPERTY(Replicated, EditAnywhere,
 			BlueprintReadOnly, Category = "Haunt|Traitor",
 			meta = (EditCondition = "HauntCategory == EHauntCategory::Hc_Asymmetric || HauntCategory == EHauntCategory::Hc_HiddenAsymmetric",
 					Tooltip = "Traitors only have an objective if the haunt is Asymmetric or Hidden Asymmetric"))
 	FDataTableRowHandle TraitorObjective;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Haunt|Traitor",
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category="Haunt|Traitor",
 			meta = (EditCondition = "HauntCategory == EHauntCategory::Hc_Asymmetric || HauntCategory == EHauntCategory::Hc_HiddenAsymmetric",
 					Tooltip = "Traitors only have a list of monsters if the haunt is Asymmetric or Hidden Asymmetric"))
 	TArray<AMonster*> TraitorMonsters;
 #pragma endregion
 
 #pragma region Survivor Properties
-	UPROPERTY(EditAnywhere,
+	UPROPERTY(Replicated, EditAnywhere,
 			BlueprintReadOnly, Category = "Haunt|Survivors",
 			meta=(Tooltip = "Survivors will always have an objective"))
 	FDataTableRowHandle SurvivorObjective;
@@ -71,16 +69,59 @@ public:
 	// TODO: Add cutscene references(start haunt, end haunt, traitor picked)
 	
 	UFUNCTION(Blueprintable, Category = "Haunt")
-	void StartHaunt();
+	virtual void StartHaunt();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
 	void OnHauntStart();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
+	UFUNCTION(Blueprintable, Category = "Haunt")
+	virtual void EndHaunt();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
 	void OnHauntEnd();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
-	void OnTraitorPicked(APlayerCharacter* TraitorPlayer);
+#pragma region Setters
 
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	FName GetHauntName() const { return HauntName; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetHauntName(const FName& NewName) { HauntName = NewName; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	FText GetHauntDescription() const { return HauntDescription; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetHauntDescription(const FText& NewDescription) { HauntDescription = NewDescription; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	TEnumAsByte<EHauntCategory> GetHauntCategory() const { return HauntCategory; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetHauntCategory(const TEnumAsByte<EHauntCategory>& NewCategory) { HauntCategory = NewCategory; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	bool HasTimer() const { return bHasTimer; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	float GetHauntDuration() const { return HauntDuration; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetHauntDuration(const float NewDuration) { HauntDuration = NewDuration; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	bool HasTraitor() const { return bHasTraitor; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	FDataTableRowHandle GetTraitorObjective() const { return TraitorObjective; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetTraitorObjective(const FDataTableRowHandle& NewObjective) { TraitorObjective = NewObjective; }
 	
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	TArray<AMonster*> GetTraitorMonsters() const { return TraitorMonsters; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetTraitorMonsters(const TArray<AMonster*>& NewMonsters) { TraitorMonsters = NewMonsters; }
+
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	FDataTableRowHandle GetSurvivorObjective() const { return SurvivorObjective; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetSurvivorObjective(const FDataTableRowHandle& NewObjective) { SurvivorObjective = NewObjective; }
+
+#pragma endregion 
 };
