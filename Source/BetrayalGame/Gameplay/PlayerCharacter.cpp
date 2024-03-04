@@ -111,6 +111,8 @@ void APlayerCharacter::SelectSlot1()
 	{
 		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::SelectSlot2()
@@ -125,6 +127,8 @@ void APlayerCharacter::SelectSlot2()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::SelectSlot3()
@@ -139,6 +143,8 @@ void APlayerCharacter::SelectSlot3()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::SelectSlot4()
@@ -153,6 +159,8 @@ void APlayerCharacter::SelectSlot4()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::EquipItem(AItemActor* Item)
@@ -188,7 +196,7 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 
 	HeldItem->Server_SetCanPickup(false);
 	
-	OnItemEquipped(Item, InventoryComponent->GetSelectedSlot().ID);
+	
 }
 
 void APlayerCharacter::UnequipItem()
