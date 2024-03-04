@@ -183,7 +183,6 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;
-		
 	}
 
 	HeldItem->Server_SetCanPickup(false);

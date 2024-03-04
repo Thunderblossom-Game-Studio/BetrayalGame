@@ -62,10 +62,25 @@ protected:
 			BlueprintReadOnly, Category = "Haunt|Survivors",
 			meta=(Tooltip = "Survivors will always have an objective"))
 	FDataTableRowHandle SurvivorObjective;
-#pragma endregion 
+#pragma endregion
+
+#pragma region GameState Reference
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Haunt|GameState")
+	class ABetrayalGameState* GameState;
+#pragma endregion
 	
 public:
 	// TODO: Add Constructor
+	UBaseHaunt(FName NewName,
+		FText NewDescription,
+		TEnumAsByte<EHauntCategory> NewCategory,
+		bool bUsesTimer,
+		float NewDuration,
+		bool bUsesTraitor,
+		FDataTableRowHandle NewTraitorObjective,
+		TArray<AMonster*> NewTraitorMonsters,
+		FDataTableRowHandle NewSurvivorObjective,
+		ABetrayalGameState* NewGameState);
 	// TODO: Add cutscene references(start haunt, end haunt, traitor picked)
 	
 	UFUNCTION(Blueprintable, Category = "Haunt")
