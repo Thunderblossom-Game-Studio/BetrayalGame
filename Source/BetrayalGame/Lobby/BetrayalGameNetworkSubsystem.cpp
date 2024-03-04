@@ -10,6 +10,7 @@
 #include "Widget_SessionConnectBtn.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
 #include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
+#include "Components/PanelWidget.h"
 #include "GameFramework/GameSession.h"
 #include "Online/OnlineSessionNames.h"
 
@@ -138,10 +139,10 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 void UBetrayalGameNetworkSubsystem::LockSession()
 {
 	auto Session = GetSessionInterface();
-	if(!Session)
+	if (!Session)
 		return;
 
-	if(SessionSettings.IsValid())
+	if (SessionSettings.IsValid())
 	{
 		SessionSettings->bAllowInvites = false;
 		SessionSettings->bUsesPresence = false;
@@ -203,12 +204,13 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		// Session password
 		if (Password.IsEmpty())
 			Password = "";
-		
+
+		// Set password value
 		SessionSettings->Set(PASSWORD, Password, EOnlineDataAdvertisementType::ViaOnlineService);
 
 		// Update session name
-		LobbyListName = SessionName.ToString(); 
-		
+		LobbyListName = SessionName.ToString();
+
 		// Session server list name
 		SessionSettings->Set(SERVERLIST_NAME, LobbyListName, EOnlineDataAdvertisementType::ViaOnlineService);
 
@@ -230,7 +232,6 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence,
                                                    bool bIsPrivate, FString Password)
 {
-	// TODO: Add session name support
 	HostSession(GetNetID(), SessionName, bIsLAN, bIsPresence, MAX_PLAYERS, bIsPrivate, Password);
 }
 
@@ -274,7 +275,8 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 	}
 }
 
-ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
+ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN,
+                                                                 bool bIsPresence)
 {
 	ResetSessionSearch();
 
@@ -318,7 +320,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	// Re-enable the lobby menu
 	_GameInstance->WB_Lobby->SetIsEnabled(true);
-	
+
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
 	Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
@@ -326,6 +328,16 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	// Log number of results
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
+	// Server list reference
+	auto SessionList = _GameInstance->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
+	UPanelWidget* Scrl_Sessions = Cast<UPanelWidget>(SessionList);
+
+	if (!Scrl_Sessions)
+	{
+		Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): Scrl_Sessions is null!");
+		return;
+	}
+	
 	// Populate the session list
 	for (auto result : SessionSearch->SearchResults)
 	{
@@ -340,14 +352,18 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 
 			// Add the button to the list of found sessions
 			FoundSessionButtons.Add(SessionButton);
+
+			// Add the button to the session list
+			Scrl_Sessions->AddChild(SessionButton);
+
+			// Update button data
+			SessionButton->UpdateDisplayedData();
 		}
 		else
 		{
 			Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): SessionButton is null!");
 		}
 	}
-
-	_GameInstance->OnSessionSearchComplete();
 }
 
 bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
@@ -455,20 +471,6 @@ void UBetrayalGameNetworkSubsystem::BP_DestroySession()
 	}
 
 	CleanupNotifications();
-}
-
-void UBetrayalGameNetworkSubsystem::OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
-{
-}
-
-void UBetrayalGameNetworkSubsystem::Multicast_UpdateReadyState_Implementation(int32 PlayerID, bool bReady)
-{
-}
-
-void UBetrayalGameNetworkSubsystem::Server_UpdateReadyState_Implementation(bool bReady)
-{
-	bIsReady = bReady;
-	//Multicast_UpdateReadyState(, bReady);
 }
 
 void UBetrayalGameNetworkSubsystem::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver,

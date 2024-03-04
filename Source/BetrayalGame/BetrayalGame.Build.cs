@@ -10,7 +10,7 @@ public class BetrayalGame : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "AIModule", "NavigationSystem", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemEOS"
+			"Core", "CoreUObject", "Engine", "InputCore", "AIModule", "NavigationSystem", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemEOS", "EOSVoiceChat"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
