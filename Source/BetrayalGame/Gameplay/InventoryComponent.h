@@ -31,7 +31,12 @@ struct FInventorySlot
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsSelected;
-	
+
+	// Overloading the == operator to compare two slots 
+	bool operator==(const FInventorySlot& Other) const
+	{
+		return ID == Other.ID && Item == Other.Item && bIsEmpty == Other.bIsEmpty && bIsSelected == Other.bIsSelected;
+	}
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -56,10 +61,7 @@ protected:
 	FInventorySlot SelectedSlot;
 
 	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-	FItem LastItemAdded;
-
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-	int LastSlotAddedID;
+	FInventorySlot LastSlotAdded;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	bool bIsInventoryInitialized = false;
@@ -113,8 +115,6 @@ public:
 	bool IsInventoryFull() const { return bIsInventoryFull; }
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	FItem GetLastItemAdded() const { return LastItemAdded; }
-
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	int GetLastSlotAddedtID() const { return LastSlotAddedID; }
+	FInventorySlot GetLastSlotAdded() const { return LastSlotAdded; }
+	
 };

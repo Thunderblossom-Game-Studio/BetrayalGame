@@ -57,10 +57,7 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 			slot.Item = Item;
 			slot.bIsEmpty = false;
 
-			SelectSlot(slot.ID);
-			
-			LastItemAdded = Item;
-			LastSlotAddedID = slot.ID;
+			LastSlotAdded = slot;
 			
 			FilledSlotCount++;
 			break;

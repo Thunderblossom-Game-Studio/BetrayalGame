@@ -255,13 +255,7 @@ void APlayerCharacter::TraceForInteractables()
 void APlayerCharacter::LocalInteract()
 {
 	if(InteractableInFocus)
-	{
-		AItemActor* Item = Cast<AItemActor>(InteractableInFocus);
-		if(Item)
-			OnItemPickedUp(Item);
-		
 		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
-	}
 }
 
 void APlayerCharacter::CycleSelectedMonster()
