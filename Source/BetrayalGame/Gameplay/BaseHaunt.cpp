@@ -2,28 +2,35 @@
 
 #include "BaseHaunt.h"
 
+#include "BetrayalGameMode.h"
+#include "GameModeInfoCustomizer.h"
 #include "ObjectivesComponent.h"
 #include "BetrayalGame/BetrayalGameState.h"
 #include "Factories/BlueprintFactory.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Net/UnrealNetwork.h"
 
-void UBaseHaunt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ABaseHaunt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UBaseHaunt, HauntName);
-	DOREPLIFETIME(UBaseHaunt, HauntDescription);
-	DOREPLIFETIME(UBaseHaunt, HauntCategory);
-	DOREPLIFETIME(UBaseHaunt, HauntDuration);
-	DOREPLIFETIME(UBaseHaunt, TraitorObjective);
-	DOREPLIFETIME(UBaseHaunt, TraitorMonsters);
-	DOREPLIFETIME(UBaseHaunt, SurvivorObjective)
+	DOREPLIFETIME(ABaseHaunt, HauntName);
+	DOREPLIFETIME(ABaseHaunt, HauntDescription);
+	DOREPLIFETIME(ABaseHaunt, HauntCategory);
+	DOREPLIFETIME(ABaseHaunt, HauntDuration);
+	DOREPLIFETIME(ABaseHaunt, TraitorObjective);
+	DOREPLIFETIME(ABaseHaunt, TraitorMonsters);
+	DOREPLIFETIME(ABaseHaunt, SurvivorObjective)
 }
 
-UBaseHaunt::UBaseHaunt(FName NewName, FText NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
-	float NewDuration, bool bUsesTraitor, FDataTableRowHandle NewTraitorObjective, TArray<AMonster*> NewTraitorMonsters,
-	FDataTableRowHandle NewSurvivorObjective)
+ABaseHaunt::ABaseHaunt(): HauntCategory(Hc_Asymmetric), bHasTimer(false), Traitor(nullptr), bHasTraitor(false), GameState(nullptr)
+{
+	bReplicates = true;
+}
+
+ABaseHaunt::ABaseHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
+                       float NewDuration, bool bUsesTraitor, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
+                       const FDataTableRowHandle& NewSurvivorObjective)
 :HauntName(NewName), HauntDescription(NewDescription),
  HauntCategory(NewCategory), bHasTimer(bUsesTimer),
  HauntDuration(NewDuration), bHasTraitor(bUsesTraitor),
@@ -34,7 +41,7 @@ SurvivorObjective(NewSurvivorObjective)
 	Traitor = nullptr;
 }
 
-void UBaseHaunt::StartHaunt()
+void ABaseHaunt::StartHaunt()
 {
 	TraitorSetup();
 		
@@ -44,12 +51,22 @@ void UBaseHaunt::StartHaunt()
 	
 }
 
-void UBaseHaunt::EndHaunt()
+void ABaseHaunt::Server_StartHaunt_Implementation()
+{
+	StartHaunt();
+}
+
+void ABaseHaunt::EndHaunt()
 {
 	OnHauntEnd();
 }
 
-void UBaseHaunt::TraitorSetup() const
+void ABaseHaunt::Server_EndHaunt_Implementation()
+{
+	EndHaunt();
+}
+
+void ABaseHaunt::TraitorSetup() const
 {
 	if(!bHasTraitor)
 		return;
@@ -66,11 +83,17 @@ void UBaseHaunt::TraitorSetup() const
 		return;
 
 	TraitorCharacter->ObjectivesComponent->Server_SetHauntObjective(*TraitorObjectiveData);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Traitor Setup"));
 }
 
-void UBaseHaunt::SurvivorSetup() const
+void ABaseHaunt::SurvivorSetup() const
 {
-	for (const auto Player : GameState->GetAllPlayers())
+	const ABetrayalGameMode* BMode = Cast<ABetrayalGameMode>(GetWorld()->GetAuthGameMode());
+	if(!BMode)
+		return;
+
+	for (const auto Player : BMode->GetAllPlayerStates())
 	{
 		if(Player->IsTraitor())
 			continue;
@@ -78,13 +101,15 @@ void UBaseHaunt::SurvivorSetup() const
 		const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Player->GetPawn());
 		if(!PlayerCharacter)
 			continue;
-
+		
 		const FObjective* SurvivorObjectiveData = SurvivorObjective.DataTable->FindRow<FObjective>(SurvivorObjective.RowName, "");
 		if(!SurvivorObjectiveData)
 			continue;
 
 		PlayerCharacter->ObjectivesComponent->Server_SetHauntObjective(*SurvivorObjectiveData);
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Survivors Setup"));
 }
 
 

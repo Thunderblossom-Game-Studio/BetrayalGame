@@ -80,6 +80,27 @@ void ABetrayalGameMode::EnableAIPlayerControllers()
 	}
 }
 
+TArray<ABetrayalPlayerState*> ABetrayalGameMode::GetAllPlayerStates() const
+{
+	TArray<ABetrayalPlayerState*> OutPlayers;
+	for (auto Player : GameState->PlayerArray)
+	{
+		OutPlayers.Add(Cast<ABetrayalPlayerState>(Player));
+	}
+	return OutPlayers;
+}
+
+TArray<APlayerCharacter*> ABetrayalGameMode::GetAllPlayerCharacters() const
+{
+	TArray<APlayerCharacter*> OutCharacters;
+	for (auto Player : GameState->PlayerArray)
+	{
+		OutCharacters.Add(Cast<APlayerCharacter>(Player));
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("Players Found"));
+	return OutCharacters;
+}
+
 void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 {
 	MatchStage = NewStage;

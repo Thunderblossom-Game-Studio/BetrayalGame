@@ -16,13 +16,12 @@ enum EHauntCategory
 };
 
 UCLASS(Blueprintable)
-class BETRAYALGAME_API UBaseHaunt : public UObject
+class BETRAYALGAME_API ABaseHaunt : public AActor
 {
 	GENERATED_BODY()
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual bool IsSupportedForNetworking() const override { return true; }
 	
 protected:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Haunt")
@@ -78,16 +77,16 @@ protected:
 #pragma endregion
 	
 public:
-	UBaseHaunt() = default;
-	UBaseHaunt(FName NewName,
-		FText NewDescription,
+	ABaseHaunt();
+	ABaseHaunt(FName NewName,
+	           const FText& NewDescription,
 		TEnumAsByte<EHauntCategory> NewCategory,
 		bool bUsesTimer,
 		float NewDuration,
 		bool bUsesTraitor,
-		FDataTableRowHandle NewTraitorObjective,
-		TArray<AMonster*> NewTraitorMonsters,
-		FDataTableRowHandle NewSurvivorObjective);
+	           const FDataTableRowHandle& NewTraitorObjective,
+	           const TArray<AMonster*>& NewTraitorMonsters,
+	           const FDataTableRowHandle& NewSurvivorObjective);
 
 	
 	// TODO: Add cutscene references(start haunt, end haunt, traitor picked)
@@ -95,11 +94,17 @@ public:
 	UFUNCTION(Blueprintable, Category = "Haunt")
 	virtual void StartHaunt();
 
+	UFUNCTION(Server, Reliable)
+	void Server_StartHaunt();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
 	void OnHauntStart();
 
 	UFUNCTION(Blueprintable, Category = "Haunt")
 	virtual void EndHaunt();
+
+	UFUNCTION(Server, Reliable)
+	void Server_EndHaunt();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
 	void OnHauntEnd();

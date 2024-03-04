@@ -75,8 +75,6 @@ public:
 
 	ABetrayalPlayerState* GetRandomPlayer() const;
 
-	TArray<ABetrayalPlayerState*> GetAllPlayers() const;
-	
 #pragma region Match Stage Variable Replication
 // Replicated Variables
 protected:
@@ -118,10 +116,10 @@ public:
 #pragma region Haunt
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
-	TSubclassOf<UBaseHaunt> HauntClass;
+	TSubclassOf<ABaseHaunt> HauntClass;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
-	UBaseHaunt* CurrentHaunt;
+	ABaseHaunt* CurrentHaunt;
 	
 #pragma endregion 
 };

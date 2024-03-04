@@ -29,11 +29,15 @@ void ABetrayalGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 void ABetrayalGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CurrentHaunt = HauntClass.GetDefaultObject();
-	CurrentHaunt->SetGameState(this);
-
 	
+	if(HasAuthority())
+	{
+		CurrentHaunt = HauntClass.GetDefaultObject();
+		CurrentHaunt->SetGameState(this);
+		CurrentHaunt = GetWorld()->SpawnActor<ABaseHaunt>(HauntClass);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Haunt Spawned"));
+	}
 }
 
 ABetrayalPlayerState* ABetrayalGameState::GetRandomPlayer() const
@@ -43,16 +47,6 @@ ABetrayalPlayerState* ABetrayalGameState::GetRandomPlayer() const
 	const int32 RandomPlayerIndex = FMath::RandRange(0, NumPlayers - 1);
 
 	return Cast<ABetrayalPlayerState>(PlayerArray[RandomPlayerIndex]);
-}
-
-TArray<ABetrayalPlayerState*> ABetrayalGameState::GetAllPlayers() const
-{
-	TArray<ABetrayalPlayerState*> OutPlayers;
-	for (auto Player : PlayerArray)
-	{
-		OutPlayers.Add(Cast<ABetrayalPlayerState>(Player));
-	}
-	return OutPlayers;
 }
 
 void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage NewStage)
@@ -67,11 +61,11 @@ void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage Ne
 		break;
 	case Haunting:
 		OnHauntingStageStart();
-		if(HasAuthority())
-			CurrentHaunt->StartHaunt();
+		CurrentHaunt->Server_StartHaunt();
 		break;
 	case Finishing:
 		OnFinishingStageStart();
+		CurrentHaunt->Server_EndHaunt();
 		break;
 	default:
 		break;
