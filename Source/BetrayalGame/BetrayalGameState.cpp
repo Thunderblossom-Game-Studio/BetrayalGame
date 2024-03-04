@@ -3,6 +3,7 @@
 
 #include "BetrayalGameState.h"
 
+#include "K2Node_SpawnActorFromClass.h"
 #include "GameFramework/GameSession.h"
 #include "Gameplay/BetrayalGameMode.h"
 #include "Gameplay/BetrayalPlayerState.h"
@@ -11,11 +12,9 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/DataTable.h"
 
-ABetrayalGameState::ABetrayalGameState()
+ABetrayalGameState::ABetrayalGameState(): CurrentHaunt(nullptr)
 {
 	bReplicates = true;
-
-	HauntEvent.AddUObject(this, &ABetrayalGameState::StartHaunt);
 }
 
 void ABetrayalGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -31,92 +30,29 @@ void ABetrayalGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(HasAuthority())
-		InitializeHaunt();
-}
+	CurrentHaunt = HauntClass.GetDefaultObject();
+	CurrentHaunt->SetGameState(this);
 
-void ABetrayalGameState::InitializeHaunt()
-{
-	// Get haunt data from data table and choose a random one
-	{
-		if(!HauntData)
-			return;
-	
-	const int32 NumRows = HauntData->GetRowNames().Num();
-	
-	int32 RandomIndex = FMath::RandRange(0, NumRows - 1);
-	
-	FName RandomRowName = HauntData->GetRowNames()[RandomIndex];
-	
-	FHaunt* Haunt = HauntData->FindRow<FHaunt>(RandomRowName, "");
-	
-	if(Haunt)
-		CurrentHaunt = *Haunt;
-	}
-
-	// Set haunt stage timer
-	{
-		if(CurrentHaunt.Duration > 0)
-		{
-			ABetrayalGameMode* BetrayalGameMode = Cast<ABetrayalGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-			if(BetrayalGameMode)
-			{
-				BetrayalGameMode->HauntStage.bUsesTimer = true;
-				BetrayalGameMode->HauntStage.TimeLength = CurrentHaunt.Duration;
-			}
-		}
-			
-			
-	}
 	
 }
 
-void ABetrayalGameState::StartHaunt()
+ABetrayalPlayerState* ABetrayalGameState::GetRandomPlayer() const
 {
-	// Set random player as traitor
+	const int32 NumPlayers = PlayerArray.Num();
+
+	const int32 RandomPlayerIndex = FMath::RandRange(0, NumPlayers - 1);
+
+	return Cast<ABetrayalPlayerState>(PlayerArray[RandomPlayerIndex]);
+}
+
+TArray<ABetrayalPlayerState*> ABetrayalGameState::GetAllPlayers() const
+{
+	TArray<ABetrayalPlayerState*> OutPlayers;
+	for (auto Player : PlayerArray)
 	{
-		const int32 NumPlayers = PlayerArray.Num();
-
-		const int32 RandomPlayerIndex = FMath::RandRange(0, NumPlayers - 1);
-
-		ABetrayalPlayerState* BetrayalPlayerState = Cast<ABetrayalPlayerState>(PlayerArray[RandomPlayerIndex]);
-		if(!BetrayalPlayerState)
-			return;
-
-		BetrayalPlayerState->SetIsTraitor(true);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Player %s is the traitor"), *BetrayalPlayerState->GetActorLabel()));
-		
-		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(BetrayalPlayerState->GetPawn());
-		if(!PlayerCharacter)
-			return;		
-		OnTraitorChosen(PlayerCharacter);
-		
+		OutPlayers.Add(Cast<ABetrayalPlayerState>(Player));
 	}
-	
-	// Assign objectives to players based on if they are traitor or not
-	{
-		const FObjective* InnocentObjective = CurrentHaunt.InnocentObjective.DataTable->FindRow<FObjective>(CurrentHaunt.InnocentObjective.RowName, "");
-		const FObjective* TraitorObjective = CurrentHaunt.TraitorObjective.DataTable->FindRow<FObjective>(CurrentHaunt.TraitorObjective.RowName, "");
-		if(!InnocentObjective || !TraitorObjective)
-			return;
-
-		// Set objectives for players
-		for (auto Player : PlayerArray)
-		{
-			const ABetrayalPlayerState* BPlayerState = Cast<ABetrayalPlayerState>(Player);
-			if(!BPlayerState)
-				continue;
-
-			const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(BPlayerState->GetPawn());
-			if (!PlayerCharacter)
-				continue;
-
-			if (BPlayerState->IsTraitor())
-				PlayerCharacter->ObjectivesComponent->Server_SetHauntObjective(*TraitorObjective);
-			else
-				PlayerCharacter->ObjectivesComponent->Server_SetHauntObjective(*InnocentObjective);
-		}
-	}
+	return OutPlayers;
 }
 
 void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage NewStage)
@@ -132,7 +68,7 @@ void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage Ne
 	case Haunting:
 		OnHauntingStageStart();
 		if(HasAuthority())
-			StartHaunt();
+			CurrentHaunt->StartHaunt();
 		break;
 	case Finishing:
 		OnFinishingStageStart();

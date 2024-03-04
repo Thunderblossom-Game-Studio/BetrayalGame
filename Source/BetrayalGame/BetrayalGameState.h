@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "Gameplay/BaseHaunt.h"
+#include "Gameplay/BetrayalPlayerState.h"
 #include "Gameplay/PlayerCharacter.h"
 #include "BetrayalGameState.generated.h"
 
@@ -70,6 +72,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void BeginPlay() override;
+
+	ABetrayalPlayerState* GetRandomPlayer() const;
+
+	TArray<ABetrayalPlayerState*> GetAllPlayers() const;
 	
 #pragma region Match Stage Variable Replication
 // Replicated Variables
@@ -109,16 +115,13 @@ public:
 	
 #pragma endregion
 
-#pragma region Objectives
-	//UFUNCTION(BlueprintCallable)
-	//void GetCompletedObjectives(TArray<FObjective>& OutObjectives, const EObjectiveType Type);
+#pragma region Haunt
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
+	TSubclassOf<UBaseHaunt> HauntClass;
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
+	UBaseHaunt* CurrentHaunt;
 	
-	
-#pragma endregion
-
-#pragma region Haunt Tracking
-
-
 #pragma endregion 
 };

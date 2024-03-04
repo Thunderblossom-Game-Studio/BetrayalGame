@@ -15,8 +15,6 @@ enum EHauntCategory
 	Hc_FreeForAll UMETA(DisplayName = "Free For All"),
 };
 
-
-
 UCLASS(Blueprintable)
 class BETRAYALGAME_API UBaseHaunt : public UObject
 {
@@ -24,6 +22,7 @@ class BETRAYALGAME_API UBaseHaunt : public UObject
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool IsSupportedForNetworking() const override { return true; }
 	
 protected:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Haunt")
@@ -42,6 +41,10 @@ protected:
 	float HauntDuration = 0.0f;
 
 #pragma region Traitor Properties
+
+	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
+	APlayerCharacter* Traitor;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
 	bool bHasTraitor;
 	
@@ -58,19 +61,24 @@ protected:
 #pragma endregion
 
 #pragma region Survivor Properties
+
+	UPROPERTY(VisibleAnywhere, Category = "Haunt|Survivors")
+	TArray<APlayerCharacter*> Survivors;
+	
 	UPROPERTY(Replicated, EditAnywhere,
 			BlueprintReadOnly, Category = "Haunt|Survivors",
 			meta=(Tooltip = "Survivors will always have an objective"))
 	FDataTableRowHandle SurvivorObjective;
 #pragma endregion
 
-#pragma region GameState Reference
+#pragma region Game
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Haunt|GameState")
 	class ABetrayalGameState* GameState;
+	
 #pragma endregion
 	
 public:
-	// TODO: Add Constructor
+	UBaseHaunt() = default;
 	UBaseHaunt(FName NewName,
 		FText NewDescription,
 		TEnumAsByte<EHauntCategory> NewCategory,
@@ -79,8 +87,9 @@ public:
 		bool bUsesTraitor,
 		FDataTableRowHandle NewTraitorObjective,
 		TArray<AMonster*> NewTraitorMonsters,
-		FDataTableRowHandle NewSurvivorObjective,
-		ABetrayalGameState* NewGameState);
+		FDataTableRowHandle NewSurvivorObjective);
+
+	
 	// TODO: Add cutscene references(start haunt, end haunt, traitor picked)
 	
 	UFUNCTION(Blueprintable, Category = "Haunt")
@@ -94,6 +103,13 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
 	void OnHauntEnd();
+
+	void TraitorSetup() const;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
+	void OnTraitorChosen();
+	
+	void SurvivorSetup() const;
 
 #pragma region Setters
 
@@ -137,6 +153,14 @@ public:
 	FDataTableRowHandle GetSurvivorObjective() const { return SurvivorObjective; }
 	UFUNCTION(BlueprintCallable, Category = "Haunt")
 	void SetSurvivorObjective(const FDataTableRowHandle& NewObjective) { SurvivorObjective = NewObjective; }
+
+#pragma endregion
+
+#pragma region Game
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	ABetrayalGameState* GetGameState() const { return GameState; }
+	UFUNCTION(BlueprintCallable, Category = "Haunt")
+	void SetGameState(ABetrayalGameState* NewGameState) { GameState = NewGameState; }
 
 #pragma endregion 
 };
