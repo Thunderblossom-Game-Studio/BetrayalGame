@@ -13,7 +13,6 @@
 #include "Interfaces/VoiceInterface.h"
 #include "Lobby/BetrayalGameNetworkSubsystem.h"
 #include "Net/Core/Connection/NetEnums.h"
-#include "EOSVoiceChatUser.h"
 
 #pragma region General
 
