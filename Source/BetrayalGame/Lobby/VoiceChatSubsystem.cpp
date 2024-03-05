@@ -44,5 +44,5 @@ void UVoiceChatSubsystem::ChangeUserVolume(APlayerState* Player, float NewVolume
 	}
 
 	LocalVoiceChatUser->SetPlayerVolume(Player->GetName(), NewVolume);
-	UE_LOG(LogTemp, Display, TEXT("UVoiceChatSubsystem::ChangeUserVolume() - Volume changed to %f for user %s"), NewVolume, *UserId.ToString());
+	UE_LOG(LogTemp, Display, TEXT("UVoiceChatSubsystem::ChangeUserVolume() - Volume changed to %f for user %s"), NewVolume, *Player->GetName());
 }
