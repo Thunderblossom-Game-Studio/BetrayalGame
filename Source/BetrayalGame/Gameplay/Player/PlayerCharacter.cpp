@@ -45,6 +45,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
+	DOREPLIFETIME(APlayerCharacter, bWasItemUnequipped)
 }
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
@@ -111,6 +112,8 @@ void APlayerCharacter::SelectSlot1()
 	{
 		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 }
 
 void APlayerCharacter::SelectSlot2()
@@ -125,6 +128,8 @@ void APlayerCharacter::SelectSlot2()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 }
 
 void APlayerCharacter::SelectSlot3()
@@ -139,6 +144,9 @@ void APlayerCharacter::SelectSlot3()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	
 }
 
 void APlayerCharacter::SelectSlot4()
@@ -153,6 +161,10 @@ void APlayerCharacter::SelectSlot4()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
+
+
+	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+
 }
 
 void APlayerCharacter::EquipItem(AItemActor* Item)
@@ -186,8 +198,6 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 	}
 
 	HeldItem->Server_SetCanPickup(false);
-	
-	OnItemEquipped(Item, InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::UnequipItem()
@@ -197,7 +207,7 @@ void APlayerCharacter::UnequipItem()
 	
 	HeldItem->Destroy();
 
-	OnItemUnequipped();
+	bWasItemUnequipped = true;
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
@@ -254,9 +264,7 @@ void APlayerCharacter::TraceForInteractables()
 void APlayerCharacter::LocalInteract()
 {
 	if(InteractableInFocus)
-	{
 		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
-	}
 }
 
 void APlayerCharacter::CycleSelectedMonster()
@@ -308,13 +316,7 @@ void APlayerCharacter::Server_SpawnMonster_Implementation()
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
 {
 	if(Interactable)
-	{
 		Interactable->OnInteract(NewOwner);
-
-		AItemActor* Item = Cast<AItemActor>(Interactable);
-		if(Item)
-			OnItemPickedUp(Item);
-	}
 		
 	
 	NetMulticast_Interact(NewOwner,Interactable);

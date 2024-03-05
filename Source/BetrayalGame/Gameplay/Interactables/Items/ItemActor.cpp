@@ -48,6 +48,8 @@ void AItemActor::OnInteract(AActor* Interactor)
 	
 	Player->InventoryComponent->Server_AddItemToInventory(Item);
 
+	Player->OnItemPickedUp(Player->InventoryComponent->GetLastSlotAdded());
+
 	OnPickup(Player);
 	
 	Destroy();
