@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "../Player/PlayerCharacter.h"
-#include "UObject/NoExportTypes.h"
 #include "BaseHaunt.generated.h"
 
 UENUM()

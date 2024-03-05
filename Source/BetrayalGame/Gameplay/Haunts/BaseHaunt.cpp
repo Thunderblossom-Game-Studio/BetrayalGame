@@ -6,8 +6,6 @@
 #include "GameModeInfoCustomizer.h"
 #include "../Player/Player Components/ObjectivesComponent.h"
 #include "BetrayalGame/BetrayalGameState.h"
-#include "Factories/BlueprintFactory.h"
-#include "Kismet2/KismetEditorUtilities.h"
 #include "Net/UnrealNetwork.h"
 
 void ABaseHaunt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
