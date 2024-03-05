@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BetrayalPlayerState.h"
+#include "../Gameplay/BetrayalPlayerState.h"
 
 #include "Net/UnrealNetwork.h"
 
@@ -38,10 +38,11 @@ void ABetrayalPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABetrayalPlayerState, bIsTraitor);
+	DOREPLIFETIME(ABetrayalPlayerState, bIsReady);
 }
 
 void ABetrayalPlayerState::OnRep_IsTraitor()
 {
-	OnIsTraitorChanged(bIsTraitor);
+	
 }
 
