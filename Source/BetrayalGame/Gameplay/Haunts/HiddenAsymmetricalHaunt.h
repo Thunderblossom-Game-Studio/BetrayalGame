@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "BaseHaunt.generated.h"
+#include "BaseHaunt.h"
+#include "HiddenAsymmetricalHaunt.generated.h"
 
 /**
  * 
  */
-UCLASS(Blueprintable)
-class BETRAYALGAME_API UBaseHaunt : public UObject
+UCLASS()
+class BETRAYALGAME_API AHiddenAsymmetricalHaunt : public ABaseHaunt
 {
 	GENERATED_BODY()
+
+
 	
 };

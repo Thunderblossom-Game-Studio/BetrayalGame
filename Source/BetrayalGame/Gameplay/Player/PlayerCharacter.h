@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputActionValue.h"
-#include "InventoryComponent.h"
-#include "../Gameplay/BaseCharacter.h"
-#include "ItemActor.h"
+#include "../Player/Player Components/InventoryComponent.h"
+#include "../Player/BaseCharacter.h"
+#include "../Interactables/Items/ItemActor.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -119,8 +118,8 @@ public:
 
 	UFUNCTION()
 	void EquipItem(AItemActor* Item);
-	
 	UFUNCTION(Server, Reliable)
+	
 	void Server_EquipItem(AItemActor* Item);
 
 	UFUNCTION()
@@ -150,11 +149,9 @@ public:
 	void TraceForInteractables();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Interaction")
-	void OnItemPickedUp(FInventorySlot Slot);
+	void OnItemPickedUp(AItemActor* Item);
 	
 	void LocalInteract();
-
-	void InputInteract();
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Interact(class AActor* NewOwner, class ABaseInteractable* Interactable);

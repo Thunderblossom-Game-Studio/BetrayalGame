@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BetrayalGameInstance.h"
+
+#include "OnlineSubsystem.h"
+#include "IOnlineSubsystemEOS.h"
 #include "StaticUtils.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/EditableText.h"
@@ -8,8 +11,8 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Interfaces/VoiceInterface.h"
 #include "Lobby/BetrayalGameNetworkSubsystem.h"
-#include "Net/Core/Connection/NetEnums.h"
 
 #pragma region General
 
@@ -186,7 +189,10 @@ void UBetrayalGameInstance::ShowLobbyRoom()
 	{
 		// Check if the delegate is already bound to avoid multiple bindings		
 		if (!NetworkSubsystem->OnClientsChangedDelegate.Contains(this, "DelayedUpdatePlayerList"))
+		{
 			NetworkSubsystem->OnClientsChangedDelegate.AddDynamic(this, &ThisClass::DelayedUpdatePlayerList);
+			Print("UBetrayalGameInstance::ShowLobbyRoom(): OnClientsChangedDelegate bound!");
+		}
 		else
 			Print("UBetrayalGameInstance::ShowLobbyRoom(): OnClientsChangedDelegate is already bound!");
 	}
@@ -209,12 +215,14 @@ void UBetrayalGameInstance::HideLobbyRoom()
 	}
 	else
 		Print("UBetrayalGameInstance::HideLobbyRoom(): NetworkSubsystem is null!");
+
+	ClearPlayerList();
 }
 
 void UBetrayalGameInstance::DelayedUpdatePlayerList()
 {
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdatePlayerList, 0.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdatePlayerList, 1.5f, false);
 }
 
 void UBetrayalGameInstance::UpdatePlayerList()
@@ -261,6 +269,31 @@ void UBetrayalGameInstance::UpdatePlayerList()
 	StartGameButton->SetIsEnabled(GetFirstLocalPlayerController()->HasAuthority());
 }
 
+void UBetrayalGameInstance::ClearPlayerList()
+{
+	if (!WB_LobbyRoom)
+	{
+		Print("UBetrayalGameInstance::ClearPlayerList(): WB_LobbyRoom is null!");
+		return;
+	}
+
+	auto PlayerListWidget = WB_LobbyRoom->GetWidgetFromName("PlayerList");
+	if (!PlayerListWidget)
+	{
+		Print("UBetrayalGameInstance::ClearPlayerList(): PlayerListWidget is null!");
+		return;
+	}
+
+	UPanelWidget* PlayerList = Cast<UPanelWidget>(PlayerListWidget);
+	if (!PlayerList)
+	{
+		Print("UBetrayalGameInstance::ClearPlayerList(): PlayerList is null!");
+		return;
+	}
+
+	PlayerList->ClearChildren();
+}
+
 #pragma endregion UI
 
 #pragma region Save/Load
@@ -275,13 +308,24 @@ void UBetrayalGameInstance::LoadPlayerProfile()
 void UBetrayalGameInstance::CheckPlayerProfile()
 {
 }
-
-
-
 #pragma endregion Save/Load
 
 #pragma region Networking
+void UBetrayalGameInstance::StartPTT()
+{
+	IOnlineVoicePtr Voice = IOnlineSubsystem::Get()->GetVoiceInterface();
+	if (Voice.IsValid())
+	{
+		Voice->StartNetworkedVoice(0);
+	}
+}
 
-
-
+void UBetrayalGameInstance::StopPTT()
+{
+	IOnlineVoicePtr Voice = IOnlineSubsystem::Get()->GetVoiceInterface();
+	if (Voice.IsValid())
+	{
+		Voice->StopNetworkedVoice(0);
+	}
+}
 #pragma endregion

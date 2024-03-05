@@ -21,7 +21,7 @@ UENUM(BlueprintType)
 enum class ESessionSearchResult : uint8
 {
 	SSR_Success UMETA(DisplayName = "Success"),
-	SSR_Failure UMETA(DisplayName = "Failure") 
+	SSR_Failure UMETA(DisplayName = "Failure")
 };
 
 UCLASS()
@@ -29,47 +29,49 @@ class BETRAYALGAME_API UBetrayalGameNetworkSubsystem : public UGameInstanceSubsy
 {
 	GENERATED_BODY()
 
+
+	// Delegates for client connection state changing callbacks
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientConnectedDelegate);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientDisconnectedDelegate);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientsChangedDelegate);
+
 public:
-	// Initialize
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UPROPERTY()
 	UBetrayalGameInstance* _GameInstance;
-	
+
+	// Helper function to grab the net ID
 	const TSharedPtr<const FUniqueNetId> GetNetID();
 
+	// Helper function to grab session interface
 	IOnlineSessionPtr GetSessionInterface();
 
+	// Set up network notifications (client connected, client disconnected, etc.)
 	void SetupNotifications();
-
 	void CleanupNotifications();
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientConnectedDelegate);
+	// State change delegates
 	FOnClientConnectedDelegate OnClientConnectedDelegate;
-
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientDisconnectedDelegate);
 	FOnClientDisconnectedDelegate OnClientDisconnectedDelegate;
-
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClientsChangedDelegate);
 	FOnClientsChangedDelegate OnClientsChangedDelegate;
-	
-	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
 
+	// State change functions
+	void OnClientConnected(FName SessionName, const FUniqueNetId& ID);
 	void OnClientDisconnected(FName SessionName, const FUniqueNetId& ID, EOnSessionParticipantLeftReason Reason);
 
-	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Networking")
-	int MAX_PLAYERS = 5; // Max number of players in a session
+	void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType,
+	                          const FString& ErrorString);
 
+	// TODO: Change this to correct value for release, currently higher for testing
+	UPROPERTY(BlueprintReadOnly, Category = "Networking")
+	int MAX_PLAYERS = 8; // Max number of players in a session
+
+	// Name displayed in server browser
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Networking")
 	FString LobbyListName = "BetrayalGameSession";
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Networking")
-	bool bIsHost = false;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Networking")
-	bool bIsReady = false;
 
 	// Found sessions
 	UPROPERTY(BlueprintReadOnly, Category = "Networking")
@@ -79,15 +81,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void ResetSessionSearch();
 
+	// Function to lock session, stopping mid-game connections or invites
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void LockSession();
 
+	// Function to change map by name reference
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void ChangeMapByName(FName MapName);
 
+	// Function to change map by object reference
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void ChangeMapByReference(FSoftWorldReference Map);
-	
+
 #pragma region Session Creation
 	// Session created delegate
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
@@ -101,47 +106,23 @@ public:
 
 	// Online session settings
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
-	
-	/**
-	*	Create a joinable session
-	*
-	*	@Param		UserID			UserID of Session Owner
-	*	@Param		SessionName		Name of the Session
-	*	@Param		bIsLAN			Is LAN connection or Online connection
-	*	@Param		bIsPresence		Create a presence session (i.e: Discord rich presence)
-	*	@Param		MaxNumPlayers	Total number of allowed connections
-	*/
-	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate, FString Password);
+
+	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN, bool bIsPresence,
+	                 int32 MaxNumPlayers, bool bIsPrivate, FString Password);
 
 	// Blueprint callable function to start a session
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence, bool bIsPrivate, FString Password);
 
-	/**
-	*	Delegate function fired on creating session
-	*
-	*	@Param		SessionName		Name of the session this callback is for
-	*	@Param		bWasSuccessful	True if async action completed without error
-	*/
+	// Post session complete delegate callback
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 
-	/**
-	*	Delegate function fired on starting session
-	*
-	*	@Param		SessionName		Name of the session this callback is for
-	*	@Param		bWasSuccessful	True if async action completed without error
-	*/
+	// Post start session complete delegate callback
 	void OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful);
 #pragma endregion
 
 #pragma region Session Finding
-	/**
-	*	find an Online Session
-	*
-	*	@Param		UserId			User that initiated the request
-	*	@Param		bIsLan			Are we searching LAN matches
-	*	@Param		bIsPresence		Are we searching presence sessions
-	*/
+	// Function to find sessions
 	ESessionSearchResult FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence);
 
 	// Blueprint callable function to find sessions
@@ -157,26 +138,15 @@ public:
 	// Session Search
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
-	/**
-	 * Delegate fired when a session search query has completed
-	 *
-	 * @param bWasSuccessful true if the async action completed without error, false if there was an error
-	 */
+	// Post session search complete delegate callback
 	void OnFindSessionsComplete(bool bWasSuccessful);
 #pragma endregion
 
 #pragma region Session Joining
-	/**
-	*	Join a session via a search result
-	*
-	*	@Param		SessionName		Name of the session
-	*	@Param		SearchResult	Session to join
-	*
-	*	@return		bool			True if successful, false otherwise
-	*/
-	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
-	
+	// Join session functions with overloads 
+	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
+	                 const FOnlineSessionSearchResult& SearchResult);
 	bool JoinSession(FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
 	// Delegate for joining a session
@@ -185,46 +155,32 @@ public:
 	// Handle to registered delegate for joining a session
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 
-	/**
-	 *	Delegate fired when a session join request has completed
-	 *
-	 *	@param	SessionName		Name of session this callback is for
-	 *	@param	Result			Result of the async action
-	 */
+	// Post session join complete delegate callback
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	// Invite accepted delegate
 	FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
 	FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
 
-	void OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
-
-public:
-	// Clear sessions
-	//UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
-	//void ClearSessions();
-
-	// Add session to UI
-	//UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
-	//void AddSessionToList(FSessionData SessionData);
-private:
+	// Post invite accepted delegate callback
+	void OnSessionUserInviteAccepted(const bool bWasSuccesful, const int32 ControllerId,
+	                                 TSharedPtr<const FUniqueNetId> UserId,
+	                                 const FOnlineSessionSearchResult& InviteResult);
 #pragma endregion
 
 #pragma region Session Destruction
+
+private:
 	// Delegate for destroying a session
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
 
 	// Handle to registered delegate for destroying a session
 	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
 
-	/**
-	 *	Delegate fired when a destroying an online session has completed
-	 *
-	 *	@param	SessionName		Name of session this callback is for
-	 *	@param	bWasSuccessful	true if the async action completed without error, false if there was an error
-	 */
+	// Post session destroy complete delegate callback
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
+	// Blueprint callable function to destroy a session
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void BP_DestroySession();
 
@@ -233,18 +189,5 @@ private:
 
 	// Handle to registered delegate for handling a disconnect from a session
 	FDelegateHandle OnHandleDisconnectDelegateHandle;
-
-	void OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-
 #pragma endregion
-
-#pragma region ReadyState
-
-	// Server Update Ready State
-	UFUNCTION(Server, Reliable, Category = "Networking")
-	void Server_UpdateReadyState(bool bReady);
-
-	UFUNCTION(NetMulticast, Reliable, Category = "Networking")
-	void Multicast_UpdateReadyState(int32 PlayerID, bool bReady);
-#pragma endregion 
 };

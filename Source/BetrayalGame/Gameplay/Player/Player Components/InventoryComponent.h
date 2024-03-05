@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemActor.h"
 #include "Components/ActorComponent.h"
+#include "../../Interactables/Items/ItemActor.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -31,12 +31,7 @@ struct FInventorySlot
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsSelected;
-
-	// Overloading the == operator to compare two slots 
-	bool operator==(const FInventorySlot& Other) const
-	{
-		return ID == Other.ID && Item == Other.Item && bIsEmpty == Other.bIsEmpty && bIsSelected == Other.bIsSelected;
-	}
+	
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -61,7 +56,10 @@ protected:
 	FInventorySlot SelectedSlot;
 
 	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-	FInventorySlot LastSlotAdded;
+	FItem LastItemAdded;
+
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	int LastSlotAddedID;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	bool bIsInventoryInitialized = false;
@@ -115,6 +113,8 @@ public:
 	bool IsInventoryFull() const { return bIsInventoryFull; }
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	FInventorySlot GetLastSlotAdded() const { return LastSlotAdded; }
-	
+	FItem GetLastItemAdded() const { return LastItemAdded; }
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int GetLastSlotAddedtID() const { return LastSlotAddedID; }
 };

@@ -39,8 +39,6 @@ private:
 	bool bIsDead;
 
 public:
-	void OnHealthUpdate();
-	
 	UFUNCTION(BlueprintPure, Category = "Health")
 	float GetMaxHealth() const { return MaxHealth; }
 	

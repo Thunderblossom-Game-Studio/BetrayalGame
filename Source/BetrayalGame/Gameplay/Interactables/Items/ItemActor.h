@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseInteractable.h"
+#include "../BaseInteractable.h"
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
 #include "ItemActor.generated.h"
@@ -32,12 +32,6 @@ struct FItem : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<AItemActor> Actor;
-
-	// Overloading the == operator to compare two items
-	bool operator==(const FItem& Other) const
-	{
-		return Name == Other.Name && Description.EqualTo(Other.Description) && Image == Other.Image;
-	}
 };
 
 

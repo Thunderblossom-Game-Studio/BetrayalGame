@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/ItemActor.h"
+#include "ItemActor.h"
 
-#include "BaseCharacter.h"
-#include "InventoryComponent.h"
-#include "PlayerCharacter.h"
+#include "../../Player/BaseCharacter.h"
+#include "../../Player/Player Components/InventoryComponent.h"
+#include "../../Player/PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -48,8 +48,6 @@ void AItemActor::OnInteract(AActor* Interactor)
 	
 	Player->InventoryComponent->Server_AddItemToInventory(Item);
 
-	Player->OnItemPickedUp(Player->InventoryComponent->GetLastSlotAdded());
-	
 	OnPickup(Player);
 	
 	Destroy();

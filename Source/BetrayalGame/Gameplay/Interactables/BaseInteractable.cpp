@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/BaseInteractable.h"
+#include "BaseInteractable.h"
 
-#include "BaseCharacter.h"
+#include "../Player/BaseCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"

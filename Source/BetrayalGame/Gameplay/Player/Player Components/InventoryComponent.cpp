@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/InventoryComponent.h"
+#include "InventoryComponent.h"
 
-#include "PlayerCharacter.h"
+#include "../PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -57,7 +57,10 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 			slot.Item = Item;
 			slot.bIsEmpty = false;
 
-			LastSlotAdded = slot;
+			SelectSlot(slot.ID);
+			
+			LastItemAdded = Item;
+			LastSlotAddedID = slot.ID;
 			
 			FilledSlotCount++;
 			break;

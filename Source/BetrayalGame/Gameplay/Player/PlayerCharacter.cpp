@@ -1,21 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/PlayerCharacter.h"
+#include "PlayerCharacter.h"
 
-#include "BaseInteractable.h"
-#include "BetrayalGameMode.h"
-#include "BetrayalPlayerState.h"
+#include "../Interactables/BaseInteractable.h"
+#include "../../BetrayalGameMode.h"
+#include "../../BetrayalPlayerState.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "InventoryComponent.h"
-#include "ObjectivesComponent.h"
+#include "../Player/Player Components/InventoryComponent.h"
+#include "../Player/Player Components/ObjectivesComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "../AI/Pawns/Monster.h"
+#include "../../AI/Pawns/Monster.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -111,8 +111,6 @@ void APlayerCharacter::SelectSlot1()
 	{
 		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
 	}
-
-	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::SelectSlot2()
@@ -127,8 +125,6 @@ void APlayerCharacter::SelectSlot2()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
-
-	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::SelectSlot3()
@@ -143,8 +139,6 @@ void APlayerCharacter::SelectSlot3()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
-
-	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::SelectSlot4()
@@ -159,8 +153,6 @@ void APlayerCharacter::SelectSlot4()
 	{
 		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
 	}
-
-	OnItemEquipped(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject(), InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::EquipItem(AItemActor* Item)
@@ -187,16 +179,15 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 
 	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item->GetClass(), SpawnParams))
 	{
-		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("RightHand"));
+		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("ItemSocket"));
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;
-		
 	}
 
 	HeldItem->Server_SetCanPickup(false);
 	
-	
+	OnItemEquipped(Item, InventoryComponent->GetSelectedSlot().ID);
 }
 
 void APlayerCharacter::UnequipItem()
@@ -263,7 +254,9 @@ void APlayerCharacter::TraceForInteractables()
 void APlayerCharacter::LocalInteract()
 {
 	if(InteractableInFocus)
+	{
 		Server_Interact(UGameplayStatics::GetPlayerCharacter(GetWorld(),0), InteractableInFocus);
+	}
 }
 
 void APlayerCharacter::CycleSelectedMonster()
@@ -315,7 +308,14 @@ void APlayerCharacter::Server_SpawnMonster_Implementation()
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
 {
 	if(Interactable)
+	{
 		Interactable->OnInteract(NewOwner);
+
+		AItemActor* Item = Cast<AItemActor>(Interactable);
+		if(Item)
+			OnItemPickedUp(Item);
+	}
+		
 	
 	NetMulticast_Interact(NewOwner,Interactable);
 }

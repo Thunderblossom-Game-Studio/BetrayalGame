@@ -6,7 +6,7 @@
 #include "NavigationPath.h"
 #include "BetrayalGame/AI/Pawns/Mauler.h"
 #include "NavigationSystem.h"
-#include "BetrayalGame/Gameplay/PlayerCharacter.h"
+#include "BetrayalGame/Gameplay/Player/PlayerCharacter.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "GameFramework/SaveGame.h"
-#include "OnlineSessionSettings.h"
 #include "BetrayalGameInstance.generated.h"
 
 #pragma region Save/Load
@@ -92,6 +91,9 @@ public:
 	
 	UFUNCTION()
 	void UpdatePlayerList();
+
+	UFUNCTION()
+	void ClearPlayerList();
 	
 
 	
@@ -131,6 +133,30 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
 	void OnSessionSearchComplete();
+
+
+	// Voice chat
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
+	bool bVoiceChatEnabled = false;
+
+	// Voice chat volume
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
+	float VoiceChatVolume = 1.0f;
+
+	// Voice chat threshold
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
+	float VoiceChatThreshold = 0.0f;
+
+	// Push to talk
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
+	bool bPushToTalk = false;
+
+	// Toggle Mic Active
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void StartPTT();
+
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void StopPTT();
 
 #pragma endregion
 	

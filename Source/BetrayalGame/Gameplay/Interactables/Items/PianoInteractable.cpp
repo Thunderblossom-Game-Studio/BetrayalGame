@@ -3,7 +3,7 @@
 
 #include "PianoInteractable.h"
 
-#include "PlayerCharacter.h"
+#include "../../Player/PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
 
