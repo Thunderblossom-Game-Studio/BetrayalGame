@@ -3,6 +3,7 @@
 
 #include "Menu_GameMode.h"
 
+#include "VoiceChatSubsystem.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
 #include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
 
@@ -34,9 +35,6 @@ void AMenu_GameMode::OnPostLogin(AController* NewPlayer)
 
 	// Log the player name
 	UE_LOG(LogTemp, Warning, TEXT("AMenu_GameMode::OnPostLogin(): PlayerName: %s"), *PlayerName);
-
-	// Update the player list
-	GetGameInstance<UBetrayalGameInstance>()->DelayedUpdatePlayerList();
 }
 
 void AMenu_GameMode::Logout(AController* Exiting)

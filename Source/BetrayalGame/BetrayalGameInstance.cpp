@@ -3,6 +3,7 @@
 #include "BetrayalGameInstance.h"
 
 #include "OnlineSubsystem.h"
+#include "IOnlineSubsystemEOS.h"
 #include "StaticUtils.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/EditableText.h"
@@ -12,7 +13,6 @@
 #include "GameFramework/PlayerState.h"
 #include "Interfaces/VoiceInterface.h"
 #include "Lobby/BetrayalGameNetworkSubsystem.h"
-#include "Net/Core/Connection/NetEnums.h"
 
 #pragma region General
 

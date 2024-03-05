@@ -10,12 +10,12 @@ public class BetrayalGame : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "AIModule", "NavigationSystem", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemEOS", "EOSVoiceChat"
+			"Core", "CoreUObject", "Engine", "InputCore", "AIModule", "NavigationSystem", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemEOS"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"Slate", "SlateCore", "EnhancedInput"
+			"Slate", "SlateCore", "EnhancedInput", "VoiceChat"
 		});
 		
 		// Used for EOS P2P connection
