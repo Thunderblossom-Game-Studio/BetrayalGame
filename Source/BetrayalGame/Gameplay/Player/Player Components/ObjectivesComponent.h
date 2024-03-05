@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemActor.h"
 #include "BetrayalGame/BetrayalGameState.h"
 #include "Components/ActorComponent.h"
 #include "ObjectivesComponent.generated.h"

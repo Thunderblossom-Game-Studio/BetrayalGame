@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/ObjectivesComponent.h"
+#include "ObjectivesComponent.h"
 
 #include "Net/UnrealNetwork.h"
 

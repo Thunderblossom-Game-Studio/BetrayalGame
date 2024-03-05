@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/BetrayalGameMode.h"
+#include "BetrayalGameMode.h"
 
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
 #include "Kismet/GameplayStatics.h"

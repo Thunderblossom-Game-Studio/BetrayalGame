@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "Gameplay/BaseHaunt.h"
-#include "Gameplay/BetrayalPlayerState.h"
-#include "Gameplay/PlayerCharacter.h"
+#include "Gameplay/Haunts/BaseHaunt.h"
+#include "BetrayalPlayerState.h"
+#include "Gameplay/Player/PlayerCharacter.h"
 #include "BetrayalGameState.generated.h"
 
 UENUM()

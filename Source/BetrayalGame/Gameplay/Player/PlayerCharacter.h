@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InventoryComponent.h"
-#include "../Gameplay/BaseCharacter.h"
-#include "ItemActor.h"
+#include "../Player/Player Components/InventoryComponent.h"
+#include "../Player/BaseCharacter.h"
+#include "../Interactables/Items/ItemActor.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;

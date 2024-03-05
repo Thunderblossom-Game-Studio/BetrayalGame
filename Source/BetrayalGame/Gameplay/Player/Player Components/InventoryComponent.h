@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemActor.h"
 #include "Components/ActorComponent.h"
+#include "../../Interactables/Items/ItemActor.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)

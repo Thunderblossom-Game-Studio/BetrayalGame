@@ -6,9 +6,9 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
-#include "BetrayalGame/Gameplay/InventoryComponent.h"
-#include "BetrayalGame/Gameplay/PlayerCharacter.h"
-#include "BetrayalGame/Gameplay/ItemActor.h"
+#include "BetrayalGame/Gameplay/Player/Player Components/InventoryComponent.h"
+#include "BetrayalGame/Gameplay/Player/PlayerCharacter.h"
+#include "BetrayalGame/Gameplay/Interactables/Items/ItemActor.h"
 
 UBTTask_PickupItem::UBTTask_PickupItem(FObjectInitializer const& ObjectInitializer)
 	: World(nullptr), Blackboard(nullptr), Controller(nullptr),	Character(nullptr)

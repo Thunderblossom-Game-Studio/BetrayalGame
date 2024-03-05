@@ -9,7 +9,7 @@
 #include "OnlineSessionSettings.h"
 #include "Widget_SessionConnectBtn.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
-#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
+#include "BetrayalGame/BetrayalPlayerState.h"
 #include "GameFramework/GameSession.h"
 #include "Online/OnlineSessionNames.h"
 

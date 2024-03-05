@@ -1,21 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/PlayerCharacter.h"
+#include "PlayerCharacter.h"
 
-#include "BaseInteractable.h"
-#include "BetrayalGameMode.h"
-#include "BetrayalPlayerState.h"
+#include "../Interactables/BaseInteractable.h"
+#include "../../BetrayalGameMode.h"
+#include "../../BetrayalPlayerState.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "InventoryComponent.h"
-#include "ObjectivesComponent.h"
+#include "../Player/Player Components/InventoryComponent.h"
+#include "../Player/Player Components/ObjectivesComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "../AI/Pawns/Monster.h"
+#include "../../AI/Pawns/Monster.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -179,7 +179,7 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 
 	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item->GetClass(), SpawnParams))
 	{
-		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("RightHand"));
+		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("ItemSocket"));
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		HeldItem = ItemActor;

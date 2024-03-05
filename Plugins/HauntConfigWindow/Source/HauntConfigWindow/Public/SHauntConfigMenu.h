@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BetrayalGame/Gameplay/BaseHaunt.h"
+#include "BetrayalGame/Gameplay/Haunts/BaseHaunt.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**

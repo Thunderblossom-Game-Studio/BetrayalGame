@@ -2,9 +2,9 @@
 
 #include "BaseHaunt.h"
 
-#include "BetrayalGameMode.h"
+#include "../../BetrayalGameMode.h"
 #include "GameModeInfoCustomizer.h"
-#include "ObjectivesComponent.h"
+#include "../Player/Player Components/ObjectivesComponent.h"
 #include "BetrayalGame/BetrayalGameState.h"
 #include "Factories/BlueprintFactory.h"
 #include "Kismet2/KismetEditorUtilities.h"
@@ -81,7 +81,7 @@ void ABaseHaunt::Server_EndHaunt_Implementation()
 	EndHaunt();
 }
 
-void ABaseHaunt::TraitorSetup() const
+void ABaseHaunt::TraitorSetup()
 {
 	if(!bHasTraitor)
 		return;
@@ -99,10 +99,12 @@ void ABaseHaunt::TraitorSetup() const
 
 	TraitorCharacter->ObjectivesComponent->Server_SetHauntObjective(*TraitorObjectiveData);
 
+	OnTraitorChosen(TraitorCharacter);
+	
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Traitor Setup"));
 }
 
-void ABaseHaunt::SurvivorSetup() const
+void ABaseHaunt::SurvivorSetup()
 {
 	const ABetrayalGameMode* BMode = Cast<ABetrayalGameMode>(GetWorld()->GetAuthGameMode());
 	if(!BMode)

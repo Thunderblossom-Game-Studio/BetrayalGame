@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlayerCharacter.h"
+#include "../Player/PlayerCharacter.h"
 #include "UObject/NoExportTypes.h"
 #include "BaseHaunt.generated.h"
 
@@ -113,12 +113,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
 	void OnHauntEnd();
 
-	void TraitorSetup() const;
+	void TraitorSetup();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Haunt")
-	void OnTraitorChosen();
+	void OnTraitorChosen(const APlayerCharacter* TraitorPlayerCharacter);
 	
-	void SurvivorSetup() const;
+	void SurvivorSetup();
 
 #pragma region Setters
 

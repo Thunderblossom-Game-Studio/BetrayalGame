@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../Gameplay/BaseCharacter.h"
+#include "BaseCharacter.h"
 
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
