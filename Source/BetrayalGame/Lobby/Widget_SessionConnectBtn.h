@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OnlineSessionSettings.h"
+#include "BetrayalGame/BetrayalGameInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "Widget_SessionConnectBtn.generated.h"
 

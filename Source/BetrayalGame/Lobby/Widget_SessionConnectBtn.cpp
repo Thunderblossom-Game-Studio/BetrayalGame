@@ -58,8 +58,6 @@ void UWidget_SessionConnectBtn::NativeConstruct()
 void UWidget_SessionConnectBtn::OnClick()
 {
 	Print("Joining session: " + _SessionData.Session.OwningUserName);
-
-	GetGameInstance<UBetrayalGameInstance>()->HideLobby();
 	
 	// Check if the session is password protected
 	if (CheckPassword())

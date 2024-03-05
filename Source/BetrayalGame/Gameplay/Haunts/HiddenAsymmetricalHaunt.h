@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
-#include "Menu_GameMode.generated.h"
+#include "BaseHaunt.h"
+#include "HiddenAsymmetricalHaunt.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BETRAYALGAME_API AMenu_GameMode : public AGameMode
+class BETRAYALGAME_API AHiddenAsymmetricalHaunt : public ABaseHaunt
 {
 	GENERATED_BODY()
 
+
+	
 };

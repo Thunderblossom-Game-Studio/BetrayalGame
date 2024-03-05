@@ -9,8 +9,7 @@
 #include "OnlineSessionSettings.h"
 #include "Widget_SessionConnectBtn.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
-#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
-#include "Components/PanelWidget.h"
+#include "BetrayalGame/BetrayalPlayerState.h"
 #include "GameFramework/GameSession.h"
 #include "Online/OnlineSessionNames.h"
 
@@ -80,10 +79,6 @@ void UBetrayalGameNetworkSubsystem::OnClientConnected(FName SessionName, const F
 {
 	// Print name of connecting player
 	Print("Player connected: " + ID.ToString());
-
-	// Call all bound callbacks
-	OnClientConnectedDelegate.Broadcast();
-	OnClientsChangedDelegate.Broadcast();
 }
 
 void UBetrayalGameNetworkSubsystem::OnClientDisconnected(FName SessionName, const FUniqueNetId& ID,
@@ -91,10 +86,6 @@ void UBetrayalGameNetworkSubsystem::OnClientDisconnected(FName SessionName, cons
 {
 	// Print name of disconnecting player
 	Print("Player disconnected: " + ID.ToString());
-
-	// Call all bound callbacks
-	OnClientDisconnectedDelegate.Broadcast();
-	OnClientsChangedDelegate.Broadcast();
 }
 
 void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
@@ -136,37 +127,6 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 	_GameInstance->HidePasswordField();
 }
 
-void UBetrayalGameNetworkSubsystem::LockSession()
-{
-	auto Session = GetSessionInterface();
-	if (!Session)
-		return;
-
-	if (SessionSettings.IsValid())
-	{
-		SessionSettings->bAllowInvites = false;
-		SessionSettings->bUsesPresence = false;
-		SessionSettings->bAllowJoinInProgress = false;
-		SessionSettings->bAllowJoinViaPresence = false;
-		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
-		SessionSettings->bShouldAdvertise = false;
-	}
-	Session->UpdateSession(NAME_GameSession, *SessionSettings, true);
-}
-
-void UBetrayalGameNetworkSubsystem::ChangeMapByName(FName MapName)
-{
-	const FString TravelURL = MapName.ToString() + "?listen";
-	GetWorld()->ServerTravel(TravelURL);
-}
-
-void UBetrayalGameNetworkSubsystem::ChangeMapByReference(FSoftWorldReference Map)
-{
-	const FString MapName = Map.WorldAsset.GetAssetName();
-	const FString TravelURL = MapName + "?listen";
-	GetWorld()->ServerTravel(TravelURL);
-}
-
 bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN,
                                                 bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate,
                                                 FString Password)
@@ -199,17 +159,9 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 		SessionSettings->bAllowJoinViaPresence = true;
 		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
 		SessionSettings->bUseLobbiesIfAvailable = true;
-		SessionSettings->bUseLobbiesVoiceChatIfAvailable = true;
 
 		// Session password
-		if (Password.IsEmpty())
-			Password = "";
-
-		// Set password value
 		SessionSettings->Set(PASSWORD, Password, EOnlineDataAdvertisementType::ViaOnlineService);
-
-		// Update session name
-		LobbyListName = SessionName.ToString();
 
 		// Session server list name
 		SessionSettings->Set(SERVERLIST_NAME, LobbyListName, EOnlineDataAdvertisementType::ViaOnlineService);
@@ -230,9 +182,11 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 }
 
 void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence,
+                                                   int32 MaxNumPlayers,
                                                    bool bIsPrivate, FString Password)
 {
-	HostSession(GetNetID(), SessionName, bIsLAN, bIsPresence, MAX_PLAYERS, bIsPrivate, Password);
+	// TODO: Add session name support
+	HostSession(GetNetID(), NAME_GameSession, bIsLAN, bIsPresence, MaxNumPlayers, bIsPrivate, Password);
 }
 
 void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -269,14 +223,18 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 		// Travel to the lobby
 		Print("Server travelling to map...");
 
-		FName Level = "L_Lobby";
+		FName Level = "";
+		if (_GameInstance)
+			Level = _GameInstance->LevelToLoad;
+		else
+			Level = "L_Map";
+
 		UGameplayStatics::OpenLevel(GetWorld(), Level, true, "listen");
 		SetupNotifications();
 	}
 }
 
-ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN,
-                                                                 bool bIsPresence)
+ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<const FUniqueNetId> UserId, bool bIsLAN, bool bIsPresence)
 {
 	ResetSessionSearch();
 
@@ -320,7 +278,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	// Re-enable the lobby menu
 	_GameInstance->WB_Lobby->SetIsEnabled(true);
-
+	
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
 	Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
@@ -328,16 +286,6 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	// Log number of results
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
-	// Server list reference
-	auto SessionList = _GameInstance->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
-	UPanelWidget* Scrl_Sessions = Cast<UPanelWidget>(SessionList);
-
-	if (!Scrl_Sessions)
-	{
-		Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): Scrl_Sessions is null!");
-		return;
-	}
-	
 	// Populate the session list
 	for (auto result : SessionSearch->SearchResults)
 	{
@@ -352,18 +300,14 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 
 			// Add the button to the list of found sessions
 			FoundSessionButtons.Add(SessionButton);
-
-			// Add the button to the session list
-			Scrl_Sessions->AddChild(SessionButton);
-
-			// Update button data
-			SessionButton->UpdateDisplayedData();
 		}
 		else
 		{
 			Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): SessionButton is null!");
 		}
 	}
+
+	_GameInstance->OnSessionSearchComplete();
 }
 
 bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
@@ -471,6 +415,20 @@ void UBetrayalGameNetworkSubsystem::BP_DestroySession()
 	}
 
 	CleanupNotifications();
+}
+
+void UBetrayalGameNetworkSubsystem::OnHandleDisconnect(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+}
+
+void UBetrayalGameNetworkSubsystem::Multicast_UpdateReadyState_Implementation(int32 PlayerID, bool bReady)
+{
+}
+
+void UBetrayalGameNetworkSubsystem::Server_UpdateReadyState_Implementation(bool bReady)
+{
+	bIsReady = bReady;
+	//Multicast_UpdateReadyState(, bReady);
 }
 
 void UBetrayalGameNetworkSubsystem::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver,

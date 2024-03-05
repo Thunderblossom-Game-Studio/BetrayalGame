@@ -5,8 +5,8 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BetrayalGame/AI/Pawns/Monster.h"
-#include "BetrayalGame/Gameplay/BetrayalGameMode.h"
-#include "BetrayalGame/Gameplay/PlayerCharacter.h"
+#include "BetrayalGame/BetrayalGameMode.h"
+#include "BetrayalGame/Gameplay/Player/PlayerCharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"

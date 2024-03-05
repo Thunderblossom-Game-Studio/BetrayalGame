@@ -3,8 +3,8 @@
 
 #include "Mauler.h"
 #include "../MaulerAnimInstance.h"
-#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
-#include "BetrayalGame/Gameplay/PlayerCharacter.h"
+#include "BetrayalGame/BetrayalPlayerState.h"
+#include "BetrayalGame/Gameplay/Player/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 
