@@ -104,6 +104,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	AItemActor* HeldItem;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	bool bWasItemUnequipped;
+	
 	UFUNCTION()
 	void SelectSlot1();
 	
@@ -127,12 +130,12 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_UnequipItem();
-
+	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnItemEquipped(AItemActor* Item, int SlotID);
+	void OnItemEquipped(FInventorySlot Slot, AItemActor* Item);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnItemUnequipped();
+	// UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	// void OnItemUnequipped(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 
@@ -149,7 +152,7 @@ public:
 	void TraceForInteractables();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Interaction")
-	void OnItemPickedUp(AItemActor* Item);
+	void OnItemPickedUp(FInventorySlot Slot);
 	
 	void LocalInteract();
 	
