@@ -4,7 +4,7 @@
 #include "Menu_GameMode.h"
 #include "VoiceChatSubsystem.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
-#include "BetrayalGame/Gameplay/BetrayalPlayerState.h"
+#include "BetrayalGame/BetrayalPlayerState.h"
 
 void AMenu_GameMode::OnPostLogin(AController* NewPlayer)
 {
