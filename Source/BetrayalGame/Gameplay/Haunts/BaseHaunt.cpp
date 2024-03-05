@@ -3,7 +3,6 @@
 #include "BaseHaunt.h"
 
 #include "../../BetrayalGameMode.h"
-#include "GameModeInfoCustomizer.h"
 #include "../Player/Player Components/ObjectivesComponent.h"
 #include "BetrayalGame/BetrayalGameState.h"
 #include "Net/UnrealNetwork.h"
