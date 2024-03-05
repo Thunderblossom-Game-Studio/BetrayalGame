@@ -3,14 +3,15 @@
 
 #include "BetrayalGameNetworkSubsystem.h"
 
-#include "OnlineSubsystem.h"
-#include "BetrayalGame/StaticUtils.h"
-#include "Kismet/GameplayStatics.h"
 #include "OnlineSessionSettings.h"
+#include "OnlineSubsystem.h"
 #include "Widget_SessionConnectBtn.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
 #include "BetrayalGame/BetrayalPlayerState.h"
 #include "GameFramework/GameSession.h"
+#include "BetrayalGame/StaticUtils.h"
+#include "Components/PanelWidget.h"
+#include "Kismet/GameplayStatics.h"
 #include "Online/OnlineSessionNames.h"
 
 const TSharedPtr<const FUniqueNetId> UBetrayalGameNetworkSubsystem::GetNetID()
