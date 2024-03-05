@@ -30,14 +30,7 @@ void ABetrayalGameState::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if(HasAuthority())
-	{
-		CurrentHaunt = HauntClass.GetDefaultObject();
-		CurrentHaunt->SetGameState(this);
-		CurrentHaunt = GetWorld()->SpawnActor<ABaseHaunt>(HauntClass);
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Haunt Spawned"));
-	}
 }
 
 ABetrayalPlayerState* ABetrayalGameState::GetRandomPlayer() const
@@ -49,12 +42,25 @@ ABetrayalPlayerState* ABetrayalGameState::GetRandomPlayer() const
 	return Cast<ABetrayalPlayerState>(PlayerArray[RandomPlayerIndex]);
 }
 
+void ABetrayalGameState::HauntSetup()
+{
+	if(HasAuthority())
+	{
+		CurrentHaunt = HauntClass.GetDefaultObject();
+		CurrentHaunt->SetGameState(this);
+		CurrentHaunt = GetWorld()->SpawnActor<ABaseHaunt>(HauntClass);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Haunt Spawned"));
+	}
+}
+
 void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage NewStage)
 {
 	switch (NewStage)
 	{
 	case Lobby:
 		OnLobbyStageStart();
+		HauntSetup();
 		break;
 	case Exploring:
 		OnExploringStageStart();

@@ -120,6 +120,8 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
 	ABaseHaunt* CurrentHaunt;
+
+	void HauntSetup();
 	
 #pragma endregion 
 };
