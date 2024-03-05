@@ -2,13 +2,7 @@
 
 
 #include "BetrayalGameState.h"
-
-#include "K2Node_SpawnActorFromClass.h"
-#include "GameFramework/GameSession.h"
-#include "BetrayalGameMode.h"
 #include "BetrayalPlayerState.h"
-#include "Gameplay/Player/Player Components/ObjectivesComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/DataTable.h"
 
