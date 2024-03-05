@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "Gameplay/BaseHaunt.h"
+#include "Gameplay/BetrayalPlayerState.h"
 #include "Gameplay/PlayerCharacter.h"
 #include "BetrayalGameState.generated.h"
 
@@ -59,28 +61,6 @@ struct FObjective : public FTableRowBase
 	int Amount;
 };
 
-USTRUCT()
-struct FHaunt : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FString Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FString Description;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FDataTableRowHandle TraitorObjective;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	FDataTableRowHandle InnocentObjective;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
-	float Duration = 0.0f;
-};
-
-
 UCLASS()
 class BETRAYALGAME_API ABetrayalGameState : public AGameState
 {
@@ -92,7 +72,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void BeginPlay() override;
-	
+
+	ABetrayalPlayerState* GetRandomPlayer() const;
+
 #pragma region Match Stage Variable Replication
 // Replicated Variables
 protected:
@@ -131,39 +113,13 @@ public:
 	
 #pragma endregion
 
-#pragma region Objectives
-	//UFUNCTION(BlueprintCallable)
-	//void GetCompletedObjectives(TArray<FObjective>& OutObjectives, const EObjectiveType Type);
-
-	
-	
-#pragma endregion
-
-#pragma region Haunt Tracking
+#pragma region Haunt
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
-	UDataTable* HauntData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
+	TSubclassOf<ABaseHaunt> HauntClass;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
+	ABaseHaunt* CurrentHaunt;
 	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunts")
-	FHaunt CurrentHaunt;
-
-	
-public:
-
-	UFUNCTION()
-	void InitializeHaunt();
-	
-	UFUNCTION()
-	void StartHaunt();
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnTraitorChosen(APlayerCharacter* Traitor);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnTraitorWin();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Game|Haunts")
-	void OnInnocentWin();
-
 #pragma endregion 
 };

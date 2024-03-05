@@ -93,4 +93,13 @@ public:
 	void EnableAIPlayerControllers();
 
 #pragma endregion
+
+#pragma region Players
+public:
+	UFUNCTION(BlueprintCallable)
+	TArray<ABetrayalPlayerState*> GetAllPlayerStates() const;
+	UFUNCTION(BlueprintCallable)
+	TArray<APlayerCharacter*> GetAllPlayerCharacters() const;
+	
+#pragma endregion 
 };
