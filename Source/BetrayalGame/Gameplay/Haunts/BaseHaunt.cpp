@@ -25,19 +25,6 @@ ABaseHaunt::ABaseHaunt(): HauntCategory(Hc_Asymmetric), bHasTimer(false), Traito
 	bReplicates = true;
 }
 
-ABaseHaunt::ABaseHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
-                       float NewDuration, bool bUsesTraitor, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
-                       const FDataTableRowHandle& NewSurvivorObjective)
-:HauntName(NewName), HauntDescription(NewDescription),
- HauntCategory(NewCategory), bHasTimer(bUsesTimer),
- HauntDuration(NewDuration), bHasTraitor(bUsesTraitor),
- TraitorObjective(NewTraitorObjective), TraitorMonsters(NewTraitorMonsters),
-SurvivorObjective(NewSurvivorObjective)
-{
-	GameState = nullptr;
-	Traitor = nullptr;
-}
-
 void ABaseHaunt::ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory,
 	bool bUsesTimer, float NewDuration, bool bUsesTraitor/*, const FDataTableRowHandle& NewTraitorObjective,
 	const TArray<AMonster*>& NewTraitorMonsters, const FDataTableRowHandle& NewSurvivorObjective*/)
