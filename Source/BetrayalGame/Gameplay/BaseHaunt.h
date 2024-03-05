@@ -88,6 +88,10 @@ public:
 	           const TArray<AMonster*>& NewTraitorMonsters,
 	           const FDataTableRowHandle& NewSurvivorObjective);
 
+
+	void ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
+					   float NewDuration, bool bUsesTraitor/*, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
+					   const FDataTableRowHandle& NewSurvivorObjective*/);
 	
 	// TODO: Add cutscene references(start haunt, end haunt, traitor picked)
 	

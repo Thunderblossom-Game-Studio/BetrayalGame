@@ -6,7 +6,6 @@
 #include "SlateOptMacros.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "KismetCompilerModule.h"
-#include "BetrayalGame/Gameplay/BaseHaunt.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
 
@@ -181,7 +180,7 @@ void SHauntConfigMenu::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			[
 				SNew(STextBlock)
-				.Visibility_Lambda([this]() { return (HauntCategory != FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
+				.Visibility_Lambda([this]() { return (HauntCategory != Hc_FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
 				.Text(FText::FromString("Monsters Option Goes Here"))				
 			]
 		]
@@ -217,7 +216,7 @@ FReply SHauntConfigMenu::CreateConfiguredBlueprint()
 	FString TrimmedName = HauntName;
 	TrimmedName.RemoveSpacesInline();
 	FString BlueprintPath = "/Game/Blueprints/Haunts/BP_" + TrimmedName;
-	const TSubclassOf<UObject> ParentClass = UBaseHaunt::StaticClass();
+	const TSubclassOf<UObject> ParentClass = ABaseHaunt::StaticClass();
 
 	// TODO - Joseph: Potentially add forced pascal casing to further enforce content style guide.
 	
@@ -234,7 +233,7 @@ FReply SHauntConfigMenu::CreateConfiguredBlueprint()
 		if (i != 0)
 		{
 			BPPath = BlueprintPath + "_" + FString::FromInt(i);
-			UE_LOG(LogTemp, Log, TEXT("Renaming UBaseHaunt blueprint to '%s'..."), *BlueprintPath);
+			UE_LOG(LogTemp, Log, TEXT("Renaming ABaseHaunt blueprint to '%s'..."), *BlueprintPath);
 		}
 		i++;
 	}
@@ -264,6 +263,8 @@ FReply SHauntConfigMenu::CreateConfiguredBlueprint()
 	
 	FAssetRegistryModule::AssetCreated(Blueprint);
 	bool bIsDirty = Blueprint->MarkPackageDirty();
+
+	ConfigureHauntBlueprint(Cast<ABaseHaunt>(Blueprint->GeneratedClass->ClassDefaultObject));
 	
 	return FReply::Handled();
 }
@@ -296,21 +297,21 @@ FReply SHauntConfigMenu::OnHauntDescriptionChanged(const FText& NewText)
 
 FReply SHauntConfigMenu::OnAsymmetricClicked()
 {
-	HauntCategory = Asymmetric;
+	HauntCategory = Hc_Asymmetric;
 	UpdatedConfigMenu();
 	return FReply::Handled();
 }
 
 FReply SHauntConfigMenu::OnHiddenAsymmetricClicked()
 {
-	HauntCategory = HiddenAsymmetric;
+	HauntCategory = Hc_HiddenAsymmetric;
 	UpdatedConfigMenu();
 	return FReply::Handled();
 }
 
 FReply SHauntConfigMenu::OnFFAClicked()
 {
-	HauntCategory = FreeForAll;
+	HauntCategory = Hc_FreeForAll;
 	UpdatedConfigMenu();
 	return FReply::Handled();
 }
@@ -319,13 +320,13 @@ void SHauntConfigMenu::UpdatedConfigMenu()
 {	
 	switch (HauntCategory)
 	{
-	case Asymmetric:		
+	case Hc_Asymmetric:		
 		CategoryName = "Asymmetric";
 		break;
-	case HiddenAsymmetric:
+	case Hc_HiddenAsymmetric:
 		CategoryName = "Hidden Asymmetric";
 		break;
-	case FreeForAll:
+	case Hc_FreeForAll:
 		CategoryName = "Free For All";
 		break;
 	default:
@@ -333,15 +334,25 @@ void SHauntConfigMenu::UpdatedConfigMenu()
 	}
 }
 
-void SHauntConfigMenu::ConfigureHauntBlueprint(UBaseHaunt* Haunt)
+void SHauntConfigMenu::ConfigureHauntBlueprint(ABaseHaunt* Haunt)
 {
-	if (!IsValid(Haunt))
+	if (!Haunt)
 	{		
 		UE_LOG(LogTemp, Warning, TEXT("Haunt can't be configured, doesn't exist..."));
 		return;
 	}
 
 	// TODO - Joseph: Integrate tool with Vasco's UBaseHaunt.
+
+	UE_LOG(LogTemp, Warning, TEXT("Configuring Haunt..."));
+	Haunt->ConfigureHaunt(
+		FName(*HauntName),
+		FText::FromString(HauntDescription),
+		HauntCategory,
+		bUsesTimer,
+		HauntLength_Seconds,
+		false
+		);
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

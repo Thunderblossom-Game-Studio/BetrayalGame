@@ -3,10 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BetrayalGame/Gameplay/BaseHaunt.h"
 #include "Widgets/SCompoundWidget.h"
-
-UENUM()
-enum ECategory { Asymmetric, HiddenAsymmetric, FreeForAll};
 
 /**
  * 
@@ -33,7 +31,7 @@ public:
 
 protected:
 	void UpdatedConfigMenu();
-	void ConfigureHauntBlueprint(class UBaseHaunt* Haunt);
+	void ConfigureHauntBlueprint(class ABaseHaunt* Haunt);
 	
 protected:
 	FString CategoryName = "Category";
@@ -41,7 +39,7 @@ protected:
 	FString HauntDescription = "This is an example description.";
 	bool bUsesTimer = true;
 	int32 HauntLength_Seconds = 120;
-	TEnumAsByte<ECategory> HauntCategory = Asymmetric;
+	TEnumAsByte<EHauntCategory> HauntCategory = Hc_Asymmetric;
 
 	const int WidgetPadding = 15;
 };

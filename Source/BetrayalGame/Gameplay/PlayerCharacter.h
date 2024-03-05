@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputActionValue.h"
 #include "InventoryComponent.h"
 #include "../Gameplay/BaseCharacter.h"
 #include "ItemActor.h"
