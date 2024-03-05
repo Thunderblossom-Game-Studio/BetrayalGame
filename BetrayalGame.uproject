@@ -43,6 +43,10 @@
 		{
 			"Name": "VoiceChat",
 			"Enabled": false
+		},
+		{
+			"Name": "ElectraPlayer",
+			"Enabled": true
 		}
 	]
 }
