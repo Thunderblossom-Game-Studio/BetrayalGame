@@ -189,7 +189,10 @@ void UBetrayalGameInstance::ShowLobbyRoom()
 	{
 		// Check if the delegate is already bound to avoid multiple bindings		
 		if (!NetworkSubsystem->OnClientsChangedDelegate.Contains(this, "DelayedUpdatePlayerList"))
+		{
 			NetworkSubsystem->OnClientsChangedDelegate.AddDynamic(this, &ThisClass::DelayedUpdatePlayerList);
+			Print("UBetrayalGameInstance::ShowLobbyRoom(): OnClientsChangedDelegate bound!");
+		}
 		else
 			Print("UBetrayalGameInstance::ShowLobbyRoom(): OnClientsChangedDelegate is already bound!");
 	}
@@ -219,7 +222,7 @@ void UBetrayalGameInstance::HideLobbyRoom()
 void UBetrayalGameInstance::DelayedUpdatePlayerList()
 {
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdatePlayerList, 0.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdatePlayerList, 1.5f, false);
 }
 
 void UBetrayalGameInstance::UpdatePlayerList()

@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "VoiceChatSubsystem.h"
 #include "BetrayalGameNetworkSubsystem.h"
+#include "VoiceChatSubsystem.h"
 #include "IOnlineSubsystemEOS.h"
 #include "VoiceChat.h"
 #include "OnlineSubsystem.h"
