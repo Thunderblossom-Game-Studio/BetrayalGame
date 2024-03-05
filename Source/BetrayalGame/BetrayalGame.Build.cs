@@ -15,7 +15,7 @@ public class BetrayalGame : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"Slate", "SlateCore", "EnhancedInput"
+			"Slate", "SlateCore", "EnhancedInput", "VoiceChat"
 		});
 		
 		// Used for EOS P2P connection

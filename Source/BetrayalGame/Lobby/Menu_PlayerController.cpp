@@ -5,6 +5,7 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineSubsystemTypes.h"
+#include "VoiceChatSubsystem.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 
 AMenu_PlayerController::AMenu_PlayerController()
@@ -100,4 +101,9 @@ void AMenu_PlayerController::OnLoginCompleted(int32 LocalUserNum, bool bWasSucce
 
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginDelegateHandle);
 	LoginDelegateHandle.Reset();
+
+	// Set up the voice chat subsystem
+	auto VC = GetGameInstance()->GetSubsystem<UVoiceChatSubsystem>();
+	if(VC)
+		VC->Init();
 }
