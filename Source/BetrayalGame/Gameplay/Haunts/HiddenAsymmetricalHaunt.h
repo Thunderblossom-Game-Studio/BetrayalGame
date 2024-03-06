@@ -50,8 +50,14 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
 	void SetupSpawns();
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetupSpawns();
+
+	UFUNCTION()
+	void DestroySpawnTransforms();
 
 	
 };

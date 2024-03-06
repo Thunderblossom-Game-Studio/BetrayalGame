@@ -40,7 +40,7 @@ protected:
 
 #pragma region Traitor Properties
 
-	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Haunt|Traitor")
 	const APlayerCharacter* Traitor;
 	
 	UPROPERTY(EditAnywhere, Category = "Haunt|Traitor")
@@ -60,7 +60,7 @@ protected:
 
 #pragma region Survivor Properties
 
-	UPROPERTY(VisibleAnywhere, Category = "Haunt|Survivors")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Haunt|Survivors")
 	TArray<APlayerCharacter*> Survivors;
 	
 	UPROPERTY(Replicated, EditAnywhere,
@@ -108,6 +108,13 @@ public:
 	void OnTraitorChosen(const APlayerCharacter* TraitorPlayerCharacter);
 	
 	void SurvivorSetup();
+
+	//TEMPORARY
+	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
+	void OnSurvivorWin();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
+	void OnTraitorWin();
 
 #pragma region Setters
 

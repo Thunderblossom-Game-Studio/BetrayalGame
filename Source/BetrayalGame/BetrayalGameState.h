@@ -114,14 +114,14 @@ public:
 #pragma endregion
 
 #pragma region Haunt
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
-	TSubclassOf<ABaseHaunt> HauntClass;
-
+public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Game|Haunt")
 	ABaseHaunt* CurrentHaunt;
+	UFUNCTION(BlueprintCallable, Category = "Game|Haunt")
+	void SetCurrentHaunt(ABaseHaunt* NewHaunt) { CurrentHaunt = NewHaunt; }
+	UFUNCTION(BlueprintCallable, Category = "Game|Haunt")
+	ABaseHaunt* GetCurrentHaunt() const { return CurrentHaunt; }
 
-	void HauntSetup();
 	
 #pragma endregion 
 };

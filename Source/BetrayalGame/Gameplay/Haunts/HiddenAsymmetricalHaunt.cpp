@@ -23,10 +23,6 @@ AHiddenAsymmetricalHaunt::AHiddenAsymmetricalHaunt()
 void AHiddenAsymmetricalHaunt::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//TODO: Items being spawned for every client and not replicating properly
-	SetupSpawns();
-	
 }
 
 void AHiddenAsymmetricalHaunt::SetupSpawns()
@@ -53,7 +49,6 @@ void AHiddenAsymmetricalHaunt::SetupSpawns()
 		SpawnParams.Owner = this;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		ObjectiveInteractable = GetWorld()->SpawnActor<ABaseInteractable>(ObjectiveInteractableClass, InteractableSpawnTransform->GetActorLocation(), InteractableSpawnTransform->GetActorRotation(), SpawnParams);
-		InteractableSpawnTransform->Destroy();
 	}
 	else
 	{
@@ -68,4 +63,18 @@ void AHiddenAsymmetricalHaunt::SetupSpawns()
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		ObjectiveItems.Add(GetWorld()->SpawnActor<AItemActor>(ObjectiveItemClass, Item->GetActorLocation(), Item->GetActorRotation(), SpawnParams));
 	}
+}
+
+void AHiddenAsymmetricalHaunt::DestroySpawnTransforms()
+{
+	InteractableSpawnTransform->Destroy();
+
+	for (auto ItemSpawn : ItemSpawnTransforms)
+		ItemSpawn->Destroy();
+}
+
+void AHiddenAsymmetricalHaunt::Server_SetupSpawns_Implementation()
+{
+	//TODO: Items being spawned for every client and not replicating properly
+	SetupSpawns();
 }
