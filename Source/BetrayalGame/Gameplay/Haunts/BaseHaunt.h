@@ -40,10 +40,10 @@ protected:
 
 #pragma region Traitor Properties
 
-	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
-	APlayerCharacter* Traitor;
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Haunt|Traitor")
+	const APlayerCharacter* Traitor;
 	
-	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
+	UPROPERTY(EditAnywhere, Category = "Haunt|Traitor")
 	bool bHasTraitor;
 	
 	UPROPERTY(Replicated, EditAnywhere,
@@ -60,7 +60,7 @@ protected:
 
 #pragma region Survivor Properties
 
-	UPROPERTY(VisibleAnywhere, Category = "Haunt|Survivors")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Haunt|Survivors")
 	TArray<APlayerCharacter*> Survivors;
 	
 	UPROPERTY(Replicated, EditAnywhere,
@@ -77,16 +77,6 @@ protected:
 	
 public:
 	ABaseHaunt();
-	ABaseHaunt(FName NewName,
-	           const FText& NewDescription,
-		TEnumAsByte<EHauntCategory> NewCategory,
-		bool bUsesTimer,
-		float NewDuration,
-		bool bUsesTraitor,
-	           const FDataTableRowHandle& NewTraitorObjective,
-	           const TArray<AMonster*>& NewTraitorMonsters,
-	           const FDataTableRowHandle& NewSurvivorObjective);
-
 
 	void ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
 					   float NewDuration, bool bUsesTraitor/*, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
@@ -118,6 +108,13 @@ public:
 	void OnTraitorChosen(const APlayerCharacter* TraitorPlayerCharacter);
 	
 	void SurvivorSetup();
+
+	//TEMPORARY
+	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
+	void OnSurvivorWin();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
+	void OnTraitorWin();
 
 #pragma region Setters
 

@@ -3,6 +3,7 @@
 
 #include "BetrayalGameMode.h"
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
+#include "Gameplay/Haunts/HiddenAsymmetricalHaunt.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -16,6 +17,8 @@ void ABetrayalGameMode::BeginPlay()
 	Super::BeginPlay();
 	BetrayalGameState = GetGameState<ABetrayalGameState>();
 	SetMatchStage(Lobby);
+
+	SetupHaunt();	
 }
 
 void ABetrayalGameMode::SetNextStage()
@@ -100,6 +103,17 @@ TArray<APlayerCharacter*> ABetrayalGameMode::GetAllPlayerCharacters() const
 	return OutCharacters;
 }
 
+ABetrayalPlayerState* ABetrayalGameMode::GetRandomPlayer() const
+{
+	TArray<ABetrayalPlayerState*> AllPlayers = GetAllPlayerStates();
+	if (AllPlayers.Num() > 0)
+	{
+		const int RandomIndex = FMath::RandRange(0, AllPlayers.Num() - 1);
+		return AllPlayers[RandomIndex];
+	}
+	return nullptr;
+}
+
 void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 {
 	MatchStage = NewStage;
@@ -136,4 +150,34 @@ void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 
 	if (BetrayalGameState)
 		BetrayalGameState->SetMatchStage(MatchStage);
+}
+
+void ABetrayalGameMode::SetupHaunt()
+{
+	if(!HauntClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Haunt Class Not Set. Please set Haunt Class in GameMode Blueprint."));
+		return;
+	}
+	BetrayalGameState->SetCurrentHaunt(HauntClass.GetDefaultObject());
+
+	// Spawn CurrentHaunt in game world
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	BetrayalGameState->CurrentHaunt = GetWorld()->SpawnActor<ABaseHaunt>(HauntClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Haunt Actor Spawned. Owner: " + BetrayalGameState->CurrentHaunt->GetOwner()->GetName()));
+
+	
+	AHiddenAsymmetricalHaunt* HiddenAsymmetricalHaunt = Cast<AHiddenAsymmetricalHaunt>(BetrayalGameState->CurrentHaunt);
+	if(!HiddenAsymmetricalHaunt)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Current Haunt is not a Hidden Asymmetrical Haunt."));
+		return;
+	}
+
+	HiddenAsymmetricalHaunt->Server_SetupSpawns();
+
+	HiddenAsymmetricalHaunt->DestroySpawnTransforms();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Hidden Asymmetrical Haunt Setup Complete."));
 }

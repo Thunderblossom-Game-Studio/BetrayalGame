@@ -27,34 +27,12 @@ void ABetrayalGameState::BeginPlay()
 
 }
 
-ABetrayalPlayerState* ABetrayalGameState::GetRandomPlayer() const
-{
-	const int32 NumPlayers = PlayerArray.Num();
-
-	const int32 RandomPlayerIndex = FMath::RandRange(0, NumPlayers - 1);
-
-	return Cast<ABetrayalPlayerState>(PlayerArray[RandomPlayerIndex]);
-}
-
-void ABetrayalGameState::HauntSetup()
-{
-	if(HasAuthority())
-	{
-		CurrentHaunt = HauntClass.GetDefaultObject();
-		CurrentHaunt->SetGameState(this);
-		CurrentHaunt = GetWorld()->SpawnActor<ABaseHaunt>(HauntClass);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Haunt Spawned"));
-	}
-}
-
 void ABetrayalGameState::OnMatchStageChanged_Implementation(const EMatchStage NewStage)
 {
 	switch (NewStage)
 	{
 	case Lobby:
 		OnLobbyStageStart();
-		HauntSetup();
 		break;
 	case Exploring:
 		OnExploringStageStart();

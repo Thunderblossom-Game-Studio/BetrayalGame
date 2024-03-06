@@ -91,7 +91,7 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerControllers();
-
+private:
 #pragma endregion
 
 #pragma region Players
@@ -100,6 +100,21 @@ public:
 	TArray<ABetrayalPlayerState*> GetAllPlayerStates() const;
 	UFUNCTION(BlueprintCallable)
 	TArray<APlayerCharacter*> GetAllPlayerCharacters() const;
+	UFUNCTION(BlueprintCallable)
+	ABetrayalPlayerState* GetRandomPlayer() const;
+private:
+#pragma endregion
+
+#pragma region Haunt Handling
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")
+	TSubclassOf<ABaseHaunt> HauntClass;
 	
+	UFUNCTION(BlueprintCallable)
+	void SetupHaunt();
+
+	
+private:
+
 #pragma endregion 
 };
