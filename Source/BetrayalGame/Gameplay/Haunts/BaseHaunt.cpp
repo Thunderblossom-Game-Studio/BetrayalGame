@@ -129,11 +129,14 @@ void ABaseHaunt::SurvivorSetup()
 
 void ABaseHaunt::OnTraitorWin_Implementation()
 {
+	
 }
 
 void ABaseHaunt::OnSurvivorWin_Implementation()
 {
+	
 }
+
 
 
 

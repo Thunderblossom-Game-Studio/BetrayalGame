@@ -109,12 +109,6 @@ public:
 	
 	void SurvivorSetup();
 
-	//TEMPORARY
-	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
-	void OnSurvivorWin();
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Haunt")
-	void OnTraitorWin();
 
 #pragma region Setters
 
