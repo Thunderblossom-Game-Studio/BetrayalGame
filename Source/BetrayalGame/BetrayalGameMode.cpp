@@ -2,7 +2,6 @@
 
 
 #include "BetrayalGameMode.h"
-
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
