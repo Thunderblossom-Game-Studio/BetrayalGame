@@ -41,9 +41,9 @@ protected:
 #pragma region Traitor Properties
 
 	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
-	APlayerCharacter* Traitor;
+	const APlayerCharacter* Traitor;
 	
-	UPROPERTY(VisibleAnywhere, Category = "Haunt|Traitor")
+	UPROPERTY(EditAnywhere, Category = "Haunt|Traitor")
 	bool bHasTraitor;
 	
 	UPROPERTY(Replicated, EditAnywhere,

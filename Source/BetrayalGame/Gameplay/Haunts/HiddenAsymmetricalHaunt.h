@@ -17,22 +17,40 @@ class BETRAYALGAME_API AHiddenAsymmetricalHaunt : public ABaseHaunt
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
-
-	UPROPERTY(EditAnywhere, Category = "Haunt|Hidden Asymmetric")
-	bool bAddInteractableOnBeginPlay = false;
-	
-	UPROPERTY(EditAnywhere, Category = "Haunt|Hidden Asymmetric", meta = (EditCondition = "!bAddInteractableOnBeginPlay"))
+#pragma region Haunt Interactable
+	UPROPERTY(EditAnywhere, Category = "Haunt|Hidden Asymmetric|Interactable", meta = (EditCondition = "bAutoSpawnInteractable"))
 	TSubclassOf<ABaseInteractable> ObjectiveInteractableClass;
 
-	UPROPERTY(EditAnywhere, Category = "Haunt|Hidden Asymmetric")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Haunt|Hidden Asymmetric|Interactable", meta = (EditCondition = "bAutoSpawnInteractable"));
+	AActor* InteractableSpawnTransform;
+	
+	UPROPERTY(Replicated, EditAnywhere, Category = "Haunt|Hidden Asymmetric|Interactable", meta = (EditCondition = "!bAutoSpawnInteractable"));
 	ABaseInteractable* ObjectiveInteractable;
 
+
+#pragma endregion
+
+#pragma region Haunt Items
+	UPROPERTY(EditAnywhere, Category="Haunt|Hidden Asymmetric|Items");
+	TSubclassOf<AItemActor> ObjectiveItemClass;
+	
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Haunt|Hidden Asymmetric|Items");
+	TArray<AActor*> ItemSpawnTransforms;
+	
+	UPROPERTY(Replicated, EditAnywhere, Category="Haunt|Hidden Asymmetric|Items");
+	TArray<AItemActor*> ObjectiveItems;
+
+	
+	
+#pragma endregion 
 	
 	
 public:
 	AHiddenAsymmetricalHaunt();
 
 	virtual void BeginPlay() override;
+
+	void SetupSpawns();
 
 
 	

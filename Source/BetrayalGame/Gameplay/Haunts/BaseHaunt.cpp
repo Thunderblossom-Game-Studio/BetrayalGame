@@ -83,6 +83,8 @@ void ABaseHaunt::TraitorSetup()
 
 	TraitorCharacter->ObjectivesComponent->Server_SetHauntObjective(*TraitorObjectiveData);
 
+	Traitor = TraitorCharacter;
+	
 	OnTraitorChosen(TraitorCharacter);
 	
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Traitor Setup"));
@@ -99,7 +101,7 @@ void ABaseHaunt::SurvivorSetup()
 		if(Player->IsTraitor())
 			continue;
 		
-		const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Player->GetPawn());
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Player->GetPawn());
 		if(!PlayerCharacter)
 			continue;
 		
@@ -108,6 +110,8 @@ void ABaseHaunt::SurvivorSetup()
 			continue;
 
 		PlayerCharacter->ObjectivesComponent->Server_SetHauntObjective(*SurvivorObjectiveData);
+
+		Survivors.Add(PlayerCharacter);
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Survivors Setup"));
