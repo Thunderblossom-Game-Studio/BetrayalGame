@@ -18,24 +18,14 @@ void ABaseHaunt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ABaseHaunt, TraitorObjective);
 	DOREPLIFETIME(ABaseHaunt, TraitorMonsters);
 	DOREPLIFETIME(ABaseHaunt, SurvivorObjective)
+	DOREPLIFETIME(ABaseHaunt, Traitor);
+	DOREPLIFETIME(ABaseHaunt, Survivors);
+	
 }
 
 ABaseHaunt::ABaseHaunt(): HauntCategory(Hc_Asymmetric), bHasTimer(false), Traitor(nullptr), bHasTraitor(false), GameState(nullptr)
 {
 	bReplicates = true;
-}
-
-ABaseHaunt::ABaseHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
-                       float NewDuration, bool bUsesTraitor, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
-                       const FDataTableRowHandle& NewSurvivorObjective)
-:HauntName(NewName), HauntDescription(NewDescription),
- HauntCategory(NewCategory), bHasTimer(bUsesTimer),
- HauntDuration(NewDuration), bHasTraitor(bUsesTraitor),
- TraitorObjective(NewTraitorObjective), TraitorMonsters(NewTraitorMonsters),
-SurvivorObjective(NewSurvivorObjective)
-{
-	GameState = nullptr;
-	Traitor = nullptr;
 }
 
 void ABaseHaunt::ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory,
@@ -82,8 +72,12 @@ void ABaseHaunt::TraitorSetup()
 {
 	if(!bHasTraitor)
 		return;
+
+	const ABetrayalGameMode* BMode = Cast<ABetrayalGameMode>(GetWorld()->GetAuthGameMode());
+	if(!BMode)
+		return;
 	
-	ABetrayalPlayerState* RandomPlayer = GameState->GetRandomPlayer();
+	ABetrayalPlayerState* RandomPlayer = BMode->GetRandomPlayer();
 	RandomPlayer->SetIsTraitor(true);
 
 	const FObjective* TraitorObjectiveData = TraitorObjective.DataTable->FindRow<FObjective>(TraitorObjective.RowName, "");
@@ -95,7 +89,10 @@ void ABaseHaunt::TraitorSetup()
 		return;
 
 	TraitorCharacter->ObjectivesComponent->Server_SetHauntObjective(*TraitorObjectiveData);
-
+	
+	// TODO Not working fix later
+	Traitor = TraitorCharacter;
+	
 	OnTraitorChosen(TraitorCharacter);
 	
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Traitor Setup"));
@@ -112,7 +109,7 @@ void ABaseHaunt::SurvivorSetup()
 		if(Player->IsTraitor())
 			continue;
 		
-		const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Player->GetPawn());
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Player->GetPawn());
 		if(!PlayerCharacter)
 			continue;
 		
@@ -121,9 +118,21 @@ void ABaseHaunt::SurvivorSetup()
 			continue;
 
 		PlayerCharacter->ObjectivesComponent->Server_SetHauntObjective(*SurvivorObjectiveData);
+
+		// TODO Not working fix later
+		Survivors.Add(PlayerCharacter);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Survivor Added"));
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Survivors Setup"));
+}
+
+void ABaseHaunt::OnTraitorWin_Implementation()
+{
+}
+
+void ABaseHaunt::OnSurvivorWin_Implementation()
+{
 }
 
 
