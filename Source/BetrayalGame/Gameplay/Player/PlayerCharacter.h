@@ -25,7 +25,8 @@ enum EInputActionValue
 	IAV_Inventory3 UMETA(DisplayName = "Inventory3"),
 	IAV_Inventory4 UMETA(DisplayName = "Inventory4"),
 	IAV_TraitorCycleMonster UMETA(DisplayName = "TraitorCycleMonster"),
-	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster")
+	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
+	IAV_Attack UMETA(DisplayName = "Attack"),
 };
 
 USTRUCT(Blueprintable)
@@ -190,6 +191,21 @@ public:
 	class UObjectivesComponent* ObjectivesComponent;
 
 	
+private:
+#pragma endregion
+
+#pragma region Combat System
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	bool bIsAttacking = false;
+	
+public:
+	UFUNCTION()
+	void Attack();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
+	void OnAttack();
+
 private:
 #pragma endregion 
 	
