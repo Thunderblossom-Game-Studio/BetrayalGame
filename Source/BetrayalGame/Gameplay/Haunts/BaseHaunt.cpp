@@ -127,15 +127,6 @@ void ABaseHaunt::SurvivorSetup()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Survivors Setup"));
 }
 
-void ABaseHaunt::OnTraitorWin_Implementation()
-{
-	
-}
-
-void ABaseHaunt::OnSurvivorWin_Implementation()
-{
-	
-}
 
 
 
