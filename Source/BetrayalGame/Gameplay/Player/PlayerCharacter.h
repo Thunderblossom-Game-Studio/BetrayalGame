@@ -29,6 +29,13 @@ enum EInputActionValue
 	IAV_Attack UMETA(DisplayName = "Attack"),
 };
 
+UENUM()
+enum EAnimationMontages
+{
+	AM_None UMETA(DisplayName = "None"),
+	AM_Attack UMETA(DisplayName = "Attack"),
+};
+
 USTRUCT(Blueprintable)
 struct FMonsterSpawnInfo
 {
@@ -54,6 +61,21 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+#pragma region Animation
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Player|Animation")
+	TMap<TEnumAsByte<EAnimationMontages>, UAnimMontage*> AnimationMontages;
+	
+	UFUNCTION()
+	void BindMontageEvents();
+	
+	UFUNCTION()
+	void MontageStarted(UAnimMontage* Montage);
+
+	UFUNCTION()
+	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
+#pragma endregion 
 	
 #pragma region Camera
 public:
@@ -196,15 +218,30 @@ private:
 
 #pragma region Combat System
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Player|Combat")
 	bool bIsAttacking = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UAnimMontage* AttackMontage;
 	
 public:
 	UFUNCTION()
 	void Attack();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Attack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_Attack();
+
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
 	void OnAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
+	void HitDetect();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Player|Combat")
+	void Server_HitDetect();
 
 private:
 #pragma endregion 

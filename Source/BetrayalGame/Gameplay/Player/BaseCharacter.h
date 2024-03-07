@@ -28,7 +28,7 @@ public:
 	
 #pragma region Health System
 	
-private:
+protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float MaxHealth;
 	
@@ -75,7 +75,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
 	void OnDeath();
 	
-
+private:
 #pragma endregion
 
 #pragma region Movement
@@ -87,19 +87,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
 	bool bIsRunning;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float StunnedSpeed;
 	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
 	bool bIsStunned;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+	float StunDuration;
+	
+public:
 	// Different implementation depending if the character is AI or Player
 	virtual void Move(const FInputActionValue& Value);
 	virtual void Move(const FVector2D Value);
+
 	
+private:
 #pragma endregion 
 	
 protected:

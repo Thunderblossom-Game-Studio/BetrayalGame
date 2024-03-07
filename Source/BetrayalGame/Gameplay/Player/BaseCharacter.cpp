@@ -22,6 +22,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABaseCharacter, CurrentHealth);
 	DOREPLIFETIME(ABaseCharacter, bIsDead);
 	DOREPLIFETIME(ABaseCharacter, bIsRunning);
+	DOREPLIFETIME(ABaseCharacter, bIsStunned);
 }
 
 void ABaseCharacter::NetDebugging()

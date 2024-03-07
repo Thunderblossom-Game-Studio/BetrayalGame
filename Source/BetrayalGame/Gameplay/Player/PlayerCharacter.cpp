@@ -46,6 +46,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
 	DOREPLIFETIME(APlayerCharacter, bWasItemUnequipped)
+	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
 }
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
@@ -328,9 +329,69 @@ void APlayerCharacter::NetMulticast_Interact_Implementation(class AActor* NewOwn
 	// 	GEngine->AddOnScreenDebugMessage(-11, 2.0f, FColor::Green, "Interactable Owner: " + NewOwner->GetActorLabel());
 }
 
+void APlayerCharacter::BindMontageEvents()
+{
+	if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::MontageEnded);
+		AnimInstance->OnMontageStarted.AddDynamic(this, &APlayerCharacter::MontageStarted);
+	}
+}
+
+void APlayerCharacter::MontageStarted(UAnimMontage* Montage)
+{
+	if(Montage == *AnimationMontages.Find(AM_Attack))
+		bIsAttacking = true;
+
+}
+
+void APlayerCharacter::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if(Montage == *AnimationMontages.Find(AM_Attack))
+		bIsAttacking = false;
+}
+
 void APlayerCharacter::Attack()
 {
 	OnAttack();
+	
+	Server_Attack();
+}
+
+void APlayerCharacter::Server_Attack_Implementation()
+{
+	NetMulticast_Attack();
+}
+
+void APlayerCharacter::NetMulticast_Attack_Implementation()
+{
+	if(!bIsAttacking && !HeldItem) // Don't attack if player has item on hand.
+		PlayAnimMontage(AttackMontage, 1.0f, NAME_None);
+}
+
+void APlayerCharacter::HitDetect()
+{
+	FVector HitLocation = GetMesh()->GetSocketLocation("ItemSocket");
+
+	TArray<FHitResult> HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	GetWorld()->SweepMultiByChannel(HitResult, HitLocation, HitLocation, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(50.0f), CollisionParams);
+
+	for (auto Pawn : HitResult)
+	{
+		ABaseCharacter* Character = Cast<ABaseCharacter>(Pawn.GetActor());
+		if(!Character)
+			continue;
+		
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Hit: " + Character->GetName());
+	}
+}
+
+void APlayerCharacter::Server_HitDetect_Implementation()
+{
+	HitDetect();
 }
 
 void APlayerCharacter::BeginPlay()
@@ -340,6 +401,8 @@ void APlayerCharacter::BeginPlay()
 	if(APlayerController* PlayerController = Cast<APlayerController>(Controller))
 		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+
+	BindMontageEvents();
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
