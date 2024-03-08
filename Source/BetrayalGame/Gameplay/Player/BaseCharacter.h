@@ -20,6 +20,8 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	bool SweepTraceForCharacter(ABaseCharacter*& HitCharacterOut);
+	
 #pragma region Debugging
 
 	void NetDebugging();
@@ -29,20 +31,20 @@ public:
 #pragma region Health System
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Character|Health")
 	float MaxHealth;
 	
-	UPROPERTY(VisibleAnywhere, Replicated, Category = "Health")
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Character|Health")
 	float CurrentHealth;
 
-	UPROPERTY(VisibleAnywhere, Replicated, Category = "Health")
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Character|Health")
 	bool bIsDead;
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Health")
+	UFUNCTION(BlueprintPure, Category = "Character|Health")
 	float GetMaxHealth() const { return MaxHealth; }
 	
-	UFUNCTION(BlueprintPure, Category = "Health")
+	UFUNCTION(BlueprintPure, Category = "Character|Health")
 	float GetCurrentHealth() const { return CurrentHealth; }
 	
 	UFUNCTION()
@@ -59,7 +61,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_TakeDamage(float Damage);
 	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Health")
 	void OnDamageTaken(float Damage);
 	
 	UFUNCTION(BlueprintCallable)
@@ -68,13 +70,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_Heal(float Amount);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Health")
 	void OnHeal(float Amount);
 
-	UFUNCTION(BlueprintPure, Category = "Health")
+	UFUNCTION(BlueprintPure, Category = "Character|Health")
 	bool IsDead() const { return bIsDead; }
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Health")
 	void OnDeath();
 	
 private:
@@ -83,45 +85,52 @@ private:
 #pragma region Movement
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Movement")
 	float WalkSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Movement")
 	float RunSpeed;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character|Movement")
 	bool bIsRunning;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float StunnedSpeed;
-	
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
-	bool bIsStunned;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Movement")
-	float StunDuration;
-	
 public:
 	// Different implementation depending if the character is AI or Player
 	virtual void Move(const FInputActionValue& Value);
 	virtual void Move(const FVector2D Value);
 
 #pragma region Stun
-	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
-	ABaseCharacter* HitDetectCharacter();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
+	float StunnedSpeed;
 	
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
+	bool bIsStunned;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
+	float StunDuration;
+		
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
 	FTimerHandle StunTimerHandle;
 	
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void Stun(ABaseCharacter* Target,float Duration);
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Character|Combat|Stun")
+	void StunAttack();
+	
+	UFUNCTION(BlueprintCallable, Category = "Character|Combat|Stun")
+	void Stun(float Duration);
 
-	UFUNCTION(Server, Reliable, Blueprintable, Category = "Movement")
-	void Server_Stun(ABaseCharacter* Target, float Duration);
+	UFUNCTION(Server, Reliable, Blueprintable, Category = "Character|Combat|Stun")
+	void Server_Stun(float Duration);
 
-	UFUNCTION(BlueprintCallable, Category = "Movement")
+	UFUNCTION(BlueprintCallable, Category = "Character|Combat|Stun")
 	void StopStun();
-#pragma endregion 
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Combat|Stun")
+	void OnStun();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Combat|Stun")
+	void OnStunEnd();
+#pragma endregion
+	
 private:
 #pragma endregion 
 	

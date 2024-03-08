@@ -78,10 +78,14 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 	const FVector2D MovementInput = Value.Get<FVector2D>();
 
-	if (bIsRunning)		
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	else
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	// if(bIsStunned)
+	// 	GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
+	// else if (bIsRunning)
+	// 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	// else
+	// 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	//
+	
 	
 	if (Controller != nullptr)
 	{
@@ -218,13 +222,21 @@ void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
 
 void APlayerCharacter::RunStart_Implementation()
 {
-	bIsRunning = true;
+	if(bIsStunned)
+		return;
+	
+	//bIsRunning = true;
+	
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
 void APlayerCharacter::RunEnd_Implementation()
 {
-	bIsRunning = false;
+	if(bIsStunned)
+		return;
+	
+	//bIsRunning = false;
+	
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
