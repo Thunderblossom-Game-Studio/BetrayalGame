@@ -369,30 +369,7 @@ void APlayerCharacter::NetMulticast_Attack_Implementation()
 		PlayAnimMontage(AttackMontage, 1.0f, NAME_None);
 }
 
-void APlayerCharacter::HitDetect()
-{
-	FVector HitLocation = GetMesh()->GetSocketLocation("ItemSocket");
 
-	TArray<FHitResult> HitResult;
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-	
-	GetWorld()->SweepMultiByChannel(HitResult, HitLocation, HitLocation, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(50.0f), CollisionParams);
-
-	for (auto Pawn : HitResult)
-	{
-		ABaseCharacter* Character = Cast<ABaseCharacter>(Pawn.GetActor());
-		if(!Character)
-			continue;
-		
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Hit: " + Character->GetName());
-	}
-}
-
-void APlayerCharacter::Server_HitDetect_Implementation()
-{
-	HitDetect();
-}
 
 void APlayerCharacter::BeginPlay()
 {

@@ -237,11 +237,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
 	void OnAttack();
 
-	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
-	void HitDetect();
 
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Player|Combat")
-	void Server_HitDetect();
 
 private:
 #pragma endregion 

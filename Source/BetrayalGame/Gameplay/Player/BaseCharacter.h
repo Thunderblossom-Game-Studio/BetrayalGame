@@ -51,12 +51,17 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_SetMaxHealth(float NewMaxHealth);
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
 	UFUNCTION(BlueprintCallable)
 	void TakeDamage(float Damage);
-
+	
 	UFUNCTION(Server, Reliable)
 	void Server_TakeDamage(float Damage);
-
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
+	void OnDamageTaken(float Damage);
+	
 	UFUNCTION(BlueprintCallable)
 	void Heal(float Amount);
 
@@ -65,9 +70,6 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
 	void OnHeal(float Amount);
-	
-	UFUNCTION(BlueprintImplementableEvent, Category = "Health")
-	void OnDamageTaken(float Damage);
 
 	UFUNCTION(BlueprintPure, Category = "Health")
 	bool IsDead() const { return bIsDead; }
@@ -104,7 +106,22 @@ public:
 	virtual void Move(const FInputActionValue& Value);
 	virtual void Move(const FVector2D Value);
 
+#pragma region Stun
+	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
+	ABaseCharacter* HitDetectCharacter();
 	
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Movement")
+	FTimerHandle StunTimerHandle;
+	
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void Stun(ABaseCharacter* Target,float Duration);
+
+	UFUNCTION(Server, Reliable, Blueprintable, Category = "Movement")
+	void Server_Stun(ABaseCharacter* Target, float Duration);
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void StopStun();
+#pragma endregion 
 private:
 #pragma endregion 
 	

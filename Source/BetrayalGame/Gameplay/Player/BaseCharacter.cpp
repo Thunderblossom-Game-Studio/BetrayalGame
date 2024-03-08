@@ -23,6 +23,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABaseCharacter, bIsDead);
 	DOREPLIFETIME(ABaseCharacter, bIsRunning);
 	DOREPLIFETIME(ABaseCharacter, bIsStunned);
+	DOREPLIFETIME(ABaseCharacter, StunTimerHandle);
 }
 
 void ABaseCharacter::NetDebugging()
@@ -53,6 +54,35 @@ void ABaseCharacter::Move(const FInputActionValue& Value)
 void ABaseCharacter::Move(const FVector2D Value)
 {
 	
+}
+
+ABaseCharacter* ABaseCharacter::HitDetectCharacter()
+{
+	FVector HitLocation = GetMesh()->GetSocketLocation("ItemSocket");
+
+	TArray<FHitResult> HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	GetWorld()->SweepMultiByChannel(HitResult, HitLocation, HitLocation, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(50.0f), CollisionParams);
+
+	for (auto Pawn : HitResult)
+	{
+		ABaseCharacter* Character = Cast<ABaseCharacter>(Pawn.GetActor());
+		if(!Character)
+			continue;
+		
+		return Character;
+	}
+
+	return nullptr;
+}
+
+
+float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+                                 AActor* DamageCauser)
+{
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ABaseCharacter::TakeDamage(float Damage)
@@ -93,6 +123,23 @@ void ABaseCharacter::Server_TakeDamage_Implementation(float Damage)
 void ABaseCharacter::Server_SetMaxHealth_Implementation(float NewMaxHealth)
 {
 	SetMaxHealth(NewMaxHealth);
+}
+
+void ABaseCharacter::Stun(ABaseCharacter* Target, float Duration)
+{
+	Target = HitDetectCharacter();
+
+	Target->GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, this, &ABaseCharacter::StopStun, Duration, false);
+}
+
+void ABaseCharacter::Server_Stun_Implementation(ABaseCharacter* Target, float Duration)
+{
+	Stun(Target, Duration);
+}
+
+void ABaseCharacter::StopStun()
+{
+	bIsStunned = false;
 }
 
 // Called when the game starts or when spawned
