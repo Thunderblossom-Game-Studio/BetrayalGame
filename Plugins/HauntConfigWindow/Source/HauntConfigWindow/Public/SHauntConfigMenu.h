@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BetrayalGame/Gameplay/Haunts/BaseHaunt.h"
+#include "BetrayalGame/Gameplay/Haunts//BaseHaunt.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**
@@ -28,6 +28,8 @@ public:
 	FReply OnHauntLengthChanged(const FText& NewText);
 	FReply OnHauntNameChanged(const FText& NewText);
 	FReply OnHauntDescriptionChanged(const FText& NewText);
+	void OnUseChaserCheckboxStateChanged(ECheckBoxState NewState);
+	void OnUseMaulerCheckboxStateChanged(ECheckBoxState NewState);
 
 protected:
 	void UpdatedConfigMenu();
@@ -40,6 +42,8 @@ protected:
 	bool bUsesTimer = true;
 	int32 HauntLength_Seconds = 120;
 	TEnumAsByte<EHauntCategory> HauntCategory = Hc_Asymmetric;
+	bool bUsesChaser = true;
+	bool bUsesMauler = true;
 
 	const int WidgetPadding = 15;
 };
