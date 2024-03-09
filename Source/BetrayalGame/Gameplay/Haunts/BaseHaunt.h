@@ -55,7 +55,7 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category="Haunt|Traitor",
 			meta = (EditCondition = "HauntCategory == EHauntCategory::Hc_Asymmetric || HauntCategory == EHauntCategory::Hc_HiddenAsymmetric",
 					Tooltip = "Traitors only have a list of monsters if the haunt is Asymmetric or Hidden Asymmetric"))
-	TArray<AMonster*> TraitorMonsters;
+	TArray<TSubclassOf<AMonster>> TraitorMonsters;
 #pragma endregion
 
 #pragma region Survivor Properties
@@ -79,7 +79,7 @@ public:
 	ABaseHaunt();
 
 	void ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
-					   float NewDuration, bool bUsesTraitor/*, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
+					   float NewDuration, bool bUsesTraitor, TArray<TSubclassOf<AMonster>> NewTraitorMonsters/*, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
 					   const FDataTableRowHandle& NewSurvivorObjective*/);
 	
 	// TODO: Add cutscene references(start haunt, end haunt, traitor picked)
@@ -144,9 +144,9 @@ public:
 	void SetTraitorObjective(const FDataTableRowHandle& NewObjective) { TraitorObjective = NewObjective; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Haunt")
-	TArray<AMonster*> GetTraitorMonsters() const { return TraitorMonsters; }
+	TArray<TSubclassOf<AMonster>> GetTraitorMonsters() const { return TraitorMonsters; }
 	UFUNCTION(BlueprintCallable, Category = "Haunt")
-	void SetTraitorMonsters(const TArray<AMonster*>& NewMonsters) { TraitorMonsters = NewMonsters; }
+	void SetTraitorMonsters(TArray<TSubclassOf<AMonster>> NewMonsters) { TraitorMonsters = NewMonsters; }
 
 	UFUNCTION(BlueprintCallable, Category = "Haunt")
 	FDataTableRowHandle GetSurvivorObjective() const { return SurvivorObjective; }

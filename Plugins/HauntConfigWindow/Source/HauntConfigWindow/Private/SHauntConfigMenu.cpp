@@ -6,6 +6,8 @@
 #include "SlateOptMacros.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "KismetCompilerModule.h"
+#include "BetrayalGame/AI/Pawns/Chaser.h"
+#include "BetrayalGame/AI/Pawns/Mauler.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
 
@@ -173,16 +175,69 @@ void SHauntConfigMenu::Construct(const FArguments& InArgs)
 				CategoryComboButton
 			]
 			
-			+SVerticalBox::Slot()
+		]
+
+		+SVerticalBox::Slot()
+		.AutoHeight()
+		.VAlign(VAlign_Top)
+		.HAlign(HAlign_Fill)
+		[
+			SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
 			.VAlign(VAlign_Center)
 			.HAlign(HAlign_Left)
 			.Padding(WidgetPadding)
-			.AutoHeight()
+			.AutoWidth()
 			[
 				SNew(STextBlock)
 				.Visibility_Lambda([this]() { return (HauntCategory != Hc_FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
-				.Text(FText::FromString("Monsters Option Goes Here"))				
+				.Text(FText::FromString("Traitor Monsters: "))				
 			]
+
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Left)
+			.Padding(WidgetPadding)
+			.AutoWidth()
+			[
+				SNew(STextBlock)
+				.Visibility_Lambda([this]() { return (HauntCategory != Hc_FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
+				.Text(FText::FromString("Chaser: "))					
+			]
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Left)
+			.Padding(WidgetPadding)
+			.AutoWidth()
+			[
+				SNew(SCheckBox)
+				.Visibility_Lambda([this]() { return (HauntCategory != Hc_FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
+				.IsChecked(bUsesChaser ? ECheckBoxState::Checked : ECheckBoxState::Unchecked)
+				.OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SHauntConfigMenu::OnUseChaserCheckboxStateChanged))			
+			]
+			
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Left)
+			.Padding(WidgetPadding)
+			.AutoWidth()
+			[
+				SNew(STextBlock)
+				.Visibility_Lambda([this]() { return (HauntCategory != Hc_FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
+				.Text(FText::FromString("Mauler: "))					
+			]
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Left)
+			.Padding(WidgetPadding)
+			.AutoWidth()
+			[
+				SNew(SCheckBox)
+				.Visibility_Lambda([this]() { return (HauntCategory != Hc_FreeForAll) ? EVisibility::All : EVisibility::Hidden; })
+				.IsChecked(bUsesMauler ? ECheckBoxState::Checked : ECheckBoxState::Unchecked)
+				.OnCheckStateChanged(FOnCheckStateChanged::CreateSP(this, &SHauntConfigMenu::OnUseMaulerCheckboxStateChanged))				
+			]
+
 		]
 
 		// Create 'Create' button
@@ -276,7 +331,7 @@ void SHauntConfigMenu::OnUseTimerCheckboxStateChanged(ECheckBoxState NewState)
 
 FReply SHauntConfigMenu::OnHauntLengthChanged(const FText& NewText)
 {
-	FText Trimmed = FText::TrimPrecedingAndTrailing(NewText);
+	const FText Trimmed = FText::TrimPrecedingAndTrailing(NewText);
 	if (!Trimmed.IsNumeric())
 		return FReply::Handled();
 	HauntLength_Seconds = FCString::Atoi(*Trimmed.ToString());
@@ -293,6 +348,16 @@ FReply SHauntConfigMenu::OnHauntDescriptionChanged(const FText& NewText)
 {
 	HauntDescription = NewText.ToString();
 	return FReply::Handled();
+}
+
+void SHauntConfigMenu::OnUseChaserCheckboxStateChanged(ECheckBoxState NewState)
+{
+	bUsesChaser = (NewState == ECheckBoxState::Checked);
+}
+
+void SHauntConfigMenu::OnUseMaulerCheckboxStateChanged(ECheckBoxState NewState)
+{
+	bUsesMauler = (NewState == ECheckBoxState::Checked);
 }
 
 FReply SHauntConfigMenu::OnAsymmetricClicked()
@@ -342,8 +407,17 @@ void SHauntConfigMenu::ConfigureHauntBlueprint(ABaseHaunt* Haunt)
 		return;
 	}
 
-	// TODO - Joseph: Integrate tool with Vasco's UBaseHaunt.
+	// TODO - Joseph: Integrate tool with Vasco's ABaseHaunt.
 
+	TArray<TSubclassOf<AMonster>> TraitorMonsters;
+	if (HauntCategory != Hc_FreeForAll)
+	{
+		if (bUsesChaser)
+			TraitorMonsters.Add(AChaser::StaticClass());
+		if (bUsesMauler)
+			TraitorMonsters.Add(AMauler::StaticClass());
+	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Configuring Haunt..."));
 	Haunt->ConfigureHaunt(
 		FName(*HauntName),
@@ -351,7 +425,8 @@ void SHauntConfigMenu::ConfigureHauntBlueprint(ABaseHaunt* Haunt)
 		HauntCategory,
 		bUsesTimer,
 		HauntLength_Seconds,
-		false
+		false,
+		TraitorMonsters
 		);
 }
 
