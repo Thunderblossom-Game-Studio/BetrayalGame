@@ -18,7 +18,7 @@ public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
 
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	bool SweepTraceForCharacter(ABaseCharacter*& HitCharacterOut);
 	
@@ -85,22 +85,24 @@ private:
 #pragma region Movement
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Movement")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Character|Movement")
 	float WalkSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Movement")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Character|Movement")
 	float RunSpeed;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character|Movement")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Character|Movement")
 	bool bIsRunning;
 
 public:
 	// Different implementation depending if the character is AI or Player
+	UFUNCTION(Server, Reliable)
 	virtual void Move(const FInputActionValue& Value);
+	
 	virtual void Move(const FVector2D Value);
 
 #pragma region Stun
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
 	float StunnedSpeed;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")

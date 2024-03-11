@@ -77,15 +77,6 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 	Super::Move(Value);
 
 	const FVector2D MovementInput = Value.Get<FVector2D>();
-
-	// if(bIsStunned)
-	// 	GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
-	// else if (bIsRunning)
-	// 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	// else
-	// 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	//
-	
 	
 	if (Controller != nullptr)
 	{
@@ -222,22 +213,22 @@ void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
 
 void APlayerCharacter::RunStart_Implementation()
 {
-	if(bIsStunned)
-		return;
+	// if(bIsStunned)
+	// 	return;
 	
-	//bIsRunning = true;
+	bIsRunning = true;
 	
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
 void APlayerCharacter::RunEnd_Implementation()
 {
-	if(bIsStunned)
-		return;
+	// if(bIsStunned)
+	// 	return;
 	
-	//bIsRunning = false;
+	bIsRunning = false;
 	
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void APlayerCharacter::Server_UnequipItem_Implementation()
@@ -407,7 +398,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	
 	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::TurnLook);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);

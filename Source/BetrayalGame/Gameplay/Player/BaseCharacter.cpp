@@ -24,6 +24,9 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABaseCharacter, bIsRunning);
 	DOREPLIFETIME(ABaseCharacter, bIsStunned);
 	DOREPLIFETIME(ABaseCharacter, StunTimerHandle);
+	DOREPLIFETIME(ABaseCharacter, WalkSpeed);
+	DOREPLIFETIME(ABaseCharacter, RunSpeed);
+	DOREPLIFETIME(ABaseCharacter, StunnedSpeed);
 }
 
 bool ABaseCharacter::SweepTraceForCharacter(ABaseCharacter*& HitCharacterOut)
@@ -69,9 +72,19 @@ void ABaseCharacter::NetDebugging()
 	}
 }
 
-void ABaseCharacter::Move(const FInputActionValue& Value)
+// void ABaseCharacter::Move(const FInputActionValue& Value)
+// {
+//
+// }
+
+void ABaseCharacter::Move_Implementation(const FInputActionValue& Value)
 {
-	
+	if(bIsStunned)
+		GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
+	else if (bIsRunning)
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ABaseCharacter::Move(const FVector2D Value)
@@ -138,7 +151,7 @@ void ABaseCharacter::Stun(float Duration)
 {
 	bIsStunned = true;
 
-	GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
 	
 	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, this, &ABaseCharacter::StopStun, Duration, false);
 
@@ -154,7 +167,7 @@ void ABaseCharacter::StopStun()
 {
 	bIsStunned = false;
 	
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	
 	OnStunEnd();
 }
