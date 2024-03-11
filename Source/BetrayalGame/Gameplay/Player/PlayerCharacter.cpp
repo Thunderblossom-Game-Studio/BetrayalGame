@@ -46,6 +46,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
 	DOREPLIFETIME(APlayerCharacter, bWasItemUnequipped)
+	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
 }
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
@@ -75,12 +76,14 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 {
 	Super::Move(Value);
 
-	const FVector2D MovementInput = Value.Get<FVector2D>();
-
-	if (bIsRunning)		
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	if(bIsStunned)
+		Server_SetMaxWalkSpeed_Implementation(StunnedSpeed);
+	else if (bIsRunning)
+		Server_SetMaxWalkSpeed_Implementation(RunSpeed);
 	else
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		Server_SetMaxWalkSpeed_Implementation(WalkSpeed);
+	
+	const FVector2D MovementInput = Value.Get<FVector2D>();
 	
 	if (Controller != nullptr)
 	{
@@ -217,14 +220,20 @@ void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
 
 void APlayerCharacter::RunStart_Implementation()
 {
+	if(bIsStunned)
+		return;
+	
 	bIsRunning = true;
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	Server_SetMaxWalkSpeed_Implementation(RunSpeed);
 }
 
 void APlayerCharacter::RunEnd_Implementation()
 {
+	if(bIsStunned)
+		return;
+	
 	bIsRunning = false;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	Server_SetMaxWalkSpeed_Implementation(WalkSpeed);
 }
 
 void APlayerCharacter::Server_UnequipItem_Implementation()
@@ -328,6 +337,48 @@ void APlayerCharacter::NetMulticast_Interact_Implementation(class AActor* NewOwn
 	// 	GEngine->AddOnScreenDebugMessage(-11, 2.0f, FColor::Green, "Interactable Owner: " + NewOwner->GetActorLabel());
 }
 
+void APlayerCharacter::BindMontageEvents()
+{
+	if(UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::MontageEnded);
+		AnimInstance->OnMontageStarted.AddDynamic(this, &APlayerCharacter::MontageStarted);
+	}
+}
+
+void APlayerCharacter::MontageStarted(UAnimMontage* Montage)
+{
+	if(Montage == *AnimationMontages.Find(AM_Attack))
+		bIsAttacking = true;
+
+}
+
+void APlayerCharacter::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if(Montage == *AnimationMontages.Find(AM_Attack))
+		bIsAttacking = false;
+}
+
+void APlayerCharacter::Attack()
+{
+	OnAttack();
+	
+	Server_Attack();
+}
+
+void APlayerCharacter::Server_Attack_Implementation()
+{
+	NetMulticast_Attack();
+}
+
+void APlayerCharacter::NetMulticast_Attack_Implementation()
+{
+	if(!bIsAttacking && !HeldItem) // Don't attack if player has item on hand.
+		PlayAnimMontage(AttackMontage, 1.0f, NAME_None);
+}
+
+
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -335,6 +386,8 @@ void APlayerCharacter::BeginPlay()
 	if(APlayerController* PlayerController = Cast<APlayerController>(Controller))
 		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+
+	BindMontageEvents();
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
@@ -347,10 +400,10 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &ABaseCharacter::Move);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::TurnLook);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);
@@ -367,6 +420,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorCycleMonster), ETriggerEvent::Started, this, &APlayerCharacter::CycleSelectedMonster);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnMonster);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Attack), ETriggerEvent::Started, this, &APlayerCharacter::Attack);
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);

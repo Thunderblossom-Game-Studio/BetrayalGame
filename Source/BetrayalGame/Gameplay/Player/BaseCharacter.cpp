@@ -22,6 +22,34 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABaseCharacter, CurrentHealth);
 	DOREPLIFETIME(ABaseCharacter, bIsDead);
 	DOREPLIFETIME(ABaseCharacter, bIsRunning);
+	DOREPLIFETIME(ABaseCharacter, bIsStunned);
+	DOREPLIFETIME(ABaseCharacter, StunTimerHandle);
+	DOREPLIFETIME(ABaseCharacter, WalkSpeed);
+	DOREPLIFETIME(ABaseCharacter, RunSpeed);
+	DOREPLIFETIME(ABaseCharacter, StunnedSpeed);
+}
+
+bool ABaseCharacter::SweepTraceForCharacter(ABaseCharacter*& HitCharacterOut)
+{
+	FVector HitLocation = GetMesh()->GetSocketLocation("ItemSocket");
+	
+	TArray<FHitResult> HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	GetWorld()->SweepMultiByChannel(HitResult, HitLocation, HitLocation, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(50.0f), CollisionParams);
+	
+	for (auto Pawn : HitResult)
+	{
+		ABaseCharacter* Character = Cast<ABaseCharacter>(Pawn.GetActor());
+		if(!Character)
+			continue;
+		
+		HitCharacterOut = Character;
+		return true;
+	}
+	
+	return false;
 }
 
 void ABaseCharacter::NetDebugging()
@@ -52,6 +80,31 @@ void ABaseCharacter::Move(const FInputActionValue& Value)
 void ABaseCharacter::Move(const FVector2D Value)
 {
 	
+}
+
+void ABaseCharacter::SetMaxWalkSpeed(float NewSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+}
+
+void ABaseCharacter::Server_SetMaxWalkSpeed_Implementation(float NewSpeed)
+{
+	SetMaxWalkSpeed(NewSpeed);
+}
+
+
+void ABaseCharacter::StunAttack_Implementation()
+{
+	ABaseCharacter* HitCharacter = nullptr;
+	
+	if(SweepTraceForCharacter(HitCharacter))
+		HitCharacter->Server_Stun(StunDuration);
+}
+
+float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+                                 AActor* DamageCauser)
+{
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ABaseCharacter::TakeDamage(float Damage)
@@ -92,6 +145,31 @@ void ABaseCharacter::Server_TakeDamage_Implementation(float Damage)
 void ABaseCharacter::Server_SetMaxHealth_Implementation(float NewMaxHealth)
 {
 	SetMaxHealth(NewMaxHealth);
+}
+
+void ABaseCharacter::Stun(float Duration)
+{
+	bIsStunned = true;
+
+	Server_SetMaxWalkSpeed_Implementation(StunnedSpeed);
+	
+	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, this, &ABaseCharacter::StopStun, Duration, false);
+
+	OnStun();
+}
+
+void ABaseCharacter::Server_Stun_Implementation(float Duration)
+{
+	Stun(Duration);
+}
+
+void ABaseCharacter::StopStun()
+{
+	bIsStunned = false;
+	
+	Server_SetMaxWalkSpeed_Implementation(WalkSpeed);
+	
+	OnStunEnd();
 }
 
 // Called when the game starts or when spawned

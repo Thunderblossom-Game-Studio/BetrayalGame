@@ -25,7 +25,15 @@ enum EInputActionValue
 	IAV_Inventory3 UMETA(DisplayName = "Inventory3"),
 	IAV_Inventory4 UMETA(DisplayName = "Inventory4"),
 	IAV_TraitorCycleMonster UMETA(DisplayName = "TraitorCycleMonster"),
-	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster")
+	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
+	IAV_Attack UMETA(DisplayName = "Attack"),
+};
+
+UENUM()
+enum EAnimationMontages
+{
+	AM_None UMETA(DisplayName = "None"),
+	AM_Attack UMETA(DisplayName = "Attack"),
 };
 
 USTRUCT(Blueprintable)
@@ -53,6 +61,21 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+#pragma region Animation
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Player|Animation")
+	TMap<TEnumAsByte<EAnimationMontages>, UAnimMontage*> AnimationMontages;
+	
+	UFUNCTION()
+	void BindMontageEvents();
+	
+	UFUNCTION()
+	void MontageStarted(UAnimMontage* Montage);
+
+	UFUNCTION()
+	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
+#pragma endregion 
 	
 #pragma region Camera
 public:
@@ -86,7 +109,7 @@ private:
 #pragma region Movement
 public:
 	virtual void Move(const FInputActionValue& Value) override;
-
+	
 	UFUNCTION(Server, Reliable)
 	void RunStart();
 
@@ -133,9 +156,6 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
 	void OnItemEquipped(FInventorySlot Slot, AItemActor* Item);
-
-	// UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	// void OnItemUnequipped(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 
@@ -190,6 +210,32 @@ public:
 	class UObjectivesComponent* ObjectivesComponent;
 
 	
+private:
+#pragma endregion
+
+#pragma region Combat System
+protected:
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Player|Combat")
+	bool bIsAttacking = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UAnimMontage* AttackMontage;
+	
+public:
+	UFUNCTION()
+	void Attack();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Attack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_Attack();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
+	void OnAttack();
+
+
+
 private:
 #pragma endregion 
 	
