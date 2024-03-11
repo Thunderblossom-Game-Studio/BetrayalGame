@@ -76,6 +76,13 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 {
 	Super::Move(Value);
 
+	if(bIsStunned)
+		Server_SetMaxWalkSpeed_Implementation(StunnedSpeed);
+	else if (bIsRunning)
+		Server_SetMaxWalkSpeed_Implementation(RunSpeed);
+	else
+		Server_SetMaxWalkSpeed_Implementation(WalkSpeed);
+	
 	const FVector2D MovementInput = Value.Get<FVector2D>();
 	
 	if (Controller != nullptr)
@@ -213,22 +220,20 @@ void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
 
 void APlayerCharacter::RunStart_Implementation()
 {
-	// if(bIsStunned)
-	// 	return;
+	if(bIsStunned)
+		return;
 	
 	bIsRunning = true;
-	
-	//GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	Server_SetMaxWalkSpeed_Implementation(RunSpeed);
 }
 
 void APlayerCharacter::RunEnd_Implementation()
 {
-	// if(bIsStunned)
-	// 	return;
+	if(bIsStunned)
+		return;
 	
 	bIsRunning = false;
-	
-	//GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	Server_SetMaxWalkSpeed_Implementation(WalkSpeed);
 }
 
 void APlayerCharacter::Server_UnequipItem_Implementation()

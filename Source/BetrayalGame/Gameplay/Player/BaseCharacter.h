@@ -96,11 +96,15 @@ public:
 
 public:
 	// Different implementation depending if the character is AI or Player
-	UFUNCTION(Server, Reliable)
 	virtual void Move(const FInputActionValue& Value);
 	
 	virtual void Move(const FVector2D Value);
+	
+	void SetMaxWalkSpeed(float NewSpeed);
 
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Character|Movement")
+	void Server_SetMaxWalkSpeed(float NewSpeed);
+	
 #pragma region Stun
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Character|Combat|Stun")
 	float StunnedSpeed;

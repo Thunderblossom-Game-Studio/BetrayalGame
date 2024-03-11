@@ -156,9 +156,6 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
 	void OnItemEquipped(FInventorySlot Slot, AItemActor* Item);
-
-	// UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	// void OnItemUnequipped(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 

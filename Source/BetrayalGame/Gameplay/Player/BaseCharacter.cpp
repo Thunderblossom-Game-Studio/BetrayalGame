@@ -72,19 +72,9 @@ void ABaseCharacter::NetDebugging()
 	}
 }
 
-// void ABaseCharacter::Move(const FInputActionValue& Value)
-// {
-//
-// }
-
-void ABaseCharacter::Move_Implementation(const FInputActionValue& Value)
+void ABaseCharacter::Move(const FInputActionValue& Value)
 {
-	if(bIsStunned)
-		GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
-	else if (bIsRunning)
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	else
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	
 }
 
 void ABaseCharacter::Move(const FVector2D Value)
@@ -92,13 +82,23 @@ void ABaseCharacter::Move(const FVector2D Value)
 	
 }
 
+void ABaseCharacter::SetMaxWalkSpeed(float NewSpeed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+}
+
+void ABaseCharacter::Server_SetMaxWalkSpeed_Implementation(float NewSpeed)
+{
+	SetMaxWalkSpeed(NewSpeed);
+}
+
+
 void ABaseCharacter::StunAttack_Implementation()
 {
 	ABaseCharacter* HitCharacter = nullptr;
 	
 	if(SweepTraceForCharacter(HitCharacter))
 		HitCharacter->Server_Stun(StunDuration);
-    	
 }
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
@@ -151,7 +151,7 @@ void ABaseCharacter::Stun(float Duration)
 {
 	bIsStunned = true;
 
-	//GetCharacterMovement()->MaxWalkSpeed = StunnedSpeed;
+	Server_SetMaxWalkSpeed_Implementation(StunnedSpeed);
 	
 	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, this, &ABaseCharacter::StopStun, Duration, false);
 
@@ -167,7 +167,7 @@ void ABaseCharacter::StopStun()
 {
 	bIsStunned = false;
 	
-	//GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	Server_SetMaxWalkSpeed_Implementation(WalkSpeed);
 	
 	OnStunEnd();
 }
