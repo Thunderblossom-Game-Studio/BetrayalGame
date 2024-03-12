@@ -82,9 +82,6 @@ protected:
 #pragma endregion
 
 #pragma region Game
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Haunt|GameState")
-	class ABetrayalGameState* GameState;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Haunt|Items")
 	TArray<FHauntActor> HauntActors;
 
@@ -179,10 +176,6 @@ public:
 #pragma endregion
 
 #pragma region Game
-	UFUNCTION(BlueprintCallable, Category = "Haunt")
-	ABetrayalGameState* GetGameState() const { return GameState; }
-	UFUNCTION(BlueprintCallable, Category = "Haunt")
-	void SetGameState(ABetrayalGameState* NewGameState) { GameState = NewGameState; }
 
 #pragma endregion 
 };

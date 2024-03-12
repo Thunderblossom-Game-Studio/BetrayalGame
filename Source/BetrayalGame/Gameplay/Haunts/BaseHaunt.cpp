@@ -77,7 +77,7 @@ void ABaseHaunt::SpawnHauntItems_Implementation(bool bInitialize)
 	}
 }
 
-ABaseHaunt::ABaseHaunt(): HauntCategory(Hc_Asymmetric), bHasTimer(false), Traitor(nullptr), bHasTraitor(false), GameState(nullptr)
+ABaseHaunt::ABaseHaunt(): HauntCategory(Hc_Asymmetric), bHasTimer(false), Traitor(nullptr), bHasTraitor(false)
 {
 	bReplicates = true;
 }
