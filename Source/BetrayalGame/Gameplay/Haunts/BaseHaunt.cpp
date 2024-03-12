@@ -2,9 +2,11 @@
 
 #include "BaseHaunt.h"
 
+#include "NavigationSystem.h"
 #include "../../BetrayalGameMode.h"
 #include "../Player/Player Components/ObjectivesComponent.h"
 #include "BetrayalGame/BetrayalGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 void ABaseHaunt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -23,13 +25,79 @@ void ABaseHaunt::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	
 }
 
+void ABaseHaunt::SpawnHauntItems_Implementation(bool bInitialize)
+{
+	if (HauntActorSpawnPoints.Num() == 0)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Haunt items spawn failed, can't find any spawn points in world.."));
+		return;
+	}	
+	
+	// Spawn Haunt Items
+	if (HauntActors.Num() > 0)
+	{
+		for (const FHauntActor& HauntActor : HauntActors)
+		{
+			if (HauntActor.bSpawnAtStart != bInitialize)
+				continue;
+
+			FVector Location = FVector::Zero();
+			FRotator Rotation = FRotator::ZeroRotator;
+			AItemSpawnLocation* ChosenSpawnPoint = nullptr;
+
+			for (AItemSpawnLocation* SpawnPoint : HauntActorSpawnPoints)
+			{
+				if (!SpawnPoint)
+					continue;
+				if (HauntActor.Actor.Get() != SpawnPoint->GetItemFilter().Get())
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Invalid spawn point.." + HauntActor.Actor.Get()->GetName() + " and " + SpawnPoint->GetItemFilter().Get()->GetName()));					
+					continue;
+				}
+				ChosenSpawnPoint = SpawnPoint;
+			}
+
+			if (!ChosenSpawnPoint)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Haunt item spawn failed, invalid chosen spawn point.."));
+				continue;				
+			}
+			
+			Location = ChosenSpawnPoint->GetActorLocation();
+			Rotation = ChosenSpawnPoint->GetActorRotation();
+			
+			HauntActorSpawnPoints.Remove(ChosenSpawnPoint);
+			ChosenSpawnPoint->Destroy();
+			
+			FActorSpawnParameters SpawnParams;
+			AActor* Actor = GetWorld()->SpawnActor(HauntActor.Actor, &Location, &Rotation, SpawnParams);
+			
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Haunt item spawned.."));
+		}
+	}
+}
+
 ABaseHaunt::ABaseHaunt(): HauntCategory(Hc_Asymmetric), bHasTimer(false), Traitor(nullptr), bHasTraitor(false), GameState(nullptr)
 {
 	bReplicates = true;
 }
 
+void ABaseHaunt::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	TArray<AActor*> SpawnPoints;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnLocation::StaticClass(), SpawnPoints);
+	for (AActor* Point : SpawnPoints)
+		if (AItemSpawnLocation* SpawnPoint = Cast<AItemSpawnLocation>(Point))
+			HauntActorSpawnPoints.Add(SpawnPoint);
+
+	
+	SpawnHauntItems(true);
+}
+
 void ABaseHaunt::ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory,
-	bool bUsesTimer, float NewDuration, bool bUsesTraitor, TArray<TSubclassOf<AMonster>> NewTraitorMonsters/*, const FDataTableRowHandle& NewTraitorObjective,
+                                bool bUsesTimer, float NewDuration, bool bUsesTraitor, TArray<TSubclassOf<AMonster>> NewTraitorMonsters/*, const FDataTableRowHandle& NewTraitorObjective,
 	, const FDataTableRowHandle& NewSurvivorObjective*/)
 {
 	HauntName = NewName;
@@ -41,6 +109,8 @@ void ABaseHaunt::ConfigureHaunt(FName NewName, const FText& NewDescription, TEnu
 	// TraitorObjective = NewTraitorObjective;
 	TraitorMonsters = NewTraitorMonsters;
 	// SurvivorObjective = NewSurvivorObjective;
+
+	
 }
 
 void ABaseHaunt::StartHaunt()
@@ -50,7 +120,11 @@ void ABaseHaunt::StartHaunt()
 	SurvivorSetup();
 	
 	OnHauntStart();
-	
+
+	if (HasAuthority())
+	{
+		SpawnHauntItems(false);
+	}
 }
 
 void ABaseHaunt::Server_StartHaunt_Implementation()

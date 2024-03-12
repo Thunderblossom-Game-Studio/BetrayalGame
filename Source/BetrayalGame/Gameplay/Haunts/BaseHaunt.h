@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../Player/PlayerCharacter.h"
+#include "BetrayalGame/Gameplay/Interactables/ItemSpawnLocation.h"
 #include "BaseHaunt.generated.h"
 
 UENUM()
@@ -12,6 +13,17 @@ enum EHauntCategory
 	Hc_Asymmetric UMETA(DisplayName = "Asymmetric"),
 	Hc_HiddenAsymmetric UMETA(DisplayName = "Hidden Asymmetric"),
 	Hc_FreeForAll UMETA(DisplayName = "Free For All"),
+};
+
+USTRUCT(BlueprintType)
+struct FHauntActor
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	TSubclassOf<AActor> Actor;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	bool bSpawnAtStart = false;
 };
 
 UCLASS(Blueprintable)
@@ -72,12 +84,23 @@ protected:
 #pragma region Game
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Haunt|GameState")
 	class ABetrayalGameState* GameState;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Haunt|Items")
+	TArray<FHauntActor> HauntActors;
+
+	UPROPERTY(VisibleAnywhere, Category = "Haunt|Items")
+	TArray<AItemSpawnLocation*> HauntActorSpawnPoints;
+	
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Haunt|Items")
+	void SpawnHauntItems(bool bInitialize = false);
 	
 #pragma endregion
 	
 public:
 	ABaseHaunt();
 
+	virtual void BeginPlay() override;
+	
 	void ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory, bool bUsesTimer,
 					   float NewDuration, bool bUsesTraitor, TArray<TSubclassOf<AMonster>> NewTraitorMonsters/*, const FDataTableRowHandle& NewTraitorObjective, const TArray<AMonster*>& NewTraitorMonsters,
 					   const FDataTableRowHandle& NewSurvivorObjective*/);
