@@ -27,8 +27,7 @@ void AMenu_GameMode::OnPostLogin(AController* NewPlayer)
 		return;
 	}
 
-	// Set the player state to not ready
-	BetrayalPlayerState->SetIsReady(false);
+	//BetrayalPlayerState->SetIsReady(false);
 
 	// Grab player name as string
 	FString PlayerName = NewPlayer->PlayerState->GetPlayerName();

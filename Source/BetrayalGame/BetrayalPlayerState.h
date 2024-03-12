@@ -25,7 +25,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "Player State")
 	bool bIsTraitor = false;
 
-	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsReady, BlueprintReadOnly, Category = "Player State")
+	UPROPERTY(Replicated, VisibleAnywhere, ReplicatedUsing=OnRep_IsReady, BlueprintReadOnly, Category = "Player State")
 	bool bIsReady = false;
 public:
 	
