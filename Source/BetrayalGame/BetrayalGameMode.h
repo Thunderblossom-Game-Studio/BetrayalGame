@@ -113,7 +113,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetupHaunt();
 
-	
 private:
 
 #pragma endregion 

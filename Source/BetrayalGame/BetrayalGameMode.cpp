@@ -99,7 +99,7 @@ TArray<APlayerCharacter*> ABetrayalGameMode::GetAllPlayerCharacters() const
 	{
 		OutCharacters.Add(Cast<APlayerCharacter>(Player));
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("Players Found"));
+	
 	return OutCharacters;
 }
 
@@ -168,16 +168,6 @@ void ABetrayalGameMode::SetupHaunt()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Haunt Actor Spawned. Owner: " + BetrayalGameState->CurrentHaunt->GetOwner()->GetName()));
 
-	
-	AHiddenAsymmetricalHaunt* HiddenAsymmetricalHaunt = Cast<AHiddenAsymmetricalHaunt>(BetrayalGameState->CurrentHaunt);
-	if(!HiddenAsymmetricalHaunt)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Current Haunt is not a Hidden Asymmetrical Haunt."));
-		return;
-	}
-
-	HiddenAsymmetricalHaunt->Server_SetupSpawns();
-
-	HiddenAsymmetricalHaunt->DestroySpawnTransforms();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("Hidden Asymmetrical Haunt Setup Complete."));
+	HauntStage.bUsesTimer = BetrayalGameState->CurrentHaunt->HasTimer();
+	HauntStage.TimeLength = BetrayalGameState->CurrentHaunt->GetHauntDuration();
 }

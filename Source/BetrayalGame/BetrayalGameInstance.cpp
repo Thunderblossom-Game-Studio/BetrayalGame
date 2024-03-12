@@ -2,8 +2,7 @@
 
 #include "BetrayalGameInstance.h"
 
-#include "OnlineSubsystem.h"
-#include "IOnlineSubsystemEOS.h"
+#include "BetrayalPlayerState.h"
 #include "StaticUtils.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/EditableText.h"
@@ -11,14 +10,14 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
-#include "Interfaces/VoiceInterface.h"
 #include "Lobby/BetrayalGameNetworkSubsystem.h"
 
 #pragma region General
 
 UBetrayalGameInstance::UBetrayalGameInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-{}
+{
+}
 
 void UBetrayalGameInstance::Init()
 {
@@ -135,7 +134,7 @@ void UBetrayalGameInstance::HideLobby()
 
 void UBetrayalGameInstance::ShowPasswordField()
 {
-	if(WB_PasswordField)
+	if (WB_PasswordField)
 		WB_PasswordField->AddToViewport();
 	else
 	{
@@ -167,7 +166,7 @@ void UBetrayalGameInstance::HidePasswordField()
 	{
 		WB_PasswordField->RemoveFromParent();
 		UEditableText* pw = Cast<UEditableText>(WB_PasswordField->GetWidgetFromName("Passwd"));
-		if(pw) pw->SetText(FText::FromString(""));
+		if (pw) pw->SetText(FText::FromString(""));
 	}
 	else
 		Print("UBetrayalGameInstance::HidePasswordField(): WB_PasswordField is null!");
@@ -182,7 +181,7 @@ void UBetrayalGameInstance::ShowLobbyRoom()
 		Print("UBetrayalGameInstance::ShowLobbyRoom(): WB_LobbyRoom is null!");
 		return;
 	}
-	
+
 	// Create a callback to UBetrayalGameNetworkSubsystem::OnClientConnected to update the UI list of connected clients
 	UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetSubsystem<UBetrayalGameNetworkSubsystem>();
 	if (NetworkSubsystem)
@@ -222,43 +221,52 @@ void UBetrayalGameInstance::HideLobbyRoom()
 void UBetrayalGameInstance::DelayedUpdatePlayerList()
 {
 	FTimerHandle TimerHandle;
+	// Update the player list after a delay to allow the network subsystem to update the list of connected clients
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdatePlayerList, 1.5f, false);
+	// Update the list of players' ready states so clients can see the current state of the lobby
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdateLobbyMemberList, 2.5f, false);
 }
 
 void UBetrayalGameInstance::UpdatePlayerList()
 {
-	Print("UBetrayalGameInstance::UpdatePlayerList()");
-	
 	if (!WB_LobbyRoom)
 	{
 		Print("UBetrayalGameInstance::UpdatePlayerList(): WB_LobbyRoom is null!");
 		return;
 	}
-	
+
 	auto PlayerListWidget = WB_LobbyRoom->GetWidgetFromName("PlayerList");
-	if(!PlayerListWidget)
+	if (!PlayerListWidget)
 	{
 		Print("UBetrayalGameInstance::UpdatePlayerList(): PlayerListWidget is null!");
 		return;
 	}
 
-	UPanelWidget* PlayerList = Cast<UPanelWidget>(PlayerListWidget); 
-	if(!PlayerList)
+	UPanelWidget* PlayerList = Cast<UPanelWidget>(PlayerListWidget);
+	if (!PlayerList)
 	{
 		Print("UBetrayalGameInstance::UpdatePlayerList(): PlayerList is null!");
-		return;	
+		return;
 	}
 
 	PlayerList->ClearChildren();
-	
+
+	// Iterate over the player states and add each unique user to the list, with a colour to indicate if they are ready
 	auto Plrs = GetWorld()->GetGameState()->PlayerArray;
-	for (auto Player : Plrs)
+	for (auto Plr : Plrs)
 	{
-		auto PlayerName = Player->GetPlayerName();
-		auto PlayerText = FText::FromString(PlayerName);
-		auto PlayerTextWidget = NewObject<UTextBlock>(PlayerList);
-		PlayerTextWidget->SetText(PlayerText);
-		PlayerList->AddChild(PlayerTextWidget);
+		Print("Updating player: " + Plr->GetPlayerName());
+		
+		if (auto Player = Cast<ABetrayalPlayerState>(Plr))
+		{
+			auto PlayerText = FText::FromString(Player->GetPlayerName());
+			auto PlayerTextWidget = NewObject<UTextBlock>(PlayerList);
+			PlayerTextWidget->SetText(PlayerText);
+
+			FSlateColor PlayerNameColour = Player->IsReady() ? FColor{0, 255, 0, 255} : FColor{255, 0, 0, 255};
+			PlayerTextWidget->SetColorAndOpacity(FSlateColor(PlayerNameColour));
+			PlayerList->AddChild(PlayerTextWidget);
+		}
 	}
 
 	// Update the start game button to be enabled if the player is the host
@@ -266,7 +274,29 @@ void UBetrayalGameInstance::UpdatePlayerList()
 	if (!StartGameButton)
 		return;
 
-	StartGameButton->SetIsEnabled(GetFirstLocalPlayerController()->HasAuthority());
+	// Check if the player is the host
+	if(!GetFirstLocalPlayerController()->HasAuthority())
+	{
+		StartGameButton->SetIsEnabled(GetFirstLocalPlayerController()->HasAuthority());
+		return;
+	}
+
+	// Check if all players are ready
+	bool AllPlayersReady = true;
+	for (auto Plr : Plrs)
+	{
+		if (auto Player = Cast<ABetrayalPlayerState>(Plr))
+		{
+			if (!Player->IsReady())
+			{
+				AllPlayersReady = false;
+				break;
+			}
+		}
+	}
+
+	// Enable the start game button if all players are ready
+	StartGameButton->SetIsEnabled(AllPlayersReady);
 }
 
 void UBetrayalGameInstance::ClearPlayerList()
@@ -307,6 +337,13 @@ void UBetrayalGameInstance::LoadPlayerProfile()
 
 void UBetrayalGameInstance::CheckPlayerProfile()
 {
+}
+
+void UBetrayalGameInstance::UpdateLobbyMemberList()
+{
+	// Broadcast an update of current player ready state for the lobby room
+	if (const auto PlayerState = GetFirstLocalPlayerController()->GetPlayerState<ABetrayalPlayerState>())
+		PlayerState->SetIsReady(PlayerState->IsReady());
 }
 #pragma endregion Save/Load
 

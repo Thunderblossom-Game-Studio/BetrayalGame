@@ -94,6 +94,7 @@ void ABaseHaunt::BeginPlay()
 
 	
 	SpawnHauntItems(true);
+	
 }
 
 void ABaseHaunt::ConfigureHaunt(FName NewName, const FText& NewDescription, TEnumAsByte<EHauntCategory> NewCategory,

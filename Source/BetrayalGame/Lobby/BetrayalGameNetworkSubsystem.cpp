@@ -140,6 +140,7 @@ void UBetrayalGameNetworkSubsystem::LockSession()
 	if (!Session)
 		return;
 
+	// TODO: Add previous state to revert to after game ends
 	if (SessionSettings.IsValid())
 	{
 		SessionSettings->bAllowInvites = false;
