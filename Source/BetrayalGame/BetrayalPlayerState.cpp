@@ -46,3 +46,7 @@ void ABetrayalPlayerState::OnRep_IsTraitor()
 	OnIsTraitorChanged(bIsTraitor);
 }
 
+void ABetrayalPlayerState::OnRep_IsReady()
+{
+}
+

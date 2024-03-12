@@ -26,13 +26,19 @@ private:
 	// Internal state
 	UPROPERTY()
 	bool bIsInitialized = false;
+
+	UPROPERTY()
+	bool bVoiceChatEnabled = false;
 	
 	UPROPERTY()
 	float Volume = 1.0f;
 
 	UPROPERTY()
 	bool bIsMuted = false;
-	
+
+	UPROPERTY()
+	bool bPushToTalk = false;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "VoiceChat")
 	void Init();
@@ -45,4 +51,11 @@ public:
 	
 	UFUNCTION(Category = "VoiceChat")
 	void ChangeUserVolume(APlayerState* Player, float NewVolume);
+	
+	// Toggle Mic Active
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void StartPTT();
+
+	UFUNCTION(BlueprintCallable, Category = "Networking")
+	void StopPTT();
 };

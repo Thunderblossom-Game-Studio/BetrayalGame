@@ -311,21 +311,5 @@ void UBetrayalGameInstance::CheckPlayerProfile()
 #pragma endregion Save/Load
 
 #pragma region Networking
-void UBetrayalGameInstance::StartPTT()
-{
-	IOnlineVoicePtr Voice = IOnlineSubsystem::Get()->GetVoiceInterface();
-	if (Voice.IsValid())
-	{
-		Voice->StartNetworkedVoice(0);
-	}
-}
 
-void UBetrayalGameInstance::StopPTT()
-{
-	IOnlineVoicePtr Voice = IOnlineSubsystem::Get()->GetVoiceInterface();
-	if (Voice.IsValid())
-	{
-		Voice->StopNetworkedVoice(0);
-	}
-}
 #pragma endregion
