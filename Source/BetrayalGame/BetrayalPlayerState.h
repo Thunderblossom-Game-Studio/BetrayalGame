@@ -25,10 +25,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "Player State")
 	bool bIsTraitor = false;
 
-	UPROPERTY(Replicated, VisibleAnywhere, ReplicatedUsing=OnRep_IsReady, BlueprintReadOnly, Category = "Player State")
+	UPROPERTY(VisibleAnywhere)
 	bool bIsReady = false;
-public:
 	
+public:
 	UFUNCTION()
 	void OnRep_IsTraitor();
 
@@ -44,11 +44,14 @@ public:
 	void SetIsTraitor(bool bNewIsTraitor) { bIsTraitor = bNewIsTraitor; }
 
 #pragma region Lobby
-	UFUNCTION()
-	void OnRep_IsReady();
-
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	bool IsReady() const { return bIsReady; }
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Lobby")
+	void SetIsReady(bool bReady);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsReady(bool bReady, ABetrayalPlayerState* Player);
 
 #pragma endregion
 };

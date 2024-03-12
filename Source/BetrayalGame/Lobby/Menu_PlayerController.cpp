@@ -85,6 +85,9 @@ void AMenu_PlayerController::OnLoginCompleted(int32 LocalUserNum, bool bWasSucce
 	auto Subsystem = IOnlineSubsystem::Get();
 	auto Identity = Subsystem->GetIdentityInterface();
 
+	if (!Subsystem || !Identity)
+		return;
+
 	if(bWasSuccessful)
 	{
 		Print("Login successful!");

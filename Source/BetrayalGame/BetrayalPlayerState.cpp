@@ -3,6 +3,7 @@
 
 #include "BetrayalPlayerState.h"
 
+#include "BetrayalGameInstance.h"
 #include "Net/UnrealNetwork.h"
 
 void ABetrayalPlayerState::CopyProperties(APlayerState* PlayerState)
@@ -38,7 +39,6 @@ void ABetrayalPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABetrayalPlayerState, bIsTraitor);
-	DOREPLIFETIME(ABetrayalPlayerState, bIsReady);
 }
 
 void ABetrayalPlayerState::OnRep_IsTraitor()
@@ -46,7 +46,18 @@ void ABetrayalPlayerState::OnRep_IsTraitor()
 	OnIsTraitorChanged(bIsTraitor);
 }
 
-void ABetrayalPlayerState::OnRep_IsReady()
+void ABetrayalPlayerState::SetIsReady_Implementation(bool bReady)
 {
+	bIsReady = bReady;
+	Multicast_SetIsReady(bReady, this);
 }
+
+void ABetrayalPlayerState::Multicast_SetIsReady_Implementation(bool bReady, ABetrayalPlayerState* Player)
+{
+	Player->bIsReady = bReady;
+	GetGameInstance<UBetrayalGameInstance>()->UpdatePlayerList();
+}
+
+
+
 

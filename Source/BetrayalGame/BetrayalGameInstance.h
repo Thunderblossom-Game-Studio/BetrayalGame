@@ -134,6 +134,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
 	void OnSessionSearchComplete();
 
+	UFUNCTION()
+	void UpdateLobbyMemberList();
+
 #pragma endregion
 	
 };
