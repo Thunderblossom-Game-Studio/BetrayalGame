@@ -91,6 +91,8 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerControllers();
+	UFUNCTION(BlueprintCallable)
+	void EnableAIPlayerHauntMode();
 private:
 #pragma endregion
 

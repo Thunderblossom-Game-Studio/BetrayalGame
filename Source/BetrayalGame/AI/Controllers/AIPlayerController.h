@@ -28,7 +28,6 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* BehaviourTree;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Componnents, meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* HauntInnocentTree;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Componnents, meta = (AllowPrivateAccess = "true"))
@@ -36,10 +35,8 @@ protected:
 	
 // Getters/Setters
 public:
-	const UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
-
 	UFUNCTION()
-	void SetHauntBehaviours(UBehaviorTree* Innocent, UBehaviorTree* Traitor);
+	void SetHauntBehaviours();
 	
 #pragma endregion
 	
