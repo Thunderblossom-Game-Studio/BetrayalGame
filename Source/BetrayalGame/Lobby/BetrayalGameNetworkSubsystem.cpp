@@ -531,5 +531,6 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 		Print("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): SessionInterface is null!");
 	}
 
-	_GameInstance->GetEngine()->OnNetworkFailure().AddUObject(this, &ThisClass::HandleNetworkFailure);
+	if (_GameInstance && _GameInstance->GetEngine())
+		_GameInstance->GetEngine()->OnNetworkFailure().AddUObject(this, &ThisClass::HandleNetworkFailure);
 }
