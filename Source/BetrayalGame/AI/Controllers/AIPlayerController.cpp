@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BetrayalGame/AI/Pawns/Monster.h"
 #include "BetrayalGame/BetrayalGameMode.h"
+#include "GameplayTagContainer.h"
 #include "BetrayalGame/Gameplay/Player/PlayerCharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
@@ -48,6 +49,7 @@ AAIPlayerController::AAIPlayerController()
 	{
 		PerceptionComponent->ConfigureSense(*DamageConfig);
 	}
+
 }
 
 void AAIPlayerController::EnableAIPlayer()
@@ -56,7 +58,8 @@ void AAIPlayerController::EnableAIPlayer()
 	{
 		if (BehaviourTree)
 		{
-			RunBehaviorTree(BehaviourTree);						
+			RunBehaviorTree(BehaviourTree);
+			GLog->Log("Started behaviour tree: " + BehaviourTree->GetName());
 		}
 		if (PerceptionComponent)
 		{
@@ -73,6 +76,7 @@ void AAIPlayerController::BeginPlay()
 	if (World)
 		BetrayalGameMode = World->GetAuthGameMode<ABetrayalGameMode>();	
 	PlayerCharacter = GetPawn<APlayerCharacter>();
+
 }
 
 void AAIPlayerController::Tick(float DeltaSeconds)
@@ -80,14 +84,32 @@ void AAIPlayerController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-void AAIPlayerController::SetHauntBehaviours(UBehaviorTree* Innocent, UBehaviorTree* Traitor)
+void AAIPlayerController::SetHauntBehaviours()
 {
-	if (Innocent)
-		HauntInnocentTree = Innocent;
-	if (Traitor)
-		HauntTraitorTree = Traitor;	
+	UBehaviorTreeComponent* BehaviourTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
+	if (!BehaviourTreeComponent)
+		return;
+	
+	
+	if (HauntInnocentTree)
+	{
+		const FString InnocentTag = TEXT("DefaultPlayerInno");
+		BehaviourTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName(*InnocentTag)), HauntInnocentTree);
+		GLog->Log("Innocent Haunt is " + HauntInnocentTree->GetName());
+	}
+	if (HauntTraitorTree)
+	{
+		const FString TraitorTag = TEXT("DefaultPlayerTraitor");
+		BehaviourTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName(*TraitorTag)), HauntTraitorTree);
+		GLog->Log("Traitor Haunt is " + HauntTraitorTree->GetName());
+	}
+	
 	if (Blackboard)
+	{		
 		Blackboard->SetValueAsBool("Haunt", true);
+		GLog->Log("Blackboard Haunt is true");
+	}
+
 }
 
 void AAIPlayerController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)

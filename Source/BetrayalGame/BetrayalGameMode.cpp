@@ -82,6 +82,17 @@ void ABetrayalGameMode::EnableAIPlayerControllers()
 	}
 }
 
+void ABetrayalGameMode::EnableAIPlayerHauntMode()
+{
+	TArray<AActor*> AIPlayerControllers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIPlayerController::StaticClass(), AIPlayerControllers);
+	for (AActor* ControllerActor : AIPlayerControllers)
+	{
+		if (AAIPlayerController* AIPlayerController = Cast<AAIPlayerController>(ControllerActor))
+			AIPlayerController->SetHauntBehaviours();
+	}
+}
+
 TArray<ABetrayalPlayerState*> ABetrayalGameMode::GetAllPlayerStates() const
 {
 	TArray<ABetrayalPlayerState*> OutPlayers;
@@ -136,6 +147,7 @@ void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 	}
 	else if (MatchStage == Haunting)
 	{
+		EnableAIPlayerHauntMode();
 		MaxStageTimer = HauntStage.TimeLength;		
 		SetStageUseTimer(HauntStage.bUsesTimer);
 		BetrayalGameState->OnMatchStageChanged(MatchStage);
