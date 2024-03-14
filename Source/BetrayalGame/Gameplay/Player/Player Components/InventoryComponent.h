@@ -86,7 +86,7 @@ public:
 	FInventorySlot GetItemSlot(FItem Item);
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	FItem GetItemInSlot(int ID);
+	FItem GetItemInSlot(int SlotID);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TArray<FInventorySlot> GetInventorySlots() const { return InventorySlots; }
@@ -95,8 +95,9 @@ public:
 	FInventorySlot GetSelectedSlot() const { return SelectedSlot; }
 	
 	UFUNCTION()
-	void SelectSlot(int ID);
-	
+	void SelectSlot(int SlotID);
+
+#pragma region RPCs
 	UFUNCTION(Server, Reliable)
 	void Server_AddItemToInventory(FItem Item);
 	UFUNCTION()
@@ -112,10 +113,13 @@ public:
 	UFUNCTION()
 	void InitializeInventory();
 	
+#pragma endregion
+	
+#pragma region Getters and Setters
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool IsInventoryFull() const { return bIsInventoryFull; }
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FInventorySlot GetLastSlotAdded() const { return LastSlotAdded; }
-
+#pragma endregion
 };
