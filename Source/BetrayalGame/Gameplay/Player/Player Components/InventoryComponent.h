@@ -17,7 +17,7 @@ struct FInventorySlot
 	{
 		ID = 15;
 		bIsEmpty = true;
-		bIsSelected = true;
+		bIsEquipped = false;
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
@@ -30,14 +30,10 @@ struct FInventorySlot
 	bool bIsEmpty;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
-	bool bIsSelected;
+	bool bIsEquipped;
 
-	// Overloading the == operator to compare two slots 
-	bool operator==(const FInventorySlot& Other) const
-	{
-		return ID == Other.ID && Item == Other.Item && bIsEmpty == Other.bIsEmpty && bIsSelected == Other.bIsSelected;
-	}
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
+	bool bIsSelected;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -93,12 +89,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FInventorySlot GetSelectedSlot() const { return SelectedSlot; }
+
+	
 	
 	UFUNCTION()
 	void SelectSlot(int SlotID);
+	UFUNCTION(Server, Reliable)
+	void Server_SelectSlot(int SlotID);
+	
+	UFUNCTION()
+	void DeselectSlot(int SlotID);
+	UFUNCTION(Server, Reliable)
+	void Server_DeselectSlot(int SlotID);
 
 #pragma region RPCs
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, Blueprintable, Category = "Inventory")
 	void Server_AddItemToInventory(FItem Item);
 	UFUNCTION()
 	void AddItemToInventory(FItem Item);
@@ -112,7 +117,6 @@ public:
 	void Server_InitializeInventory();
 	UFUNCTION()
 	void InitializeInventory();
-	
 #pragma endregion
 	
 #pragma region Getters and Setters

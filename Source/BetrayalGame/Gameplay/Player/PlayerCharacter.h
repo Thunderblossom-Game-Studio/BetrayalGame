@@ -143,10 +143,9 @@ public:
 	void SelectSlot4();
 
 	UFUNCTION()
-	void EquipItem(AItemActor* Item);
+	void EquipItem(int SlotID);
 	UFUNCTION(Server, Reliable)
-	
-	void Server_EquipItem(AItemActor* Item);
+	void Server_EquipItem(int SlotID);
 
 	UFUNCTION()
 	void UnequipItem();
@@ -155,7 +154,7 @@ public:
 	void Server_UnequipItem();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnItemEquipped(FInventorySlot Slot, AItemActor* Item);
+	void OnSlotSelected(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 

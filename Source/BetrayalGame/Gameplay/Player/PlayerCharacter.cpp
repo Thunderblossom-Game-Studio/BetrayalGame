@@ -105,79 +105,81 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 void APlayerCharacter::SelectSlot1()
 {
-	InventoryComponent->SelectSlot(0);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
+		EquipItem(0);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
+		Server_EquipItem(0);
 	}
 
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::SelectSlot2()
 {
-	InventoryComponent->SelectSlot(1);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		EquipItem(1);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		Server_EquipItem(1);
 	}
 
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::SelectSlot3()
 {
-	InventoryComponent->SelectSlot(2);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		EquipItem(2);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		Server_EquipItem(2);
 	}
 
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	OnSlotSelected(InventoryComponent->GetSelectedSlot());
 	
 }
 
 void APlayerCharacter::SelectSlot4()
 {
-	InventoryComponent->SelectSlot(3);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		EquipItem(3);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		Server_EquipItem(3);
 	}
-
-
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
-
+	
+	OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
-void APlayerCharacter::EquipItem(AItemActor* Item)
+void APlayerCharacter::EquipItem(int SlotID)
 {
+	InventoryComponent->Server_SelectSlot(SlotID);
+
+	AItemActor* Item = InventoryComponent->GetItemInSlot(SlotID).Actor.GetDefaultObject();
+	
+	if(HeldItem && !Item)
+	{
+		UnequipItem();
+		HeldItem = nullptr;
+		return;
+	}
+	
 	if(!Item)
 		return;
-
+	
 	if(HeldItem && Item->GetClass() == HeldItem->GetClass())
 	{
 		UnequipItem();
+		InventoryComponent->Server_DeselectSlot(SlotID);
 		HeldItem = nullptr;
 		return;
 	}
@@ -213,9 +215,9 @@ void APlayerCharacter::UnequipItem()
 	bWasItemUnequipped = true;
 }
 
-void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
+void APlayerCharacter::Server_EquipItem_Implementation(int SlotID)
 {
-	EquipItem(Item);
+	EquipItem(SlotID);
 }
 
 void APlayerCharacter::RunStart_Implementation()

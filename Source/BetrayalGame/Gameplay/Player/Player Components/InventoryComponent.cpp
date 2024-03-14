@@ -54,11 +54,7 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 		{
 			slot.Item = Item;
 			slot.bIsEmpty = false;
-
-			SelectSlot(slot.ID);
-			
 			LastSlotAdded = slot;
-			
 			FilledSlotCount++;
 			break;
 		}
@@ -138,14 +134,46 @@ void UInventoryComponent::SelectSlot(int SlotID)
 {
 	for (auto& slot : InventorySlots)
 	{
-		if(slot.ID == SlotID)
+		if(SlotID == slot.ID)
 		{
 			slot.bIsSelected = true;
+
+			if(slot.Item.Actor)
+			{
+				slot.bIsEquipped = true;
+				
+			}
+
 			SelectedSlot = slot;
 		}
 		else
 		{
 			slot.bIsSelected = false;
+			slot.bIsEquipped = false;
 		}
 	}
+}
+
+void UInventoryComponent::Server_SelectSlot_Implementation(int SlotID)
+{
+	SelectSlot(SlotID);
+}
+
+void UInventoryComponent::DeselectSlot(int SlotID)
+{
+	for (auto& slot : InventorySlots)
+	{
+		if(SlotID == slot.ID)
+		{
+			slot.bIsSelected = false;
+			slot.bIsEquipped = false;
+
+			SelectedSlot = slot;
+		}
+	}
+}
+
+void UInventoryComponent::Server_DeselectSlot_Implementation(int SlotID)
+{
+	DeselectSlot(SlotID);
 }
