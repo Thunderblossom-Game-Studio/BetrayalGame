@@ -6,11 +6,9 @@
 #include "../PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
-// Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+	// Set this component to be initialized when the game starts, and to be ticked every frame.
 	PrimaryComponentTick.bCanEverTick = true;
 
 	SetIsReplicatedByDefault(true);
@@ -127,20 +125,20 @@ FInventorySlot UInventoryComponent::GetItemSlot(FItem Item)
 	return FInventorySlot();	
 }
 
-FItem UInventoryComponent::GetItemInSlot(int ID)
+FItem UInventoryComponent::GetItemInSlot(int SlotID)
 {
 	for (auto slot : InventorySlots)
-		if(slot.ID == ID)
+		if(slot.ID == SlotID)
 			return slot.Item;
 
 	return FItem();
 }
 
-void UInventoryComponent::SelectSlot(int ID)
+void UInventoryComponent::SelectSlot(int SlotID)
 {
 	for (auto& slot : InventorySlots)
 	{
-		if(slot.ID == ID)
+		if(slot.ID == SlotID)
 		{
 			slot.bIsSelected = true;
 			SelectedSlot = slot;
