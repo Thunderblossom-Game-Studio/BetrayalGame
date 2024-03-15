@@ -29,7 +29,7 @@ EBTNodeResult::Type UBTTask_SearchForTargetActor::ExecuteTask(UBehaviorTreeCompo
 	UGameplayStatics::GetAllActorsOfClass(World, ActorClass, Targets);
 	
 	if (Targets.Num() == 0)
-		return EBTNodeResult::InProgress;
+		return EBTNodeResult::Failed;
 	AActor* Target = Targets[0];
 
 	if (bFindClosest)
