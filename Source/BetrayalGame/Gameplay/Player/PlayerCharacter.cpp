@@ -16,6 +16,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "../../AI/Pawns/Monster.h"
+#include "Components/SphereComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -28,6 +29,9 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = true;
 	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
 
+	ItemDropLocation = CreateDefaultSubobject<USphereComponent>(TEXT("Item Drop Location"));
+	ItemDropLocation->SetupAttachment(GetMesh());
+	
 	InteractableInFocus = nullptr;
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
@@ -45,7 +49,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
-	DOREPLIFETIME(APlayerCharacter, bWasItemUnequipped)
 	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
 }
 
@@ -183,7 +186,6 @@ void APlayerCharacter::EquipItem(int SlotID)
 		UnequipItem();
 		InventoryComponent->Server_DeselectSlot(SlotID);
 		OnSlotSelected(InventoryComponent->GetSelectedSlot());
-		HeldItem = nullptr;
 		return;
 	}
 	else
@@ -199,7 +201,7 @@ void APlayerCharacter::EquipItem(int SlotID)
 	
 	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item->GetClass(), SpawnParams))
 	{
-		ItemActor->NetMulticast_DisableItemPhysics();
+		ItemActor->NetMulticast_EnableItemPhysics(false);
 		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("ItemSocket"));
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
@@ -218,18 +220,40 @@ void APlayerCharacter::UnequipItem()
 		return;
 	
 	HeldItem->Destroy();
-	
-	bWasItemUnequipped = true;
+
+	HeldItem = nullptr;
 }
 
 void APlayerCharacter::DropItem()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, "Dropping item");
+	Server_DropItem();
 }
 
 void APlayerCharacter::Server_DropItem_Implementation()
 {
-	DropItem();
+	if(!HeldItem)
+		return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(HeldItem->GetClass(), SpawnParams))
+	{
+		ItemActor->NetMulticast_EnableItemPhysics(true);
+		ItemActor->SetActorRelativeLocation(ItemDropLocation->GetComponentLocation());
+		ItemActor->SetActorRelativeRotation(ItemDropLocation->GetComponentRotation());
+		ItemActor->bIsInteractable = true;
+	}
+
+	UnequipItem();
+
+	InventoryComponent->Server_RemoveItemFromInventory(InventoryComponent->GetSelectedSlot().ID);
+	InventoryComponent->Server_DeselectSlot(InventoryComponent->GetSelectedSlot().ID);
+	OnItemRemovedFromInventory(InventoryComponent->GetSelectedSlot());
+	
+	//GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Dropping item at: " + ItemDropLocation->GetComponentLocation().ToString());
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(int SlotID)
@@ -448,7 +472,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropItem);
 	}
 
-	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::Server_DropItem);
+	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DropItem);
 
 	if (!HasAuthority())
 		return;

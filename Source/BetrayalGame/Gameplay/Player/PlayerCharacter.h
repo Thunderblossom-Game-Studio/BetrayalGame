@@ -121,7 +121,9 @@ private:
 
 #pragma region Inventory
 public:
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	class USphereComponent* ItemDropLocation;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	class UInventoryComponent* InventoryComponent;
 

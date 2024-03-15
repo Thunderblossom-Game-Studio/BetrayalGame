@@ -107,7 +107,7 @@ public:
 	void Server_SetCanPickup(const bool CanPickup);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticast_DisableItemPhysics();
+	void NetMulticast_EnableItemPhysics(bool bState);
 	
 #pragma endregion 
 

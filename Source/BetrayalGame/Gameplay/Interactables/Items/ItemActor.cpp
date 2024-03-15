@@ -63,11 +63,21 @@ void AItemActor::OnInteract(AActor* Interactor)
 	Destroy();
 }
 
-void AItemActor::NetMulticast_DisableItemPhysics_Implementation()
+void AItemActor::NetMulticast_EnableItemPhysics_Implementation(bool bState)
 {
-	ItemMesh->SetSimulatePhysics(false);
-	ItemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+	if(bState)
+	{
+		ItemMesh->SetSimulatePhysics(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	}
+	else
+	{
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+	
+	}
 }
+
 
 void AItemActor::Server_SetCanPickup_Implementation(const bool CanPickup)
 {

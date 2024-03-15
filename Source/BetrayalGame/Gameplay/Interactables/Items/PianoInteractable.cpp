@@ -32,7 +32,9 @@ void APianoInteractable::OnInteract(AActor* Interactor)
 			if(Player->HeldItem)
 				Player->UnequipItem();
 
-			Player->OnItemRemovedFromInventory(InventorySlot);
+			Player->InventoryComponent->DeselectSlot(InventorySlot.ID);
+			
+			Player->OnItemRemovedFromInventory(Player->InventoryComponent->GetSelectedSlot());
 			
 			if(CurrentSheets == NecessarySheets)
 				OnPianoComplete();
