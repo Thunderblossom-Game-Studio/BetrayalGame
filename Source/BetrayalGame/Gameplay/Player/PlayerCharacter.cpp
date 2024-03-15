@@ -199,6 +199,7 @@ void APlayerCharacter::EquipItem(int SlotID)
 		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("ItemSocket"));
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+		ItemActor->bIsInteractable = false;
 		HeldItem = ItemActor;
 	}
 
@@ -260,6 +261,9 @@ void APlayerCharacter::TraceForInteractables()
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
 		{
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
+			
+			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)
+				InteractableInFocus = nullptr;
 		}
 		else if (!HitActor->Implements<UInteractable>())
 		{

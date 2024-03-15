@@ -29,15 +29,9 @@ struct FItem : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	UTexture2D* Image;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<AItemActor> Actor;
-
-	// Overloading the == operator to compare two items
-	bool operator==(const FItem& Other) const
-	{
-		return Name == Other.Name && Description.EqualTo(Other.Description) && Image == Other.Image;
-	}
 };
 
 
