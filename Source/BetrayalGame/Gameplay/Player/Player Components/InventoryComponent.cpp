@@ -23,6 +23,7 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryFull);
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryInitialized);
 	DOREPLIFETIME(UInventoryComponent, SelectedSlot);
+	DOREPLIFETIME(UInventoryComponent, LastSlotAdded);
 }
 
 // Called when the game starts

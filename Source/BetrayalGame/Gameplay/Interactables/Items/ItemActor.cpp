@@ -13,6 +13,12 @@ AItemActor::AItemActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	SetReplicateMovement(true);
+	
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	ItemMesh->SetupAttachment(RootComponent);
+	ItemMesh->SetSimulatePhysics(true);
 	
 }
 
@@ -30,6 +36,8 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AItemActor, ItemData);
 	DOREPLIFETIME(AItemActor, bIsObjectiveItem);
 	DOREPLIFETIME(AItemActor, bCanPickup);
+	DOREPLIFETIME(AItemActor, ItemMesh);
+	
 }
 
 void AItemActor::OnInteract(AActor* Interactor)
@@ -53,6 +61,12 @@ void AItemActor::OnInteract(AActor* Interactor)
 	OnPickup(Player);
 	
 	Destroy();
+}
+
+void AItemActor::NetMulticast_DisableItemPhysics_Implementation()
+{
+	ItemMesh->SetSimulatePhysics(false);
+	ItemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
 void AItemActor::Server_SetCanPickup_Implementation(const bool CanPickup)

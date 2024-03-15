@@ -27,6 +27,7 @@ enum EInputActionValue
 	IAV_TraitorCycleMonster UMETA(DisplayName = "TraitorCycleMonster"),
 	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
 	IAV_Attack UMETA(DisplayName = "Attack"),
+	IAV_DropItem UMETA(DisplayName = "DropItem"),
 };
 
 UENUM()
@@ -149,12 +150,19 @@ public:
 
 	UFUNCTION()
 	void UnequipItem();
-	
 	UFUNCTION(Server, Reliable)
 	void Server_UnequipItem();
+
+	UFUNCTION()
+	void DropItem();
+	UFUNCTION(Server, Reliable)
+	void Server_DropItem();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
 	void OnSlotSelected(FInventorySlot Slot);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	void OnItemRemovedFromInventory(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 

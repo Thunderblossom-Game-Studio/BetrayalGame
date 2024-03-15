@@ -34,6 +34,12 @@ struct FInventorySlot
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Slot")
 	bool bIsSelected;
+
+	//Overload the == operator to compare two FInventorySlot structs
+	bool operator==(const FInventorySlot& Other) const
+	{
+		return ID == Other.ID && Item == Other.Item && bIsEmpty == Other.bIsEmpty && bIsEquipped == Other.bIsEquipped;
+	}
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -57,7 +63,7 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	FInventorySlot SelectedSlot;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")
 	FInventorySlot LastSlotAdded;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Inventory")

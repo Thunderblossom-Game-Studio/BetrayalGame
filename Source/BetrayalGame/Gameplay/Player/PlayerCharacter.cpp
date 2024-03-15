@@ -114,7 +114,7 @@ void APlayerCharacter::SelectSlot1()
 		Server_EquipItem(0);
 	}
 
-	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::SelectSlot2()
@@ -128,7 +128,7 @@ void APlayerCharacter::SelectSlot2()
 		Server_EquipItem(1);
 	}
 
-	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::SelectSlot3()
@@ -142,7 +142,7 @@ void APlayerCharacter::SelectSlot3()
 		Server_EquipItem(2);
 	}
 
-	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 	
 }
 
@@ -157,13 +157,15 @@ void APlayerCharacter::SelectSlot4()
 		Server_EquipItem(3);
 	}
 	
-	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::EquipItem(int SlotID)
 {
 	InventoryComponent->Server_SelectSlot(SlotID);
-
+	
+	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	
 	AItemActor* Item = InventoryComponent->GetItemInSlot(SlotID).Actor.GetDefaultObject();
 	
 	if(HeldItem && !Item)
@@ -180,6 +182,7 @@ void APlayerCharacter::EquipItem(int SlotID)
 	{
 		UnequipItem();
 		InventoryComponent->Server_DeselectSlot(SlotID);
+		OnSlotSelected(InventoryComponent->GetSelectedSlot());
 		HeldItem = nullptr;
 		return;
 	}
@@ -193,9 +196,10 @@ void APlayerCharacter::EquipItem(int SlotID)
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
+	
 	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item->GetClass(), SpawnParams))
 	{
+		ItemActor->NetMulticast_DisableItemPhysics();
 		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("ItemSocket"));
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
@@ -204,6 +208,8 @@ void APlayerCharacter::EquipItem(int SlotID)
 	}
 
 	HeldItem->Server_SetCanPickup(false);
+
+	
 }
 
 void APlayerCharacter::UnequipItem()
@@ -212,8 +218,18 @@ void APlayerCharacter::UnequipItem()
 		return;
 	
 	HeldItem->Destroy();
-
+	
 	bWasItemUnequipped = true;
+}
+
+void APlayerCharacter::DropItem()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, "Dropping item");
+}
+
+void APlayerCharacter::Server_DropItem_Implementation()
+{
+	DropItem();
 }
 
 void APlayerCharacter::Server_EquipItem_Implementation(int SlotID)
@@ -428,9 +444,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnMonster);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Attack), ETriggerEvent::Started, this, &APlayerCharacter::Attack);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropItem);
 	}
 
-	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);
+	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::Server_DropItem);
 
 	if (!HasAuthority())
 		return;

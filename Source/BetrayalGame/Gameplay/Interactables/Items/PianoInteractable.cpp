@@ -22,15 +22,17 @@ void APianoInteractable::OnInteract(AActor* Interactor)
 	if(!Player)
 		return;
 
-	for (auto SlotInPlayer : Player->InventoryComponent->GetInventorySlots())
+	for (auto InventorySlot : Player->InventoryComponent->GetInventorySlots())
 	{
-		if(SlotInPlayer.Item.Name == "Music Sheet")
+		if(InventorySlot.Item.Name == "Music Sheet")
 		{
 			CurrentSheets++;
-			Player->InventoryComponent->RemoveItemFromInventory(SlotInPlayer.ID);
-
+			Player->InventoryComponent->RemoveItemFromInventory(InventorySlot.ID);
+			
 			if(Player->HeldItem)
 				Player->UnequipItem();
+
+			Player->OnItemRemovedFromInventory(InventorySlot);
 			
 			if(CurrentSheets == NecessarySheets)
 				OnPianoComplete();
