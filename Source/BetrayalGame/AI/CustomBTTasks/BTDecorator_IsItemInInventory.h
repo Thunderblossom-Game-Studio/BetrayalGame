@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTDecorator.h"
 #include "BetrayalGame/Gameplay/Interactables/Items/ItemActor.h"
+#include "BetrayalGame/Gameplay/Player/Player Components/InventoryComponent.h"
 #include "BTDecorator_IsItemInInventory.generated.h"
 
 /**
@@ -22,8 +23,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FDataTableRowHandle ItemData;
 	UPROPERTY(EditAnywhere)
+	bool bEquipIfFound = false;
+	UPROPERTY(EditAnywhere)
 	FString ItemName;
-	
-	bool CheckInventoryForItem(class UInventoryComponent* Inventory) const;
+
+	// Returns the inventory slot
+	FInventorySlot GetItemInventorySlot(class UInventoryComponent* Inventory) const;
 	
 };
