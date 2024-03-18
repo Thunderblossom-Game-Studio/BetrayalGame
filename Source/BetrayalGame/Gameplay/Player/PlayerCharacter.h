@@ -27,6 +27,7 @@ enum EInputActionValue
 	IAV_TraitorCycleMonster UMETA(DisplayName = "TraitorCycleMonster"),
 	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
 	IAV_Attack UMETA(DisplayName = "Attack"),
+	IAV_DropItem UMETA(DisplayName = "DropItem"),
 };
 
 UENUM()
@@ -120,7 +121,9 @@ private:
 
 #pragma region Inventory
 public:
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	class USphereComponent* ItemDropLocation;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	class UInventoryComponent* InventoryComponent;
 
@@ -143,19 +146,35 @@ public:
 	void SelectSlot4();
 
 	UFUNCTION()
-	void EquipItem(AItemActor* Item);
+	void EquipItem(int SlotID);
 	UFUNCTION(Server, Reliable)
-	
-	void Server_EquipItem(AItemActor* Item);
+	void Server_EquipItem(int SlotID);
 
 	UFUNCTION()
 	void UnequipItem();
-	
 	UFUNCTION(Server, Reliable)
 	void Server_UnequipItem();
+
+	UFUNCTION()
+	void DropHeldItem();
+	UFUNCTION(Server, Reliable)
+	void Server_DropHeldItem();
+	
+	UFUNCTION()
+	void DropItem(FInventorySlot Slot);
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void Server_DropItem(FInventorySlot Slot);
+	
+	UFUNCTION()
+	void DropAllItems();
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void Server_DropAllItems();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnItemEquipped(FInventorySlot Slot, AItemActor* Item);
+	void OnSlotSelected(FInventorySlot Slot);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	void OnItemRemovedFromInventory(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 

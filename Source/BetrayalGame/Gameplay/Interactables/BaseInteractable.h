@@ -38,6 +38,9 @@ public:
 	UFUNCTION()
 	virtual void OnEndFocus(class AActor* Interactor);
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+	bool bIsInteractable = true;
+
 private:
 #pragma endregion 
 
