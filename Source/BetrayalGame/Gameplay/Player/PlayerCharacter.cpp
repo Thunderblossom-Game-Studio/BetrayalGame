@@ -272,6 +272,20 @@ void APlayerCharacter::DropItem(FInventorySlot Slot)
 		if(InventorySlot.bIsEmpty)
 			continue;
 
+		AItemActor* SlotItem = InventoryComponent->GetItemInSlot(InventorySlot.ID).Actor.GetDefaultObject();
+		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = this;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+		if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(SlotItem->GetClass(), SpawnParams))
+		{
+			ItemActor->NetMulticast_EnableItemPhysics(true);
+			ItemActor->SetActorRelativeLocation(ItemDropLocation->GetComponentLocation());
+			ItemActor->SetActorRelativeRotation(ItemDropLocation->GetComponentRotation());
+			ItemActor->bIsInteractable = true;
+		}
 		
 		InventoryComponent->Server_RemoveItemFromInventory(InventorySlot.ID);
 		
@@ -289,7 +303,10 @@ void APlayerCharacter::Server_DropItem_Implementation(FInventorySlot Slot)
 
 void APlayerCharacter::DropAllItems()
 {
-	
+	for (auto Slot : InventoryComponent->GetInventorySlots())
+	{
+		DropItem(Slot);
+	}
 }
 
 void APlayerCharacter::Server_DropAllItems_Implementation()
