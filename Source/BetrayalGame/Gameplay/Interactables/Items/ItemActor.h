@@ -19,6 +19,7 @@ struct FItem : public FTableRowBase
 		Description = FText::FromString("None");
 		Image = nullptr;
 		Actor = nullptr;
+
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")

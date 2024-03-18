@@ -224,12 +224,12 @@ void APlayerCharacter::UnequipItem()
 	HeldItem = nullptr;
 }
 
-void APlayerCharacter::DropItem()
+void APlayerCharacter::DropHeldItem()
 {
-	Server_DropItem();
+	Server_DropHeldItem();
 }
 
-void APlayerCharacter::Server_DropItem_Implementation()
+void APlayerCharacter::Server_DropHeldItem_Implementation()
 {
 	if(!HeldItem)
 		return;
@@ -255,6 +255,48 @@ void APlayerCharacter::Server_DropItem_Implementation()
 	
 	//GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Dropping item at: " + ItemDropLocation->GetComponentLocation().ToString());
 }
+
+void APlayerCharacter::DropItem(FInventorySlot Slot)
+{
+	for (auto InventorySlot : InventoryComponent->GetInventorySlots())
+	{
+		if(Slot != InventorySlot)
+			continue;
+		
+		if(InventorySlot.bIsEquipped)
+		{
+			DropHeldItem();
+			continue;
+		}
+		
+		if(InventorySlot.bIsEmpty)
+			continue;
+
+		
+		InventoryComponent->Server_RemoveItemFromInventory(InventorySlot.ID);
+		
+		if(InventorySlot.bIsSelected)
+			InventoryComponent->Server_DeselectSlot(InventorySlot.ID);
+			
+		OnItemRemovedFromInventory(InventoryComponent->GetSlot(InventorySlot.ID));
+	}
+}
+
+void APlayerCharacter::Server_DropItem_Implementation(FInventorySlot Slot)
+{
+	DropItem(Slot);
+}
+
+void APlayerCharacter::DropAllItems()
+{
+	
+}
+
+void APlayerCharacter::Server_DropAllItems_Implementation()
+{
+	DropAllItems();
+}
+
 
 void APlayerCharacter::Server_EquipItem_Implementation(int SlotID)
 {
@@ -469,10 +511,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Attack), ETriggerEvent::Started, this, &APlayerCharacter::Attack);
 
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropItem);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
 	}
 
-	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DropItem);
+	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DropHeldItem);
 
 	if (!HasAuthority())
 		return;

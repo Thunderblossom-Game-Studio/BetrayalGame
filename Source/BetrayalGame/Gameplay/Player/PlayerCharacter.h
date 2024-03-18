@@ -156,9 +156,24 @@ public:
 	void Server_UnequipItem();
 
 	UFUNCTION()
-	void DropItem();
+	void DropHeldItem();
 	UFUNCTION(Server, Reliable)
-	void Server_DropItem();
+	void Server_DropHeldItem();
+	
+	UFUNCTION(BlueprintCallable, Category="Player|Inventory")
+	void DropItem(FInventorySlot Slot);
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void Server_DropItem(FInventorySlot Slot);
+	
+	UFUNCTION()
+	void DropAllItems();
+	UFUNCTION(Server, Reliable)
+	void Server_DropAllItems();
+
+
+	
+	
+	
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
 	void OnSlotSelected(FInventorySlot Slot);

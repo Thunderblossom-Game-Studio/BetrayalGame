@@ -74,11 +74,15 @@ void UInventoryComponent::RemoveItemFromInventory(int ID)
 		if(slot.ID == ID)
 		{
 			slot.Item = FItem();
+			slot.bIsSelected = false;
 			slot.bIsEmpty = true;
 			FilledSlotCount--;
 			break;
 		}
 	}
+
+	
+	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "ITEM WIPED");
 }
 
 void UInventoryComponent::Server_RemoveItemFromInventory_Implementation(int ID)
