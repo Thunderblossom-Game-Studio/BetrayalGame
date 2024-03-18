@@ -3,6 +3,7 @@
 
 #include "BetrayalGameNetworkSubsystem.h"
 
+#include "Menu_PlayerController.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 #include "Widget_SessionConnectBtn.h"
@@ -126,12 +127,21 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 		OnJoinSessionCompleteDelegateHandle.Reset();
 	}
 
-	if (!_GameInstance->SessionPassword.IsEmpty())
+	if(!_MenuController)
 	{
-		_GameInstance->SessionPassword = "";
+		_MenuController = Cast<AMenu_PlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	}
 
-	_GameInstance->HidePasswordField();
+	if (_MenuController && !_MenuController->SessionPassword.IsEmpty())
+	{
+		_MenuController->SessionPassword = "";
+	}
+	else
+	{
+		Print("UBetrayalGameNetworkSubsystem::ResetSessionSearch(): MenuController is null!");
+	}
+
+	_MenuController->HidePasswordField();
 }
 
 void UBetrayalGameNetworkSubsystem::LockSession()
@@ -280,7 +290,7 @@ ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<cons
 	ResetSessionSearch();
 
 	// Set lobby menu to inactive during search
-	_GameInstance->WB_Lobby->SetIsEnabled(false);
+	_MenuController->WB_Lobby->SetIsEnabled(false);
 
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
@@ -318,7 +328,7 @@ void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresenc
 void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	// Re-enable the lobby menu
-	_GameInstance->WB_Lobby->SetIsEnabled(true);
+	_MenuController->WB_Lobby->SetIsEnabled(true);
 
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
@@ -328,7 +338,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
 	// Server list reference
-	auto SessionList = _GameInstance->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
+	auto SessionList = _MenuController->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
 	UPanelWidget* Scrl_Sessions = Cast<UPanelWidget>(SessionList);
 
 	if (!Scrl_Sessions)
@@ -341,8 +351,8 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	for (auto result : SessionSearch->SearchResults)
 	{
 		// Create new button for each session
-		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_GameInstance,
-		                                                             _GameInstance->WB_SessionConnectBtnClass);
+		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_MenuController,
+		                                                             _MenuController->WB_SessionConnectBtnClass);
 
 		if (SessionButton)
 		{

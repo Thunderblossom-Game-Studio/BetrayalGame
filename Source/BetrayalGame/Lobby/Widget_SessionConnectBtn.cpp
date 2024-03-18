@@ -4,6 +4,7 @@
 #include "Widget_SessionConnectBtn.h"
 
 #include "BetrayalGameNetworkSubsystem.h"
+#include "Menu_PlayerController.h"
 #include "BetrayalGame/BetrayalGameInstance.h"
 #include "BetrayalGame/StaticUtils.h"
 #include "Components/Button.h"
@@ -17,8 +18,12 @@ bool UWidget_SessionConnectBtn::CheckPassword()
 	if (Password.IsEmpty())
 	{
 		// Hide the password field
-		GetGameInstance<UBetrayalGameInstance>()->HidePasswordField();
-
+		APlayerController* Ctrl = GetGameInstance()->GetFirstLocalPlayerController();
+		if(auto Menu = Cast<AMenu_PlayerController>(Ctrl))
+		{
+			Menu->HidePasswordField();
+		}
+			
 		Print("No password required!");
 		
 		// No password, just join
@@ -26,8 +31,16 @@ bool UWidget_SessionConnectBtn::CheckPassword()
 	}
 
 	// Check password against stored password
-	const FString StoredPassword = GetGameInstance<UBetrayalGameInstance>()->SessionPassword;
-	if (StoredPassword.IsEmpty())
+	//const FString StoredPassword = GetGameInstance<UBetrayalGameInstance>()->SessionPassword;
+	APlayerController* Ctrl = GetGameInstance()->GetFirstLocalPlayerController();
+	auto Menu = Cast<AMenu_PlayerController>(Ctrl);
+	if(!Menu)
+	{
+		Print("UWidget_SessionConnectBtn::CheckPassword(): Menu is null!");
+		return false;
+	}
+
+	if (Menu->SessionPassword.IsEmpty())
 	{
 		Print("Password input required!");
 		
@@ -37,7 +50,7 @@ bool UWidget_SessionConnectBtn::CheckPassword()
 
 	Print("Checking password...");
 	// Compare stored password with session password
-	return StoredPassword == Password;
+	return Menu->SessionPassword == Password;
 }
 
 void UWidget_SessionConnectBtn::NativeConstruct()
@@ -59,8 +72,16 @@ void UWidget_SessionConnectBtn::OnClick()
 {
 	Print("Joining session: " + _SessionData.Session.OwningUserName);
 
-	GetGameInstance<UBetrayalGameInstance>()->HideLobby();
+	//GetGameInstance<UBetrayalGameInstance>()->HideLobby();
+	APlayerController* Ctrl = GetGameInstance()->GetFirstLocalPlayerController();
+	auto Menu = Cast<AMenu_PlayerController>(Ctrl);
+	if(!Menu)
+	{
+		Print("UWidget_SessionConnectBtn::OnClick(): Menu is null!");
+		return;
+	}
 	
+		Menu->HideLobby();
 	// Check if the session is password protected
 	if (CheckPassword())
 	{
@@ -73,10 +94,15 @@ void UWidget_SessionConnectBtn::OnClick()
 		Print("UWidget_SessionConnectBtn::OnClick(): Password required!");
 
 		// Prompt for password
-		GetGameInstance<UBetrayalGameInstance>()->ShowPasswordField();
+		//GetGameInstance<UBetrayalGameInstance>()->ShowPasswordField();
+		if(Menu)
+		{
+			Menu->ShowPasswordField();
+		}
 
+		
 		// Bind OnClick to the password field to join the session
-		if (UButton* Button = Cast<UButton>(GetGameInstance<UBetrayalGameInstance>()->WB_PasswordField->GetWidgetFromName("Btn_AcceptPswd")))
+		if (UButton* Button = Cast<UButton>(Menu->WB_PasswordField->GetWidgetFromName("Btn_AcceptPswd")))
 		{
 			// Clear other bindings from the button
 			Button->OnClicked.Clear();

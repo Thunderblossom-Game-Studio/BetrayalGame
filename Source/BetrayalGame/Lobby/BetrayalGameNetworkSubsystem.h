@@ -43,6 +43,9 @@ public:
 	UPROPERTY()
 	UBetrayalGameInstance* _GameInstance;
 
+	UPROPERTY()
+	class AMenu_PlayerController* _MenuController;
+
 	// Helper function to grab the net ID
 	const TSharedPtr<const FUniqueNetId> GetNetID();
 

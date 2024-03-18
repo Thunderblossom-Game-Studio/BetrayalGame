@@ -30,75 +30,9 @@ class BETRAYALGAME_API UBetrayalGameInstance : public UGameInstance
 	
 	UFUNCTION(BlueprintCallable, Category = "General")
 	void QuitGame();
-	
 #pragma endregion
 	
-#pragma region UI
 public:
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WB_MainMenuClass;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WB_LobbyClass;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WB_PasswordFieldClass;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WB_SessionConnectBtnClass;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WB_LobbyRoomClass;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	UUserWidget* WB_MainMenu;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	UUserWidget* WB_Lobby;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	UUserWidget* WB_LobbyRoom;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	UUserWidget* WB_PasswordField;
-	
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ShowMainMenu();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void HideMainMenu();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ShowLobby();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void HideLobby();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ShowPasswordField();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void HidePasswordField();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ShowLobbyRoom();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void HideLobbyRoom();
-
-	UFUNCTION()
-	void DelayedUpdatePlayerList();
-	
-	UFUNCTION()
-	void UpdatePlayerList();
-
-	UFUNCTION()
-	void ClearPlayerList();
-	
-
-	
-#pragma endregion
-
 #pragma region Save/Load
 private:
 	UPROPERTY()
@@ -121,21 +55,9 @@ public:
 	void CheckPlayerProfile();
 	
 #pragma endregion
-
 #pragma region Networking	
-public:
 	UPROPERTY(EditAnywhere, Category = "Networking")
 	FName LevelToLoad = "";
-
-	// Session password value
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
-	FString SessionPassword = ""; // Password for the session
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
-	void OnSessionSearchComplete();
-
-	UFUNCTION()
-	void UpdateLobbyMemberList();
 
 #pragma endregion
 	
