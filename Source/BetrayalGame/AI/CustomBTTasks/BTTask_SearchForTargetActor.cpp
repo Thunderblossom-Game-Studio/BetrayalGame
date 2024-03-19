@@ -15,15 +15,11 @@ UBTTask_SearchForTargetActor::UBTTask_SearchForTargetActor(FObjectInitializer co
 }
 
 EBTNodeResult::Type UBTTask_SearchForTargetActor::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{	
-	if (!Controller)
-		Controller = OwnerComp.GetAIOwner();
-	if (!Pawn)
-		Pawn = Controller->GetPawn();
-	if (!World)
-		World = GetWorld();
-	if (!Blackboard)
-		Blackboard = OwnerComp.GetBlackboardComponent();
+{
+	const AAIController* Controller = OwnerComp.GetAIOwner();
+	const APawn* Pawn = Controller->GetPawn();
+	const UWorld* World = GetWorld();
+	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	
 	TArray<AActor*> Targets;
 	UGameplayStatics::GetAllActorsOfClass(World, ActorClass, Targets);

@@ -172,6 +172,10 @@ void AAIPlayerController::SeeItem(AActor* UpdatedActor, FAIStimulus Stimulus)
 			return;	
 		if (!Item->GetCanPickup())
 			return;
+
+		if (Blackboard->GetValueAsBool(TEXT("ActionLock")))
+			return;
+		
 		Blackboard->SetValueAsObject("Item", Item);
 	}
 	else if (Blackboard->GetValueAsObject("Item"))
