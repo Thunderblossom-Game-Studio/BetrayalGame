@@ -116,45 +116,44 @@ void AAIPlayerController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus
 {
 	if (!UpdatedActor || !HasAuthority())
 		return;	
-	if (UpdatedActor->IsA(AMonster::StaticClass()))
-		SeeMonster(UpdatedActor, Stimulus);
+	if (UpdatedActor->IsA(ABaseCharacter::StaticClass()))
+		SeeCharacter(UpdatedActor, Stimulus);
 	else if (UpdatedActor->IsA(AItemActor::StaticClass()))
 		SeeItem(UpdatedActor, Stimulus);
 }
 
-void AAIPlayerController::SeeMonster(AActor* UpdatedActor, FAIStimulus Stimulus)
+void AAIPlayerController::SeeCharacter(AActor* UpdatedActor, FAIStimulus Stimulus)
 {
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		World->GetTimerManager().ClearTimer(MonsterLOSTimerHandle);
+		World->GetTimerManager().ClearTimer(CharacterLOSTimerHandle);
 
-		if (AttackingMonster)
+		if (CharacterInView)
 			return;
 		
-		AttackingMonster = Cast<AMonster>(UpdatedActor);
-		if (!AttackingMonster)
+		CharacterInView = Cast<ABaseCharacter>(UpdatedActor);
+		if (!CharacterInView)
 			return;
-		Blackboard->SetValueAsObject("Attacker", AttackingMonster);
+		Blackboard->SetValueAsObject("CharacterInView", CharacterInView);
 		if (PlayerCharacter)
 			PlayerCharacter->RunStart();
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "Detected Actor: " + TargetActor->GetFName().ToString());
 		Blackboard->SetValueAsBool("LineOfSight", true);
 	}
-	else if (AttackingMonster && AttackingMonster == UpdatedActor)
+	else if (CharacterInView && CharacterInView == UpdatedActor)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, "Detected Actor: " + TargetActor->GetFName().ToString());
 		FTimerDelegate LoseDelegate;
-		LoseDelegate.BindUFunction(this, FName("MonsterLOSRecaptureFail"), UpdatedActor);
-		World->GetTimerManager().SetTimer(MonsterLOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
+		LoseDelegate.BindUFunction(this, FName("CharacterLOSRecaptureFail"), UpdatedActor);
+		World->GetTimerManager().SetTimer(CharacterLOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
 	}
-	return;
 }
 
-void AAIPlayerController::MonsterLOSRecaptureFail()
+void AAIPlayerController::CharacterLOSRecaptureFail()
 {
-	World->GetTimerManager().ClearTimer(MonsterLOSTimerHandle);	
-	AttackingMonster = nullptr;	
-	Blackboard->ClearValue("Attacker");
+	World->GetTimerManager().ClearTimer(CharacterLOSTimerHandle);	
+	CharacterInView = nullptr;	
+	Blackboard->ClearValue("CharacterInView");
 	Blackboard->SetValueAsBool("LineOfSight", false);
 	if (!BetrayalGameMode)
 		return;	
@@ -183,7 +182,6 @@ void AAIPlayerController::SeeItem(AActor* UpdatedActor, FAIStimulus Stimulus)
 		LoseDelegate.BindUFunction(this, FName("ItemLOSRecaptureFail"), UpdatedActor);
 		World->GetTimerManager().SetTimer(ItemLOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
 	}
-	return;
 }
 
 void AAIPlayerController::ItemLOSRecaptureFail()
