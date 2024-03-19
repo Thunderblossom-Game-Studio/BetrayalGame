@@ -83,20 +83,20 @@ public:
 #pragma region Line Of Sight
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player | Perception | Sight", meta = (AllowPrivateAccess = "true"))
-	class AMonster* AttackingMonster;
+	class ABaseCharacter* CharacterInView;
 	UPROPERTY(BlueprintReadOnly, Category = "Player | Perception | Sight", meta = (AllowPrivateAccess = "true"))
 	float LineOfSightTimer = 4.0f;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FTimerHandle MonsterLOSTimerHandle;
+	FTimerHandle CharacterLOSTimerHandle;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FTimerHandle ItemLOSTimerHandle;
 	
 	// Exposed Functions/Events
 public:
 	UFUNCTION()
-	void SeeMonster(AActor* UpdatedActor, struct FAIStimulus Stimulus);
+	void SeeCharacter(AActor* UpdatedActor, struct FAIStimulus Stimulus);
 	UFUNCTION(BlueprintCallable)
-	void MonsterLOSRecaptureFail();
+	void CharacterLOSRecaptureFail();
 	
 	UFUNCTION()
 	void SeeItem(AActor* UpdatedActor, struct FAIStimulus Stimulus);
