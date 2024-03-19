@@ -100,8 +100,6 @@ public:
 	
 	UFUNCTION()
 	void SeeItem(AActor* UpdatedActor, struct FAIStimulus Stimulus);
-	UFUNCTION(BlueprintCallable)
-	void ItemLOSRecaptureFail();
 
 #pragma endregion
 	

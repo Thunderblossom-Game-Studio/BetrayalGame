@@ -20,5 +20,6 @@ EBTNodeResult::Type UBTTask_DropItem::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	if (!Character)
 		return EBTNodeResult::Failed;
 	GLog->Log(Character->GetName() + TEXT(" dropping item..."));
+	Character->DropHeldItem();
 	return EBTNodeResult::Succeeded;
 }
