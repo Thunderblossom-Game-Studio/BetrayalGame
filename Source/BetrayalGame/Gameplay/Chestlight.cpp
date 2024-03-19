@@ -4,6 +4,33 @@
 #include "Chestlight.h"
 
 #include "Components/SpotLightComponent.h"
+#include "Net/UnrealNetwork.h"
+
+void AChestlight::SetLightIntensity(float NewIntensity)
+{
+	Light->SetIntensity(NewIntensity);
+}
+
+void AChestlight::Multicast_SetLightIntensity_Implementation(float NewIntensity)
+{
+	SetLightIntensity(NewIntensity);
+}
+
+void AChestlight::Server_SetLightIntensity_Implementation(float NewIntensity)
+{
+	SetLightIntensity(NewIntensity);
+	Multicast_SetLightIntensity(NewIntensity);
+}
+
+void AChestlight::DrainBattery(float DrainAmount)
+{
+	
+}
+
+void AChestlight::RechargeBattery(float RechargeAmount)
+{
+	
+}
 
 // Sets default values
 AChestlight::AChestlight()
@@ -25,10 +52,32 @@ void AChestlight::BeginPlay()
 	
 }
 
+void AChestlight::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AChestlight, Light);
+	DOREPLIFETIME(AChestlight, Intensity);
+	DOREPLIFETIME(AChestlight, bIsOn);
+	
+}
+
 // Called every frame
 void AChestlight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+}
+
+void AChestlight::ToggleLight()
+{
+	bIsOn = !bIsOn;
+	Light->SetVisibility(bIsOn);
+}
+
+void AChestlight::Server_ToggleLight_Implementation()
+{
+	ToggleLight();
 }
 

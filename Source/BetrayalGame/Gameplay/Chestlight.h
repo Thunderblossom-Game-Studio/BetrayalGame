@@ -11,13 +11,57 @@ class BETRAYALGAME_API AChestlight : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+public:	
+	// Sets default values for this actor's properties
+	AChestlight();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	
+#pragma region Light
+protected:
+	UPROPERTY(Replicated, EditAnywhere)
 	class USpotLightComponent* Light;
 
-	UPROPERTY(EditAnywhere, Category = "Chestlight")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Chestlight")
 	float Intensity = 1000.0f;
 
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Chestlight")
+	bool bIsOn = true;
 
+public:
+
+	UFUNCTION()
+	void ToggleLight();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleLight();
+	
+	UFUNCTION(BlueprintPure, Category = "Chestlight|Light")
+	bool IsOn() const { return bIsOn; }
+
+	UFUNCTION(BlueprintPure, Category = "Chestlight|Light")
+	float GetIntensity() const { return Intensity; }
+
+	UFUNCTION()
+	void SetLightIntensity(float NewIntensity);
+	
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void Server_SetLightIntensity(float NewIntensity);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetLightIntensity(float NewIntensity);
+private:
+#pragma endregion 
+	
 #pragma region Battery
 protected:
 	UPROPERTY(EditAnywhere, Category = "Chestlight|Battery")
@@ -45,16 +89,6 @@ public:
 private:
 #pragma endregion 
 	
-public:	
-	// Sets default values for this actor's properties
-	AChestlight();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

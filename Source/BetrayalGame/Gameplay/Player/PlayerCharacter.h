@@ -6,6 +6,7 @@
 #include "../Player/Player Components/InventoryComponent.h"
 #include "../Player/BaseCharacter.h"
 #include "../Interactables/Items/ItemActor.h"
+#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -28,6 +29,7 @@ enum EInputActionValue
 	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
 	IAV_Attack UMETA(DisplayName = "Attack"),
 	IAV_DropItem UMETA(DisplayName = "DropItem"),
+	IAV_ToggleLight UMETA(DisplayName = "ToggleLight"),
 };
 
 UENUM()
@@ -256,8 +258,17 @@ public:
 
 
 private:
-#pragma endregion 
+#pragma endregion
+
+#pragma region Chestlight
+	UPROPERTY()
+	AChestlight* Chestlight;
+
+	UFUNCTION()
+	void ToggleLight();
 	
+#pragma endregion 
+                                  
 protected:
 	virtual void BeginPlay() override;
 
