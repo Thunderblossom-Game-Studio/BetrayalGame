@@ -169,25 +169,17 @@ void AAIPlayerController::SeeItem(AActor* UpdatedActor, FAIStimulus Stimulus)
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		if (!PlayerCharacter)
+			return;	
+		if (!Item->GetCanPickup())
 			return;
-		//World->GetTimerManager().ClearTimer(ItemLOSTimerHandle);		
-		if (!Item->GetCanPickup() || TargetItem)
-			return;
-		TargetItem = Item;
-		Blackboard->SetValueAsObject("Item", TargetItem);
-	}
-	else if (TargetItem && TargetItem == Item)
-	{
-		FTimerDelegate LoseDelegate;
-		LoseDelegate.BindUFunction(this, FName("ItemLOSRecaptureFail"), UpdatedActor);
-		World->GetTimerManager().SetTimer(ItemLOSTimerHandle, LoseDelegate, LineOfSightTimer, false);
-	}
-}
 
-void AAIPlayerController::ItemLOSRecaptureFail()
-{
-	if (!Blackboard)
-		return;
-	TargetItem = nullptr;
-	Blackboard->ClearValue("Item");
+		if (Blackboard->GetValueAsBool(TEXT("ActionLock")))
+			return;
+		
+		Blackboard->SetValueAsObject("Item", Item);
+	}
+	else if (Blackboard->GetValueAsObject("Item"))
+	{
+		Blackboard->ClearValue("Item");
+	}
 }

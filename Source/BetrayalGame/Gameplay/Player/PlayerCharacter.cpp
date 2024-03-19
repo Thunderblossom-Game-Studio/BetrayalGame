@@ -399,32 +399,31 @@ void APlayerCharacter::Server_CycleSelectedMonster_Implementation()
 		SelectedMonsterIndex++;
 }
 
-void APlayerCharacter::SpawnMonster()
+void APlayerCharacter::SpawnSelectedMonster()
 {
-	Server_SpawnMonster();
+	if (Monsters[SelectedMonsterIndex].Count >= Monsters[SelectedMonsterIndex].MaxAmount)
+		return;
+
+	Server_SpawnMonster(Monsters[SelectedMonsterIndex].Monster);
+	Monsters[SelectedMonsterIndex].Count++;
 }
 
-void APlayerCharacter::Server_SpawnMonster_Implementation()
+void APlayerCharacter::Server_SpawnMonster_Implementation(TSubclassOf<AMonster> MonsterType)
 {
 	const ABetrayalPlayerState* BetrayalPlayerState = GetPlayerState<ABetrayalPlayerState>();
 	if (!BetrayalPlayerState->IsTraitor())
 		return;
-	if (Monsters[SelectedMonsterIndex].Count >= Monsters[SelectedMonsterIndex].MaxAmount)
-		return;
-
 	UWorld* World = GetWorld();
 	if (!World)
 		return;
+	
 	FVector Location = GetActorLocation();
 	//Location.Y += 30;
 	const FRotator Rotation = GetActorRotation();
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
-	if (AMonster* Monster = World->SpawnActor<AMonster>(Monsters[SelectedMonsterIndex].Monster, Location, Rotation, SpawnInfo))
-	{
+	if (AMonster* Monster = World->SpawnActor<AMonster>(MonsterType, Location, Rotation, SpawnInfo))
 		Monster->SpawnDefaultController();
-		Monsters[SelectedMonsterIndex].Count++;
-	}
 }
 
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
@@ -524,7 +523,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory4), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot4);
 		
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorCycleMonster), ETriggerEvent::Started, this, &APlayerCharacter::CycleSelectedMonster);
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnMonster);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnSelectedMonster);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Attack), ETriggerEvent::Started, this, &APlayerCharacter::Attack);
 

@@ -205,17 +205,18 @@ private:
 #pragma endregion 
 
 #pragma region Traitor Actions
-protected:
+public:
 	UFUNCTION()
 	void CycleSelectedMonster();
 	UFUNCTION(Server, Reliable)
 	void Server_CycleSelectedMonster();
 	
 	UFUNCTION()
-	void SpawnMonster();
+	void SpawnSelectedMonster();
 	UFUNCTION(Server, Reliable)
-	void Server_SpawnMonster();
+	void Server_SpawnMonster(TSubclassOf<class AMonster> MonsterType);
 
+protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Traitor", meta = (AllowPrivateAccess))
 	TArray<FMonsterSpawnInfo> Monsters;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Traitor", meta = (AllowPrivateAccess = "true"))
