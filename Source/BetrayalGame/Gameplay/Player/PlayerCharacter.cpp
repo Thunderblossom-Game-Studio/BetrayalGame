@@ -44,8 +44,7 @@ APlayerCharacter::APlayerCharacter()
 	if(ChestlightBP.Class)
 	{
 		ChestlightComponent->SetChildActorClass(ChestlightBP.Class);
-		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
-		ChestlightComponent->AttachToComponent(GetMesh(), AttachmentRules, FName("ChestLightSocket"));
+		ChestlightComponent->SetupAttachment(GetMesh(), FName("ChestLightSocket"));
 	}
 	else
 	{
