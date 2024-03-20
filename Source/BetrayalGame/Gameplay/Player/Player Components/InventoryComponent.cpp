@@ -81,6 +81,10 @@ void UInventoryComponent::RemoveItemFromInventory(int ID)
 		}
 	}
 
+	if(FilledSlotCount < InventorySlots.Num())
+	{
+		bIsInventoryFull = false;
+	}
 	
 	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "ITEM WIPED");
 }

@@ -64,6 +64,7 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 #pragma region Animation
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Player|Animation")
