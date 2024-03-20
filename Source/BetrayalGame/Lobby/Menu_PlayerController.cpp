@@ -5,7 +5,6 @@
 #include "BetrayalGameNetworkSubsystem.h"
 #include "../StaticUtils.h"
 #include "OnlineSubsystem.h"
-#include "OnlineSubsystemUtils.h"
 #include "OnlineSubsystemTypes.h"
 #include "VoiceChatSubsystem.h"
 #include "BetrayalGame/BetrayalPlayerState.h"
@@ -14,13 +13,6 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/GameStateBase.h"
 #include "Interfaces/OnlineIdentityInterface.h"
-
-AMenu_PlayerController::AMenu_PlayerController()
-{
-	Print("AMenu_PlayerController::AMenu_PlayerController()");
-	
-
-}
 
 void AMenu_PlayerController::BeginPlay()
 {
@@ -84,7 +76,7 @@ void AMenu_PlayerController::Init()
 		if (!WB_LobbyRoomClass)
 			Print("AMenu_PlayerController::AMenu_PlayerController(): WB_LobbyRoomClass is null!");
 	}
-	
+
 	Login();
 }
 
@@ -189,7 +181,7 @@ void AMenu_PlayerController::ShowMainMenu()
 	else
 	{
 		// Returns out to skip setting focus and binding buttons if the widget is null
-		Print("AMenu_PlayerController::ShowMainMenu(): WB_MainMenu is null!");		
+		Print("AMenu_PlayerController::ShowMainMenu(): WB_MainMenu is null!");
 		return;
 	}
 
@@ -299,13 +291,13 @@ void AMenu_PlayerController::ShowLobbyRoom()
 	if (NetworkSubsystem)
 	{
 		// Check if the delegate is already bound to avoid multiple bindings		
-//		if (!NetworkSubsystem->OnClientsChangedDelegate.Contains(this, "UpdateReadyStates"))
+		//		if (!NetworkSubsystem->OnClientsChangedDelegate.Contains(this, "UpdateReadyStates"))
 		{
 			NetworkSubsystem->OnClientsChangedDelegate.AddDynamic(this, &ThisClass::UpdateUI);
 			Print("AMenu_PlayerController::ShowLobbyRoom(): OnClientsChangedDelegate bound!");
 		}
-//		else
-//			Print("AMenu_PlayerController::ShowLobbyRoom(): OnClientsChangedDelegate is already bound!");
+		//		else
+		//			Print("AMenu_PlayerController::ShowLobbyRoom(): OnClientsChangedDelegate is already bound!");
 	}
 	else
 		Print("AMenu_PlayerController::ShowLobbyRoom(): NetworkSubsystem is null!");
@@ -333,7 +325,7 @@ void AMenu_PlayerController::HideLobbyRoom()
 void AMenu_PlayerController::UpdateUI()
 {
 	Print("Updating UI...");
-	
+
 	FTimerHandle TimerHandle;
 	// Update the player list after a delay to allow the network subsystem to update the list of connected clients
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::UpdatePlayerList, 5.0f, false);
@@ -373,13 +365,31 @@ void AMenu_PlayerController::UpdatePlayerList()
 
 		if (auto PlayerRef = Cast<ABetrayalPlayerState>(Plr))
 		{
-			auto PlayerText = FText::FromString(PlayerRef->GetPlayerName());
-			auto PlayerTextWidget = NewObject<UTextBlock>(PlayerList);
-			PlayerTextWidget->SetText(PlayerText);
+			// Create a new widget for the player name
+			auto PlayerName = FText::FromString(PlayerRef->GetPlayerName());
+			auto PlayerNameWidget = NewObject<UWidget_PlayerNameText>(PlayerList);
+			if (!IsValid(PlayerNameWidget))
+			{
+				Print("AMenu_PlayerController::UpdatePlayerList(): PlayerTextWidget is null!");
+				return;
+			}
 
-			FSlateColor PlayerNameColour = PlayerRef->IsReady() ? FColor{0, 255, 0, 255} : FColor{255, 0, 0, 255};
-			PlayerTextWidget->SetColorAndOpacity(FSlateColor(PlayerNameColour));
-			PlayerList->AddChild(PlayerTextWidget);
+			// Get text from widget and set it to the player name
+			auto PlayerNameText = PlayerNameWidget->GetWidgetFromName("Text_Username");
+			if (PlayerNameText && PlayerNameText->IsA<UTextBlock>())
+				Cast<UTextBlock>(PlayerNameText)->SetText(PlayerName);
+			else
+			{
+				Print("AMenu_PlayerController::UpdatePlayerList(): PlayerNameText is null!");
+				return;
+			}
+
+			// Add the widget to the list
+			PlayerList->AddChild(PlayerNameWidget);
+
+			if (UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetGameInstance()->GetSubsystem<
+				UBetrayalGameNetworkSubsystem>())
+				NetworkSubsystem->UpdatePlayerNameText(PlayerNameWidget);
 		}
 	}
 

@@ -15,8 +15,6 @@ class BETRAYALGAME_API AMenu_PlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	AMenu_PlayerController();
-
 	virtual void BeginPlay() override;
 	FDelegateHandle LoginDelegateHandle;
 
