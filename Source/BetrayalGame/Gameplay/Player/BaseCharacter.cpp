@@ -3,6 +3,7 @@
 
 #include "BaseCharacter.h"
 
+#include "PlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -98,7 +99,16 @@ void ABaseCharacter::StunAttack_Implementation()
 	ABaseCharacter* HitCharacter = nullptr;
 	
 	if(SweepTraceForCharacter(HitCharacter))
-		HitCharacter->Server_Stun(StunDuration);
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(HitCharacter);
+		if(Player)
+		{
+			Player->Server_DropAllItems();
+			Player->Stun(StunDuration);
+		}
+	}
+		
+		//HitCharacter->Server_Stun(StunDuration);
 }
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,

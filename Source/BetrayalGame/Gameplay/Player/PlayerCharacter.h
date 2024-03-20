@@ -6,6 +6,7 @@
 #include "../Player/Player Components/InventoryComponent.h"
 #include "../Player/BaseCharacter.h"
 #include "../Interactables/Items/ItemActor.h"
+#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -28,6 +29,7 @@ enum EInputActionValue
 	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
 	IAV_Attack UMETA(DisplayName = "Attack"),
 	IAV_DropItem UMETA(DisplayName = "DropItem"),
+	IAV_ToggleLight UMETA(DisplayName = "ToggleLight"),
 };
 
 UENUM()
@@ -254,11 +256,23 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
 	void OnAttack();
 
-
-
 private:
+#pragma endregion
+
+#pragma region Chestlight
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Chestlight")
+	class UChildActorComponent* ChestlightComponent;
+
+public:
+	UFUNCTION()
+	void ToggleLight();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleLight();
+private:	
 #pragma endregion 
-	
+                                  
 protected:
 	virtual void BeginPlay() override;
 
