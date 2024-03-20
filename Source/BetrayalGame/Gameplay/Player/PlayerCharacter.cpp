@@ -39,9 +39,18 @@ APlayerCharacter::APlayerCharacter()
 	ObjectivesComponent = CreateDefaultSubobject<UObjectivesComponent>(TEXT("Objectives Component"));
 
 
-	Chestlight = CreateDefaultSubobject<AChestlight>(TEXT("Chestlight"));
-	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
-	Chestlight->AttachToComponent(GetMesh(), AttachmentRules, FName("ChestLightSocket"));
+	ChestlightComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("Chestlight"));
+	static ConstructorHelpers::FClassFinder<AChestlight> ChestlightBP(TEXT("/Game/Blueprints/BP_Chestlight"));
+	if(ChestlightBP.Class)
+	{
+		ChestlightComponent->SetChildActorClass(ChestlightBP.Class);
+		const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
+		ChestlightComponent->AttachToComponent(GetMesh(), AttachmentRules, FName("ChestLightSocket"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Chestlight BP not found"));
+	}
 }
 
 void APlayerCharacter::DebugInput()
@@ -490,6 +499,13 @@ void APlayerCharacter::NetMulticast_Attack_Implementation()
 
 void APlayerCharacter::ToggleLight()
 {
+	Server_ToggleLight();
+}
+
+void APlayerCharacter::Server_ToggleLight_Implementation()
+{
+	if(AChestlight* Chestlight = Cast<AChestlight>(ChestlightComponent->GetChildActor()))
+		Chestlight->Multicast_ToggleLight();
 }
 
 void APlayerCharacter::BeginPlay()

@@ -255,18 +255,21 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
 	void OnAttack();
 
-
-
 private:
 #pragma endregion
 
 #pragma region Chestlight
-	UPROPERTY()
-	AChestlight* Chestlight;
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Chestlight")
+	class UChildActorComponent* ChestlightComponent;
 
+public:
 	UFUNCTION()
 	void ToggleLight();
-	
+
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleLight();
+private:	
 #pragma endregion 
                                   
 protected:

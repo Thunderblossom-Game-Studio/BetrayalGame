@@ -76,8 +76,9 @@ void AChestlight::ToggleLight()
 	Light->SetVisibility(bIsOn);
 }
 
-void AChestlight::Server_ToggleLight_Implementation()
+void AChestlight::Multicast_ToggleLight_Implementation()
 {
 	ToggleLight();
 }
+
 

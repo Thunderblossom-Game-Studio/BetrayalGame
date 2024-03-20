@@ -41,9 +41,9 @@ public:
 
 	UFUNCTION()
 	void ToggleLight();
-
-	UFUNCTION(Server, Reliable)
-	void Server_ToggleLight();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ToggleLight();
 	
 	UFUNCTION(BlueprintPure, Category = "Chestlight|Light")
 	bool IsOn() const { return bIsOn; }
