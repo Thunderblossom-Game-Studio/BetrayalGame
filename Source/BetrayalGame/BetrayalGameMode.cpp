@@ -2,9 +2,13 @@
 
 
 #include "BetrayalGameMode.h"
+
+#include "BetrayalGameInstance.h"
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
+#include "GameFramework/GameSession.h"
 #include "Gameplay/Haunts/HiddenAsymmetricalHaunt.h"
 #include "Kismet/GameplayStatics.h"
+#include "Lobby/BetrayalGameNetworkSubsystem.h"
 
 
 ABetrayalGameMode::ABetrayalGameMode()
@@ -73,12 +77,32 @@ void ABetrayalGameMode::SetStageUseTimer(const bool bUseTimer)
 
 void ABetrayalGameMode::EnableAIPlayerControllers()
 {
-	TArray<AActor*> AIPlayerControllers;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIPlayerController::StaticClass(), AIPlayerControllers);
-	for (AActor* ControllerActor : AIPlayerControllers)
+	UBetrayalGameInstance* Inst = GetGameInstance<UBetrayalGameInstance>();
+	if (!Inst)
+		return;
+	
+	const int32 PlayerCount = UGameplayStatics::GetNumPlayerStates(GetWorld());
+	const FVector Location = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetSpawnLocation();
+	const FRotator Rotation = FRotator::ZeroRotator;
+	
+	FActorSpawnParameters SpawnParams;
+	for (int i = 0; i < Inst->GetSubsystem<UBetrayalGameNetworkSubsystem>()->MAX_PLAYERS - PlayerCount; ++i)
 	{
-		if (AAIPlayerController* AIPlayerController = Cast<AAIPlayerController>(ControllerActor))
+		AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation);
+		if (AIPlayerController)
+		{
+			RestartPlayer(AIPlayerController);			
 			AIPlayerController->EnableAIPlayer();
+		}
+	}
+
+	TArray<AActor*> AIPlayerControllers;	
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAIPlayerController::StaticClass(), AIPlayerControllers);
+
+	for (AActor* Controller : AIPlayerControllers)
+	{
+		if (AAIPlayerController* Cont = Cast<AAIPlayerController>(Controller))
+			Cont->EnableAIPlayer();
 	}
 }
 
@@ -147,10 +171,10 @@ void ABetrayalGameMode::SetMatchStage(TEnumAsByte<EMatchStage> NewStage)
 	}
 	else if (MatchStage == Haunting)
 	{
-		EnableAIPlayerHauntMode();
 		MaxStageTimer = HauntStage.TimeLength;		
 		SetStageUseTimer(HauntStage.bUsesTimer);
 		BetrayalGameState->OnMatchStageChanged(MatchStage);
+		EnableAIPlayerHauntMode();
 	}
 	else if (MatchStage == Finishing)
 	{

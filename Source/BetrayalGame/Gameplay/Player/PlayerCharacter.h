@@ -64,6 +64,12 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+#pragma region Possession
+
+
+	
+#pragma endregion
 	
 #pragma region Animation
 protected:

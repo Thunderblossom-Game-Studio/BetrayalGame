@@ -31,7 +31,7 @@ class BETRAYALGAME_API ABetrayalGameMode : public AGameMode
 
 public:
 	ABetrayalGameMode();
-
+	
 #pragma region Game Mode Functions
 public:
 	virtual void BeginPlay() override;
@@ -93,6 +93,9 @@ public:
 	void EnableAIPlayerControllers();
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerHauntMode();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AController> BotController;
 private:
 #pragma endregion
 

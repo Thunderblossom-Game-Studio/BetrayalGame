@@ -17,6 +17,8 @@ AAIPlayerController::AAIPlayerController()
 	: BehaviourTree(nullptr), SightConfig(nullptr), HearingConfig(nullptr), DamageConfig(nullptr), World(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bWantsPlayerState = true;
 	
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception"));
 	
@@ -108,8 +110,12 @@ void AAIPlayerController::SetHauntBehaviours()
 	{		
 		Blackboard->SetValueAsBool("Haunt", true);
 		GLog->Log("Blackboard Haunt is true");
+		if (ABetrayalPlayerState* State = Cast<ABetrayalPlayerState>(PlayerState))
+		{
+			if (State->IsTraitor())
+				Blackboard->SetValueAsBool("Traitor", true);
+		}
 	}
-
 }
 
 void AAIPlayerController::OnSenseTargetUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)
