@@ -4,12 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Gameplay/Player/PlayerCharacter.h"
 #include "BetrayalPlayerState.generated.h"
 
 
-/**
- * 
- */
+UENUM()
+enum EControlState
+{
+	CS_None UMETA(DisplayName = "None"),
+	CS_Player UMETA(DisplayName = "Player"),
+	CS_AI UMETA(DisplayName = "AI"),
+	CS_Spectator UMETA(DisplayName = "Spectator")
+};
+
+
 UCLASS()
 class BETRAYALGAME_API ABetrayalPlayerState : public APlayerState
 {
@@ -20,40 +28,98 @@ class BETRAYALGAME_API ABetrayalPlayerState : public APlayerState
 	virtual void OverrideWith(APlayerState* PlayerState) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
+
 protected:
-	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "Player State")
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	FName DisplayName = "Dave";
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	TEnumAsByte<EControlState> ControlState = CS_Player;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State")
+	TSubclassOf<APlayerCharacter> CharacterClassTest;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	APlayerCharacter* ControlledCharacter;
+
+private:
+	
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SetControlState(EControlState NewControlState) { ControlState = NewControlState; }
+
+	UFUNCTION(BlueprintPure, Category = "State")
+	EControlState GetControlState() const { return ControlState; }
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SetDisplayName(FName NewDisplayName) { DisplayName = NewDisplayName; }
+	
+	UFUNCTION(BlueprintPure, Category = "State")
+	FName GetDisplayName() const { return DisplayName; }
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
+
+	UFUNCTION(BlueprintPure, Category = "State")
+	APlayerCharacter* GetControlledCharacter() const { return ControlledCharacter; }
+
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
+	
+#pragma region AI
+
+
+private:
+#pragma endregion
+	
+#pragma region Gameplay
+protected:
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_IsTraitor, BlueprintReadOnly, Category = "State|Gameplay")
 	bool bIsTraitor = false;
 
-	UPROPERTY(VisibleAnywhere)
-	bool bIsReady = false;
-	
 public:
 	UFUNCTION()
 	void OnRep_IsTraitor();
-
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnIsTraitorChanged(bool bNewIsTraitor);
-
-
-	UFUNCTION()
+	
+	UFUNCTION(BlueprintPure, Category = "State|Gameplay")
 	bool IsTraitor() const { return bIsTraitor; }
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable , Category = "State|Gameplay")
 	void SetIsTraitor(bool bNewIsTraitor) { bIsTraitor = bNewIsTraitor; }
-
+	
+private:
+#pragma endregion
+	
 #pragma region Lobby
-	UFUNCTION(BlueprintCallable, Category = "Lobby")
+
+#pragma region ReadyState
+protected:
+	UPROPERTY(VisibleAnywhere)
+	bool bIsReady = false;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Lobby|ReadyState")
 	bool IsReady() const { return bIsReady; }
 
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Lobby")
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Lobby|ReadyState")
 	void SetIsReady(bool bReady);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetIsReady(bool bReady, ABetrayalPlayerState* Player);
 
+private:
 #pragma endregion
+
+	
+
+#pragma endregion
+	
+	
+	
 };
 
 

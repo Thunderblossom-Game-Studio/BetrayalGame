@@ -73,8 +73,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	ABetrayalPlayerState* GetRandomPlayer() const;
-
 #pragma region Match Stage Variable Replication
 // Replicated Variables
 protected:
