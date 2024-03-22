@@ -35,16 +35,16 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	FName DisplayName = "Dave";
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	TEnumAsByte<EControlState> ControlState = CS_Player;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State")
 	TSubclassOf<APlayerCharacter> CharacterClassTest;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	APlayerCharacter* ControlledCharacter;
 
-private:
+public:
 	
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void SetControlState(EControlState NewControlState) { ControlState = NewControlState; }
@@ -58,14 +58,19 @@ private:
 	UFUNCTION(BlueprintPure, Category = "State")
 	FName GetDisplayName() const { return DisplayName; }
 
-	UFUNCTION(BlueprintCallable, Category = "State")
+	UFUNCTION(Category = "State")
 	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
-
+	
 	UFUNCTION(BlueprintPure, Category = "State")
 	APlayerCharacter* GetControlledCharacter() const { return ControlledCharacter; }
 
-	UFUNCTION(BlueprintCallable, Server, Reliable)
+	UFUNCTION(BlueprintCallable, Category = "State")
 	void ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
+	UFUNCTION(BlueprintCallable, Server, Reliable , Category = "State")
+	void Server_ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "State")
+	void OnCharacterChanged();
 	
 #pragma region AI
 

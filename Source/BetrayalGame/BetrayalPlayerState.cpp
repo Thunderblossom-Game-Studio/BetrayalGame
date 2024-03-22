@@ -17,6 +17,8 @@ void ABetrayalPlayerState::CopyProperties(APlayerState* PlayerState)
 		if(IsValid(BetrayalPlayerState))
 		{
 			bIsTraitor = BetrayalPlayerState->bIsTraitor;
+			ControlledCharacter = BetrayalPlayerState->ControlledCharacter;
+			ControlState = BetrayalPlayerState->ControlState;
 		}
 	}
 }
@@ -31,6 +33,8 @@ void ABetrayalPlayerState::OverrideWith(APlayerState* PlayerState)
 		if(IsValid(BetrayalPlayerState))
 		{
 			bIsTraitor = BetrayalPlayerState->bIsTraitor;
+			ControlledCharacter = BetrayalPlayerState->ControlledCharacter;
+			ControlState = BetrayalPlayerState->ControlState;
 		}
 	}
 }
@@ -40,19 +44,50 @@ void ABetrayalPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABetrayalPlayerState, bIsTraitor);
+	DOREPLIFETIME(ABetrayalPlayerState, ControlledCharacter);
+	DOREPLIFETIME(ABetrayalPlayerState, ControlState);
 }
 
-void ABetrayalPlayerState::ChangeCharacter_Implementation(TSubclassOf<APlayerCharacter> NewControlledCharacter)
+void ABetrayalPlayerState::Server_ChangeCharacter_Implementation(TSubclassOf<APlayerCharacter> NewControlledCharacter)
 {
-	//SetControlledCharacter(CharacterClassTest->GetDefaultObject<APlayerCharacter>());
+	ChangeCharacter(NewControlledCharacter);
+}
 
-	const FTransform Transform = GetOwningController()->GetPawn()->GetActorTransform();
+void ABetrayalPlayerState::ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter)
+{
+	APawn* PreviousCharacter = GetOwningController()->GetPawn();
+	if(!PreviousCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No previous character"));
+		return;
+	}
+
+	// Save the transform before destroying the previous character
+	const FTransform Transform = PreviousCharacter->GetTransform();
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = GetOwningController();
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
-	GetOwningController()->GetPawn()->Destroy();
+	AActor* NewCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewControlledCharacter, Transform, SpawnParameters);
+	if(!NewCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No new character"));
+		return;
+	}
 
-	APlayerCharacter* NewCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewControlledCharacter, Transform);
-
-	GetOwningController()->Possess(NewCharacter);
+	APlayerCharacter* NewPlayerCharacter = Cast<APlayerCharacter>(NewCharacter);
+	if(!NewPlayerCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("New character is not a player character"));
+		return;
+	}
+	
+	PreviousCharacter->Destroy();
+	
+	SetControlledCharacter(NewPlayerCharacter);
+	
+	GetOwningController()->Possess(NewPlayerCharacter);
 }
 
 void ABetrayalPlayerState::OnRep_IsTraitor()
