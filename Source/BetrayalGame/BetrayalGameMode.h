@@ -31,7 +31,7 @@ class BETRAYALGAME_API ABetrayalGameMode : public AGameMode
 
 public:
 	ABetrayalGameMode();
-
+	
 #pragma region Game Mode Functions
 public:
 	virtual void BeginPlay() override;
@@ -39,6 +39,9 @@ public:
 	
 	virtual void StartMatch() override;
 	virtual void EndMatch() override;
+	
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
 private:	
 #pragma endregion 
 
@@ -88,12 +91,28 @@ protected:
 #pragma endregion
 
 #pragma region AI Players
-public:
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Bots)
+	// Whether the match should use bots or not.
+	bool bUsesBots = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Bots)
+	// The A.I player controller.
+	TSubclassOf<class AController> BotController;
+	
+private:
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerControllers();
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerHauntMode();
-private:
+
+	void ReplacePlayer(const class ABetrayalPlayerController* BetrayalPlayerController) const;
+	void ReplaceBot(const class ABetrayalPlayerController* BetrayalPlayerController) const;
+
+// Getters/Setters
+public:
+	void SetUseBots(const bool Bots) { bUsesBots = Bots; }
+	bool UseBots() const { return bUsesBots; }
+	
 #pragma endregion
 
 #pragma region Players

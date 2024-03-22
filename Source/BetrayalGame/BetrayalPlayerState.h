@@ -90,6 +90,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnIsTraitorChanged(bool bNewIsTraitor);
 	
+
 	UFUNCTION(BlueprintPure, Category = "State|Gameplay")
 	bool IsTraitor() const { return bIsTraitor; }
 

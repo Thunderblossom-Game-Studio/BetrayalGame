@@ -2,7 +2,9 @@
 
 
 #include "BetrayalPlayerController.h"
-
+#include "BetrayalGame/AI/Controllers/AIPlayerController.h"
+#include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "BetrayalGame/BetrayalPlayerState.h"
 
 void ABetrayalPlayerController::BeginPlay()
@@ -20,6 +22,5 @@ void ABetrayalPlayerController::BeginPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, BetrayalPlayerState->GetPlayerName());
 		
 	}
-	
 	
 }
