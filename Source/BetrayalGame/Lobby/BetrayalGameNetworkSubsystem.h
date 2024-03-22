@@ -8,6 +8,7 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Net/Core/Connection/NetEnums.h"
+#include "BetrayalGame/Lobby/Widget_PlayerNameText.h"
 #include "BetrayalGameNetworkSubsystem.generated.h"
 
 // Forward Declarations
@@ -22,6 +23,15 @@ enum class ESessionSearchResult : uint8
 {
 	SSR_Success UMETA(DisplayName = "Success"),
 	SSR_Failure UMETA(DisplayName = "Failure")
+};
+
+UENUM(BlueprintType)
+enum class ESessionPrivacy : uint8
+{
+	SP_Public UMETA(DisplayName = "Public"),
+	SP_Friends UMETA(DisplayName = "Friends"),
+	SP_Private UMETA(DisplayName = "Private"),
+	SP_LAN UMETA(DisplayName = "LAN")
 };
 
 UCLASS()
@@ -42,6 +52,9 @@ public:
 
 	UPROPERTY()
 	UBetrayalGameInstance* _GameInstance;
+
+	UPROPERTY()
+	class AMenu_PlayerController* _MenuController;
 
 	// Helper function to grab the net ID
 	const TSharedPtr<const FUniqueNetId> GetNetID();
@@ -93,6 +106,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Networking")
 	void ChangeMapByReference(FSoftWorldReference Map);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
+	void UpdatePlayerNameText(UTextBlock* PlayerNameText);
+
 #pragma region Session Creation
 	// Session created delegate
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
@@ -107,12 +123,11 @@ public:
 	// Online session settings
 	TSharedPtr<class FOnlineSessionSettings> SessionSettings;
 
-	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN, bool bIsPresence,
-	                 int32 MaxNumPlayers, bool bIsPrivate, FString Password);
+	bool HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, FString Password, ESessionPrivacy Privacy);
 
 	// Blueprint callable function to start a session
 	UFUNCTION(BlueprintCallable, Category = "Networking")
-	void BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence, bool bIsPrivate, FString Password);
+	void BP_HostSession(FName SessionName, FString Password, ESessionPrivacy Privacy);
 
 	// Post session complete delegate callback
 	virtual void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);

@@ -5,6 +5,7 @@
 
 #include "BetrayalGameInstance.h"
 #include "GameFramework/GameModeBase.h"
+#include "Lobby/Menu_PlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 void ABetrayalPlayerState::CopyProperties(APlayerState* PlayerState)
@@ -104,7 +105,11 @@ void ABetrayalPlayerState::SetIsReady_Implementation(bool bReady)
 void ABetrayalPlayerState::Multicast_SetIsReady_Implementation(bool bReady, ABetrayalPlayerState* Player)
 {
 	Player->bIsReady = bReady;
-	GetGameInstance<UBetrayalGameInstance>()->UpdatePlayerList();
+	APlayerController* Ctrl = GetWorld()->GetFirstPlayerController();
+	if (auto Menu = Cast<AMenu_PlayerController>(Ctrl))
+	{
+		Menu->UpdatePlayerList();
+	}
 }
 
 
