@@ -7,7 +7,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
-void ABetrayalPlayerController::BeginPlay()
+/*void ABetrayalPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -25,7 +25,7 @@ void ABetrayalPlayerController::BeginPlay()
 }
 
 void ABetrayalPlayerController::Destroyed()
-{	
+{
 	const int32 PlayerCount = UGameplayStatics::GetNumPlayerStates(GetWorld());
 	const FVector Location = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetSpawnLocation();
 	const FRotator Rotation = FRotator::ZeroRotator;
@@ -35,9 +35,9 @@ void ABetrayalPlayerController::Destroyed()
 	AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation);
 	if (AIPlayerController)
 	{
-		GetWorld()->GetAuthGameMode()->RestartPlayerAtPlayerStart(AIPlayerController, GetPawn());			
+		GetWorld()->GetAuthGameMode()->RestartPlayerAtPlayerStart(AIPlayerController, AIPlayerController->GetPawn());			
 		AIPlayerController->EnableAIPlayer();
 	}
 	
 	Super::Destroyed();
-}
+}*/

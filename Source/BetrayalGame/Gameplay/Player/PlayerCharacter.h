@@ -67,7 +67,8 @@ public:
 
 #pragma region Possession
 
-
+public:
+	virtual void Destroyed() override;
 	
 #pragma endregion
 	

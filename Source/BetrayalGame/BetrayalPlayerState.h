@@ -35,8 +35,7 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnIsTraitorChanged(bool bNewIsTraitor);
-
-
+	
 	UFUNCTION()
 	bool IsTraitor() const { return bIsTraitor; }
 

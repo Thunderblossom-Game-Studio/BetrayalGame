@@ -14,10 +14,6 @@ class BETRAYALGAME_API ABetrayalPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-
 public:
-	virtual void BeginPlay() override;
-	virtual void Destroyed() override;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class AController> BotController;
+	FTransform DestroyedTransform;
 };

@@ -3,6 +3,7 @@
 
 #include "PlayerCharacter.h"
 
+#include "BetrayalPlayerController.h"
 #include "../Interactables/BaseInteractable.h"
 #include "../../BetrayalGameMode.h"
 #include "../../BetrayalPlayerState.h"
@@ -63,6 +64,18 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
 	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
+}
+
+void APlayerCharacter::Destroyed()
+{
+	DropAllItems();
+	
+	if (ABetrayalPlayerController* BetrayalPlayerController = GetController<ABetrayalPlayerController>())
+	{
+		BetrayalPlayerController->DestroyedTransform = GetActorTransform();
+	}
+	
+	Super::Destroyed();
 }
 
 void APlayerCharacter::TurnLook(const FInputActionValue& Value)
