@@ -54,6 +54,11 @@ void ABetrayalPlayerState::Server_ChangeCharacter_Implementation(TSubclassOf<APl
 	ChangeCharacter(NewControlledCharacter);
 }
 
+void ABetrayalPlayerState::Server_SetControlledCharacter_Implementation(APlayerCharacter* NewControlledCharacter)
+{
+	SetControlledCharacter(NewControlledCharacter);
+}
+
 void ABetrayalPlayerState::ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter)
 {
 	APawn* PreviousCharacter = GetOwningController()->GetPawn();
