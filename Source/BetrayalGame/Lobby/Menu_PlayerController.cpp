@@ -357,7 +357,7 @@ void AMenu_PlayerController::UpdatePlayerList()
 
 	PlayerList->ClearChildren();
 
-	// Iterate over the player states and add each unique user to the list, with a colour to indicate if they are ready
+	// Iterate over the player states and add each unique user to the list
 	auto Plrs = GetWorld()->GetGameState()->PlayerArray;
 	for (auto Plr : Plrs)
 	{
@@ -365,31 +365,13 @@ void AMenu_PlayerController::UpdatePlayerList()
 
 		if (auto PlayerRef = Cast<ABetrayalPlayerState>(Plr))
 		{
-			// Create a new widget for the player name
-			auto PlayerName = FText::FromString(PlayerRef->GetPlayerName());
-			auto PlayerNameWidget = NewObject<UWidget_PlayerNameText>(PlayerList);
-			if (!IsValid(PlayerNameWidget))
-			{
-				Print("AMenu_PlayerController::UpdatePlayerList(): PlayerTextWidget is null!");
-				return;
-			}
-
-			// Get text from widget and set it to the player name
-			auto PlayerNameText = PlayerNameWidget->GetWidgetFromName("Text_Username");
-			if (PlayerNameText && PlayerNameText->IsA<UTextBlock>())
-				Cast<UTextBlock>(PlayerNameText)->SetText(PlayerName);
-			else
-			{
-				Print("AMenu_PlayerController::UpdatePlayerList(): PlayerNameText is null!");
-				return;
-			}
-
-			// Add the widget to the list
-			PlayerList->AddChild(PlayerNameWidget);
+			CreatePlayerNameTextWidget(PlayerRef->GetPlayerName(), PlayerRef->IsReady(), PlayerList);
 
 			if (UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetGameInstance()->GetSubsystem<
 				UBetrayalGameNetworkSubsystem>())
-				NetworkSubsystem->UpdatePlayerNameText(PlayerNameWidget);
+			{
+				//NetworkSubsystem->UpdatePlayerNameText(PlayerNameWidget);
+			}
 		}
 	}
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/PanelWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Menu_PlayerController.generated.h"
 
@@ -18,9 +19,12 @@ public:
 	virtual void BeginPlay() override;
 	FDelegateHandle LoginDelegateHandle;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
+	FString SessionPassword = ""; // Password for the session
+
 	UFUNCTION(BlueprintCallable, Category = "Controller")
 	void Init();
-	
+
 	void Login();
 	void OnLoginCompleted(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
 
@@ -38,6 +42,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WB_LobbyRoomClass;
+
+	UPROPERTY(EditAnywhere, Category = "UI|PlayerList")
+	TSubclassOf<UUserWidget> WB_PlayerNameTextClass;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UUserWidget* WB_MainMenu;
@@ -83,10 +90,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void UpdateReadyStates();
-	
+
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ClearPlayerList();
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Networking")
-	FString SessionPassword = ""; // Password for the session
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void CreatePlayerNameTextWidget(const FString& PlayerName, bool bIsReady, UPanelWidget* ParentWidget);
+
+	//UFUNCTION(BlueprintCallable, Category = "UI")
+	//void AddPlayerNameTextWidget(UUserWidget* PlayerNameText);
 };

@@ -56,7 +56,6 @@ void ABetrayalPlayerState::SetIsReady_Implementation(bool bReady)
 void ABetrayalPlayerState::Multicast_SetIsReady_Implementation(bool bReady, ABetrayalPlayerState* Player)
 {
 	Player->bIsReady = bReady;
-	//GetGameInstance<UBetrayalGameInstance>()->UpdatePlayerList();
 	APlayerController* Ctrl = GetWorld()->GetFirstPlayerController();
 	if (auto Menu = Cast<AMenu_PlayerController>(Ctrl))
 	{

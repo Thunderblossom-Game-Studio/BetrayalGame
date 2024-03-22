@@ -107,7 +107,7 @@ public:
 	void ChangeMapByReference(FSoftWorldReference Map);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Networking")
-	void UpdatePlayerNameText(UWidget_PlayerNameText* PlayerNameText);
+	void UpdatePlayerNameText(UTextBlock* PlayerNameText);
 
 #pragma region Session Creation
 	// Session created delegate
