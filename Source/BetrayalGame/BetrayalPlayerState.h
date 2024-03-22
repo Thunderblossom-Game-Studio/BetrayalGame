@@ -58,8 +58,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "State")
 	FName GetDisplayName() const { return DisplayName; }
 
-	UFUNCTION(Category = "State")
+	UFUNCTION()
 	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
+	UFUNCTION(Server, Reliable)
+	void Server_SetControlledCharacter(APlayerCharacter* NewControlledCharacter);
+
 	
 	UFUNCTION(BlueprintPure, Category = "State")
 	APlayerCharacter* GetControlledCharacter() const { return ControlledCharacter; }
