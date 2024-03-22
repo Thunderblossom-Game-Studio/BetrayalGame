@@ -23,6 +23,7 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryFull);
 	DOREPLIFETIME(UInventoryComponent, bIsInventoryInitialized);
 	DOREPLIFETIME(UInventoryComponent, SelectedSlot);
+	DOREPLIFETIME(UInventoryComponent, LastSlotAdded);
 }
 
 // Called when the game starts
@@ -54,11 +55,7 @@ void UInventoryComponent::AddItemToInventory(FItem Item)
 		{
 			slot.Item = Item;
 			slot.bIsEmpty = false;
-
-			SelectSlot(slot.ID);
-			
 			LastSlotAdded = slot;
-			
 			FilledSlotCount++;
 			break;
 		}
@@ -77,11 +74,19 @@ void UInventoryComponent::RemoveItemFromInventory(int ID)
 		if(slot.ID == ID)
 		{
 			slot.Item = FItem();
+			slot.bIsSelected = false;
 			slot.bIsEmpty = true;
 			FilledSlotCount--;
 			break;
 		}
 	}
+
+	if(FilledSlotCount < InventorySlots.Num())
+	{
+		bIsInventoryFull = false;
+	}
+	
+	GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "ITEM WIPED");
 }
 
 void UInventoryComponent::Server_RemoveItemFromInventory_Implementation(int ID)
@@ -138,14 +143,46 @@ void UInventoryComponent::SelectSlot(int SlotID)
 {
 	for (auto& slot : InventorySlots)
 	{
-		if(slot.ID == SlotID)
+		if(SlotID == slot.ID)
 		{
 			slot.bIsSelected = true;
+
+			if(slot.Item.Actor)
+			{
+				slot.bIsEquipped = true;
+				
+			}
+
 			SelectedSlot = slot;
 		}
 		else
 		{
 			slot.bIsSelected = false;
+			slot.bIsEquipped = false;
 		}
 	}
+}
+
+void UInventoryComponent::Server_SelectSlot_Implementation(int SlotID)
+{
+	SelectSlot(SlotID);
+}
+
+void UInventoryComponent::DeselectSlot(int SlotID)
+{
+	for (auto& slot : InventorySlots)
+	{
+		if(SlotID == slot.ID)
+		{
+			slot.bIsSelected = false;
+			slot.bIsEquipped = false;
+
+			SelectedSlot = slot;
+		}
+	}
+}
+
+void UInventoryComponent::Server_DeselectSlot_Implementation(int SlotID)
+{
+	DeselectSlot(SlotID);
 }

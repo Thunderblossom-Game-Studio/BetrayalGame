@@ -16,6 +16,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "../../AI/Pawns/Monster.h"
+#include "Components/SphereComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -28,11 +29,27 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = true;
 	CameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FName("Head"));
 
+	ItemDropLocation = CreateDefaultSubobject<USphereComponent>(TEXT("Item Drop Location"));
+	ItemDropLocation->SetupAttachment(GetMesh());
+	
 	InteractableInFocus = nullptr;
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
 
 	ObjectivesComponent = CreateDefaultSubobject<UObjectivesComponent>(TEXT("Objectives Component"));
+
+
+	ChestlightComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("Chestlight"));
+	static ConstructorHelpers::FClassFinder<AChestlight> ChestlightBP(TEXT("/Game/Blueprints/BP_Chestlight"));
+	if(ChestlightBP.Class)
+	{
+		ChestlightComponent->SetChildActorClass(ChestlightBP.Class);
+		ChestlightComponent->SetupAttachment(GetMesh(), FName("ChestLightSocket"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Chestlight BP not found"));
+	}
 }
 
 void APlayerCharacter::DebugInput()
@@ -45,7 +62,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
-	DOREPLIFETIME(APlayerCharacter, bWasItemUnequipped)
 	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
 }
 
@@ -105,80 +121,84 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 void APlayerCharacter::SelectSlot1()
 {
-	InventoryComponent->SelectSlot(0);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
+		EquipItem(0);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetItemInSlot(0).Actor.GetDefaultObject());
+		Server_EquipItem(0);
 	}
 
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::SelectSlot2()
 {
-	InventoryComponent->SelectSlot(1);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		EquipItem(1);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		Server_EquipItem(1);
 	}
 
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
 void APlayerCharacter::SelectSlot3()
 {
-	InventoryComponent->SelectSlot(2);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		EquipItem(2);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		Server_EquipItem(2);
 	}
 
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 	
 }
 
 void APlayerCharacter::SelectSlot4()
 {
-	InventoryComponent->SelectSlot(3);
-
 	if(HasAuthority())
 	{
-		EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		EquipItem(3);
 	}
 	else
 	{
-		Server_EquipItem(InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
+		Server_EquipItem(3);
 	}
-
-
-	OnItemEquipped(InventoryComponent->GetSelectedSlot(), InventoryComponent->GetSelectedSlot().Item.Actor.GetDefaultObject());
-
+	
+	//OnSlotSelected(InventoryComponent->GetSelectedSlot());
 }
 
-void APlayerCharacter::EquipItem(AItemActor* Item)
+void APlayerCharacter::EquipItem(int SlotID)
 {
-	if(!Item)
-		return;
-
-	if(HeldItem && Item->GetClass() == HeldItem->GetClass())
+	InventoryComponent->Server_SelectSlot(SlotID);
+	
+	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	
+	AItemActor* Item = InventoryComponent->GetItemInSlot(SlotID).Actor.GetDefaultObject();
+	
+	if(HeldItem && !Item)
 	{
 		UnequipItem();
 		HeldItem = nullptr;
+		return;
+	}
+	
+	if(!Item)
+		return;
+	
+	if(HeldItem && Item->GetClass() == HeldItem->GetClass())
+	{
+		UnequipItem();
+		InventoryComponent->Server_DeselectSlot(SlotID);
+		OnSlotSelected(InventoryComponent->GetSelectedSlot());
 		return;
 	}
 	else
@@ -191,16 +211,20 @@ void APlayerCharacter::EquipItem(AItemActor* Item)
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = this;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
+	
 	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(Item->GetClass(), SpawnParams))
 	{
+		ItemActor->NetMulticast_EnableItemPhysics(false);
 		ItemActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("ItemSocket"));
 		ItemActor->SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		ItemActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+		ItemActor->bIsInteractable = false;
 		HeldItem = ItemActor;
 	}
 
 	HeldItem->Server_SetCanPickup(false);
+
+	
 }
 
 void APlayerCharacter::UnequipItem()
@@ -210,12 +234,103 @@ void APlayerCharacter::UnequipItem()
 	
 	HeldItem->Destroy();
 
-	bWasItemUnequipped = true;
+	HeldItem = nullptr;
 }
 
-void APlayerCharacter::Server_EquipItem_Implementation(AItemActor* Item)
+void APlayerCharacter::DropHeldItem()
 {
-	EquipItem(Item);
+	Server_DropHeldItem();
+}
+
+void APlayerCharacter::Server_DropHeldItem_Implementation()
+{
+	if(!HeldItem)
+		return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(HeldItem->GetClass(), SpawnParams))
+	{
+		ItemActor->NetMulticast_EnableItemPhysics(true);
+		ItemActor->SetActorRelativeLocation(ItemDropLocation->GetComponentLocation());
+		ItemActor->SetActorRelativeRotation(ItemDropLocation->GetComponentRotation());
+		ItemActor->bIsInteractable = true;
+	}
+
+	UnequipItem();
+
+	InventoryComponent->Server_RemoveItemFromInventory(InventoryComponent->GetSelectedSlot().ID);
+	InventoryComponent->Server_DeselectSlot(InventoryComponent->GetSelectedSlot().ID);
+	OnItemRemovedFromInventory(InventoryComponent->GetSelectedSlot());
+	
+	//GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Dropping item at: " + ItemDropLocation->GetComponentLocation().ToString());
+}
+
+void APlayerCharacter::DropItem(FInventorySlot Slot)
+{
+	for (auto InventorySlot : InventoryComponent->GetInventorySlots())
+	{
+		if(Slot != InventorySlot)
+			continue;
+		
+		if(InventorySlot.bIsEquipped)
+		{
+			DropHeldItem();
+			continue;
+		}
+		
+		if(InventorySlot.bIsEmpty)
+			continue;
+
+		AItemActor* SlotItem = InventoryComponent->GetItemInSlot(InventorySlot.ID).Actor.GetDefaultObject();
+		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = this;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+		if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(SlotItem->GetClass(), SpawnParams))
+		{
+			ItemActor->NetMulticast_EnableItemPhysics(true);
+			ItemActor->SetActorRelativeLocation(ItemDropLocation->GetComponentLocation());
+			ItemActor->SetActorRelativeRotation(ItemDropLocation->GetComponentRotation());
+			ItemActor->bIsInteractable = true;
+		}
+		
+		InventoryComponent->Server_RemoveItemFromInventory(InventorySlot.ID);
+		
+		if(InventorySlot.bIsSelected)
+			InventoryComponent->Server_DeselectSlot(InventorySlot.ID);
+			
+		OnItemRemovedFromInventory(InventoryComponent->GetSlot(InventorySlot.ID));
+	}
+}
+
+void APlayerCharacter::Server_DropItem_Implementation(FInventorySlot Slot)
+{
+	DropItem(Slot);
+}
+
+void APlayerCharacter::DropAllItems()
+{
+	for (auto Slot : InventoryComponent->GetInventorySlots())
+	{
+		DropItem(Slot);
+	}
+}
+
+void APlayerCharacter::Server_DropAllItems_Implementation()
+{
+	DropAllItems();
+}
+
+
+void APlayerCharacter::Server_EquipItem_Implementation(int SlotID)
+{
+	EquipItem(SlotID);
 }
 
 void APlayerCharacter::RunStart_Implementation()
@@ -258,6 +373,9 @@ void APlayerCharacter::TraceForInteractables()
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
 		{
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
+			
+			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)
+				InteractableInFocus = nullptr;
 		}
 		else if (!HitActor->Implements<UInteractable>())
 		{
@@ -294,32 +412,31 @@ void APlayerCharacter::Server_CycleSelectedMonster_Implementation()
 		SelectedMonsterIndex++;
 }
 
-void APlayerCharacter::SpawnMonster()
+void APlayerCharacter::SpawnSelectedMonster()
 {
-	Server_SpawnMonster();
+	if (Monsters[SelectedMonsterIndex].Count >= Monsters[SelectedMonsterIndex].MaxAmount)
+		return;
+
+	Server_SpawnMonster(Monsters[SelectedMonsterIndex].Monster);
+	Monsters[SelectedMonsterIndex].Count++;
 }
 
-void APlayerCharacter::Server_SpawnMonster_Implementation()
+void APlayerCharacter::Server_SpawnMonster_Implementation(TSubclassOf<AMonster> MonsterType)
 {
 	const ABetrayalPlayerState* BetrayalPlayerState = GetPlayerState<ABetrayalPlayerState>();
 	if (!BetrayalPlayerState->IsTraitor())
 		return;
-	if (Monsters[SelectedMonsterIndex].Count >= Monsters[SelectedMonsterIndex].MaxAmount)
-		return;
-
 	UWorld* World = GetWorld();
 	if (!World)
 		return;
+	
 	FVector Location = GetActorLocation();
 	//Location.Y += 30;
 	const FRotator Rotation = GetActorRotation();
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::Undefined;
-	if (AMonster* Monster = World->SpawnActor<AMonster>(Monsters[SelectedMonsterIndex].Monster, Location, Rotation, SpawnInfo))
-	{
+	if (AMonster* Monster = World->SpawnActor<AMonster>(MonsterType, Location, Rotation, SpawnInfo))
 		Monster->SpawnDefaultController();
-		Monsters[SelectedMonsterIndex].Count++;
-	}
 }
 
 void APlayerCharacter::Server_Interact_Implementation(class AActor* NewOwner, class ABaseInteractable* Interactable)
@@ -378,6 +495,16 @@ void APlayerCharacter::NetMulticast_Attack_Implementation()
 }
 
 
+void APlayerCharacter::ToggleLight()
+{
+	Server_ToggleLight();
+}
+
+void APlayerCharacter::Server_ToggleLight_Implementation()
+{
+	if(AChestlight* Chestlight = Cast<AChestlight>(ChestlightComponent->GetChildActor()))
+		Chestlight->Multicast_ToggleLight();
+}
 
 void APlayerCharacter::BeginPlay()
 {
@@ -419,12 +546,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Inventory4), ETriggerEvent::Started, this, &APlayerCharacter::SelectSlot4);
 		
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorCycleMonster), ETriggerEvent::Started, this, &APlayerCharacter::CycleSelectedMonster);
-		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnMonster);
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_TraitorSpawnMonster), ETriggerEvent::Started, this, &APlayerCharacter::SpawnSelectedMonster);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Attack), ETriggerEvent::Started, this, &APlayerCharacter::Attack);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_ToggleLight), ETriggerEvent::Started, this, &APlayerCharacter::ToggleLight);
 	}
 
-	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DebugInput);
+	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DropHeldItem);
 
 	if (!HasAuthority())
 		return;

@@ -6,6 +6,7 @@
 #include "../Player/Player Components/InventoryComponent.h"
 #include "../Player/BaseCharacter.h"
 #include "../Interactables/Items/ItemActor.h"
+#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -27,6 +28,8 @@ enum EInputActionValue
 	IAV_TraitorCycleMonster UMETA(DisplayName = "TraitorCycleMonster"),
 	IAV_TraitorSpawnMonster UMETA(DisplayName = "TraitorSpawnMonster"),
 	IAV_Attack UMETA(DisplayName = "Attack"),
+	IAV_DropItem UMETA(DisplayName = "DropItem"),
+	IAV_ToggleLight UMETA(DisplayName = "ToggleLight"),
 };
 
 UENUM()
@@ -61,6 +64,7 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 #pragma region Animation
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Player|Animation")
@@ -120,7 +124,9 @@ private:
 
 #pragma region Inventory
 public:
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	class USphereComponent* ItemDropLocation;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
 	class UInventoryComponent* InventoryComponent;
 
@@ -143,19 +149,35 @@ public:
 	void SelectSlot4();
 
 	UFUNCTION()
-	void EquipItem(AItemActor* Item);
+	void EquipItem(int SlotID);
 	UFUNCTION(Server, Reliable)
-	
-	void Server_EquipItem(AItemActor* Item);
+	void Server_EquipItem(int SlotID);
 
 	UFUNCTION()
 	void UnequipItem();
-	
 	UFUNCTION(Server, Reliable)
 	void Server_UnequipItem();
+
+	UFUNCTION()
+	void DropHeldItem();
+	UFUNCTION(Server, Reliable)
+	void Server_DropHeldItem();
+	
+	UFUNCTION()
+	void DropItem(FInventorySlot Slot);
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void Server_DropItem(FInventorySlot Slot);
+	
+	UFUNCTION()
+	void DropAllItems();
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void Server_DropAllItems();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnItemEquipped(FInventorySlot Slot, AItemActor* Item);
+	void OnSlotSelected(FInventorySlot Slot);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
+	void OnItemRemovedFromInventory(FInventorySlot Slot);
 	
 private:	
 #pragma endregion 
@@ -186,17 +208,18 @@ private:
 #pragma endregion 
 
 #pragma region Traitor Actions
-protected:
+public:
 	UFUNCTION()
 	void CycleSelectedMonster();
 	UFUNCTION(Server, Reliable)
 	void Server_CycleSelectedMonster();
 	
 	UFUNCTION()
-	void SpawnMonster();
+	void SpawnSelectedMonster();
 	UFUNCTION(Server, Reliable)
-	void Server_SpawnMonster();
+	void Server_SpawnMonster(TSubclassOf<class AMonster> MonsterType);
 
+protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Traitor", meta = (AllowPrivateAccess))
 	TArray<FMonsterSpawnInfo> Monsters;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Traitor", meta = (AllowPrivateAccess = "true"))
@@ -234,11 +257,23 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Player|Combat")
 	void OnAttack();
 
-
-
 private:
+#pragma endregion
+
+#pragma region Chestlight
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Chestlight")
+	class UChildActorComponent* ChestlightComponent;
+
+public:
+	UFUNCTION()
+	void ToggleLight();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ToggleLight();
+private:	
 #pragma endregion 
-	
+                                  
 protected:
 	virtual void BeginPlay() override;
 

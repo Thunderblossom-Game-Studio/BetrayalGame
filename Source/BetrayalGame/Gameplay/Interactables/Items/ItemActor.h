@@ -19,6 +19,7 @@ struct FItem : public FTableRowBase
 		Description = FText::FromString("None");
 		Image = nullptr;
 		Actor = nullptr;
+
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
@@ -29,11 +30,11 @@ struct FItem : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	UTexture2D* Image;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<AItemActor> Actor;
 
-	// Overloading the == operator to compare two items
+	// Overload the == operator to compare two FItem structs
 	bool operator==(const FItem& Other) const
 	{
 		return Name == Other.Name && Description.EqualTo(Other.Description) && Image == Other.Image;
@@ -80,7 +81,10 @@ private:
 #pragma endregion
 	
 #pragma region Item
-public:	
+public:
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Item")
+	UStaticMeshComponent* ItemMesh;
+	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FDataTableRowHandle ItemData;
 
@@ -102,6 +106,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetCanPickup(const bool CanPickup);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_EnableItemPhysics(bool bState);
 	
 #pragma endregion 
 

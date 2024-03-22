@@ -36,15 +36,4 @@ private:
 	bool bFindClosest;
 #pragma endregion
 	
-#pragma region Cached Pointers
-private:
-	UPROPERTY()
-	UWorld* World;
-	UPROPERTY()
-	UBlackboardComponent* Blackboard;
-	UPROPERTY()
-	AAIController* Controller;
-	UPROPERTY()
-	APawn* Pawn;
-#pragma endregion
 };
