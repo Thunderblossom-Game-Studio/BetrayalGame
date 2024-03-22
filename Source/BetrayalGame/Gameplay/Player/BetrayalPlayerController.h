@@ -16,4 +16,7 @@ class BETRAYALGAME_API ABetrayalPlayerController : public APlayerController
 
 public:
 	FTransform DestroyedTransform;
+
+	void BeginPlay() override;
+	
 };

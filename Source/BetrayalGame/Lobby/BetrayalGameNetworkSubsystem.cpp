@@ -3,6 +3,7 @@
 
 #include "BetrayalGameNetworkSubsystem.h"
 
+#include "Menu_PlayerController.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 #include "Widget_SessionConnectBtn.h"
@@ -126,12 +127,21 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 		OnJoinSessionCompleteDelegateHandle.Reset();
 	}
 
-	if (!_GameInstance->SessionPassword.IsEmpty())
+	if (!_MenuController)
 	{
-		_GameInstance->SessionPassword = "";
+		_MenuController = Cast<AMenu_PlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	}
 
-	_GameInstance->HidePasswordField();
+	if (_MenuController && !_MenuController->SessionPassword.IsEmpty())
+	{
+		_MenuController->SessionPassword = "";
+	}
+	else
+	{
+		Print("UBetrayalGameNetworkSubsystem::ResetSessionSearch(): MenuController is null!");
+	}
+
+	_MenuController->HidePasswordField();
 }
 
 void UBetrayalGameNetworkSubsystem::LockSession()
@@ -166,9 +176,8 @@ void UBetrayalGameNetworkSubsystem::ChangeMapByReference(FSoftWorldReference Map
 	GetWorld()->ServerTravel(TravelURL);
 }
 
-bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN,
-                                                bool bIsPresence, int32 MaxNumPlayers, bool bIsPrivate,
-                                                FString Password)
+bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName,
+                                                FString Password, ESessionPrivacy Privacy)
 {
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
@@ -176,43 +185,71 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 	{
 		SessionSettings = MakeShareable(new FOnlineSessionSettings());
 
-		SessionSettings->bIsLANMatch = bIsLAN;
-		SessionSettings->bUsesPresence = bIsPresence;
-
-		if (bIsPrivate)
+		// Set up session settings per privacy setting
+		switch (Privacy)
 		{
-			// Set the session as private
-			SessionSettings->NumPrivateConnections = MaxNumPlayers;
+		case ESessionPrivacy::SP_LAN:
+			SessionSettings->bIsLANMatch = true;
+			SessionSettings->bUsesPresence = false;
+			SessionSettings->bAllowJoinViaPresence = false;
+			SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+			SessionSettings->NumPrivateConnections = MAX_PLAYERS;
 			SessionSettings->NumPublicConnections = 0;
-		}
-		else
-		{
-			// Set the session as public
+			SessionSettings->bAllowInvites = true;
+			SessionSettings->bAllowJoinInProgress = true;
+			SessionSettings->bShouldAdvertise = false;
+			SessionSettings->bUseLobbiesIfAvailable = true;
+			break;
+
+		case ESessionPrivacy::SP_Private:
+			SessionSettings->bIsLANMatch = false;
+			SessionSettings->bUsesPresence = true;
+			SessionSettings->bAllowJoinViaPresence = false;
+			SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+			SessionSettings->NumPrivateConnections = MAX_PLAYERS;
+			SessionSettings->NumPublicConnections = 0;
+			SessionSettings->bAllowInvites = true;
+			SessionSettings->bAllowJoinInProgress = true;
+			SessionSettings->bShouldAdvertise = false;
+			SessionSettings->bUseLobbiesIfAvailable = true;
+			break;
+
+		case ESessionPrivacy::SP_Friends:
+			SessionSettings->bIsLANMatch = false;
+			SessionSettings->bUsesPresence = true;
+			SessionSettings->bAllowJoinViaPresence = true;
+			SessionSettings->bAllowJoinViaPresenceFriendsOnly = true;
+			SessionSettings->NumPrivateConnections = MAX_PLAYERS;
+			SessionSettings->NumPublicConnections = 0;
+			SessionSettings->bAllowInvites = true;
+			SessionSettings->bAllowJoinInProgress = true;
+			SessionSettings->bShouldAdvertise = false;
+			SessionSettings->bUseLobbiesIfAvailable = true;
+			break;
+
+		case ESessionPrivacy::SP_Public:
+			SessionSettings->bIsLANMatch = false;
+			SessionSettings->bUsesPresence = true;
+			SessionSettings->bAllowJoinViaPresence = true;
+			SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
 			SessionSettings->NumPrivateConnections = 0;
-			SessionSettings->NumPublicConnections = MaxNumPlayers;
+			SessionSettings->NumPublicConnections = MAX_PLAYERS;
+			SessionSettings->bAllowInvites = true;
+			SessionSettings->bAllowJoinInProgress = true;
+			SessionSettings->bShouldAdvertise = true;
+			SessionSettings->bUseLobbiesIfAvailable = true;
+			break;
 		}
-
-		SessionSettings->bAllowInvites = true;
-		SessionSettings->bAllowJoinInProgress = true;
-		SessionSettings->bShouldAdvertise = true;
-		SessionSettings->bAllowJoinViaPresence = true;
-		SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
-		SessionSettings->bUseLobbiesIfAvailable = true;
-		//SessionSettings->bUseLobbiesVoiceChatIfAvailable = true;
-
-		// Session password
-		if (Password.IsEmpty())
-			Password = "";
 
 		// Set password value
-		SessionSettings->Set(PASSWORD, Password, EOnlineDataAdvertisementType::ViaOnlineService);
+		if (!Password.IsEmpty())
+			SessionSettings->Set(PASSWORD, Password, EOnlineDataAdvertisementType::ViaOnlineService);
 
 		// Update session name
 		LobbyListName = SessionName.ToString();
 
 		// Session server list name
 		SessionSettings->Set(SERVERLIST_NAME, LobbyListName, EOnlineDataAdvertisementType::ViaOnlineService);
-
 
 		// Set the delegate to the handle of the session created function
 		CreateSessionDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(
@@ -228,10 +265,10 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 	return false;
 }
 
-void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, bool bIsLAN, bool bIsPresence,
-                                                   bool bIsPrivate, FString Password)
+void UBetrayalGameNetworkSubsystem::BP_HostSession(FName SessionName, FString Password,
+                                                   ESessionPrivacy Privacy)
 {
-	HostSession(GetNetID(), SessionName, bIsLAN, bIsPresence, MAX_PLAYERS, bIsPrivate, Password);
+	HostSession(GetNetID(), SessionName, Password, Privacy);
 }
 
 void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -280,7 +317,7 @@ ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<cons
 	ResetSessionSearch();
 
 	// Set lobby menu to inactive during search
-	_GameInstance->WB_Lobby->SetIsEnabled(false);
+	_MenuController->WB_Lobby->SetIsEnabled(false);
 
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
@@ -318,7 +355,7 @@ void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresenc
 void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	// Re-enable the lobby menu
-	_GameInstance->WB_Lobby->SetIsEnabled(true);
+	_MenuController->WB_Lobby->SetIsEnabled(true);
 
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
@@ -328,7 +365,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
 	// Server list reference
-	auto SessionList = _GameInstance->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
+	auto SessionList = _MenuController->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
 	UPanelWidget* Scrl_Sessions = Cast<UPanelWidget>(SessionList);
 
 	if (!Scrl_Sessions)
@@ -336,13 +373,13 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 		Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): Scrl_Sessions is null!");
 		return;
 	}
-	
+
 	// Populate the session list
 	for (auto result : SessionSearch->SearchResults)
 	{
 		// Create new button for each session
-		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_GameInstance,
-		                                                             _GameInstance->WB_SessionConnectBtnClass);
+		auto SessionButton = CreateWidget<UWidget_SessionConnectBtn>(_MenuController,
+		                                                             _MenuController->WB_SessionConnectBtnClass);
 
 		if (SessionButton)
 		{
@@ -437,6 +474,8 @@ void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasS
 	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " +
 		InviteResult.GetSessionIdStr());
 	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
+	
+	SetupNotifications();
 }
 
 void UBetrayalGameNetworkSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)

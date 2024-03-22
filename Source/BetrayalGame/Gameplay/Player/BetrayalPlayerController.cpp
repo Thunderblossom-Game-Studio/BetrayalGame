@@ -2,42 +2,25 @@
 
 
 #include "BetrayalPlayerController.h"
-
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "BetrayalGame/BetrayalPlayerState.h"
 
-/*void ABetrayalPlayerController::BeginPlay()
+void ABetrayalPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<AActor*> BotControllers;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), BotController, BotControllers);
-	if (BotControllers.Num() == 0)
-		return;
-	AAIPlayerController* AICont = Cast<AAIPlayerController>(BotControllers[0]);
-	if (!AICont)
-		return;
-	FTransform Transform = AICont->GetPawn()->GetTransform();
-	AICont->GetPawn()->Destroy();
-	AICont->Destroy();
-	GetPawn()->SetActorTransform(Transform);
-}
-
-void ABetrayalPlayerController::Destroyed()
-{
-	const int32 PlayerCount = UGameplayStatics::GetNumPlayerStates(GetWorld());
-	const FVector Location = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetSpawnLocation();
-	const FRotator Rotation = FRotator::ZeroRotator;
-	
-	FActorSpawnParameters SpawnParams;
-	
-	AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation);
-	if (AIPlayerController)
+	if(HasAuthority())
 	{
-		GetWorld()->GetAuthGameMode()->RestartPlayerAtPlayerStart(AIPlayerController, AIPlayerController->GetPawn());			
-		AIPlayerController->EnableAIPlayer();
+		ABetrayalPlayerState* BetrayalPlayerState = GetPlayerState<ABetrayalPlayerState>();
+		if(IsValid(BetrayalPlayerState))
+		{
+			BetrayalPlayerState->SetPlayerName("Dave");
+		}
+		
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, BetrayalPlayerState->GetPlayerName());
+		
 	}
 	
-	Super::Destroyed();
-}*/
+}
