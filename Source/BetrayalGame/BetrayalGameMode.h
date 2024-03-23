@@ -119,13 +119,30 @@ public:
 public:
 	UFUNCTION(BlueprintCallable)
 	TArray<ABetrayalPlayerState*> GetAllPlayerStates() const;
+	
 	UFUNCTION(BlueprintCallable)
 	TArray<APlayerCharacter*> GetAllPlayerCharacters() const;
+	
 	UFUNCTION(BlueprintCallable)
 	ABetrayalPlayerState* GetRandomPlayer() const;
+
+	
+
+	
 private:
 #pragma endregion
 
+#pragma region Spawn Points
+public:
+	UFUNCTION(BlueprintCallable)
+	TArray<APlayerStart*> GetAllSpawnPoints() const;
+
+	UFUNCTION(BlueprintCallable)
+	APlayerStart* GetRandomSpawnPoint() const;
+	
+private:
+#pragma endregion 
+	
 #pragma region Haunt Handling
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")

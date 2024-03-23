@@ -6,6 +6,7 @@
 #include "BetrayalGameInstance.h"
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
 #include "GameFramework/GameSession.h"
+#include "GameFramework/PlayerStart.h"
 #include "Gameplay/Haunts/HiddenAsymmetricalHaunt.h"
 #include "Gameplay/Player/BetrayalPlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -235,6 +236,29 @@ ABetrayalPlayerState* ABetrayalGameMode::GetRandomPlayer() const
 	{
 		const int RandomIndex = FMath::RandRange(0, AllPlayers.Num() - 1);
 		return AllPlayers[RandomIndex];
+	}
+	return nullptr;
+}
+
+TArray<APlayerStart*> ABetrayalGameMode::GetAllSpawnPoints() const
+{
+	TArray<APlayerStart*> OutSpawnPoints;
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), FoundActors);
+	for (AActor* Actor : FoundActors)
+	{
+		OutSpawnPoints.Add(Cast<APlayerStart>(Actor));
+	}
+	return OutSpawnPoints;
+}
+
+APlayerStart* ABetrayalGameMode::GetRandomSpawnPoint() const
+{
+	TArray<APlayerStart*> AllSpawnPoints = GetAllSpawnPoints();
+	if (AllSpawnPoints.Num() > 0)
+	{
+		const int RandomIndex = FMath::RandRange(0, AllSpawnPoints.Num() - 1);
+		return AllSpawnPoints[RandomIndex];
 	}
 	return nullptr;
 }

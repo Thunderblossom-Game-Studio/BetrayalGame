@@ -58,6 +58,12 @@ public:
 		
 private:
 #pragma endregion
-	
+
+
+	UFUNCTION(BlueprintCallable, Category = "Controller|Gameplay")
+	void SpawnPlayerCharacter();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnPlayerCharacter();
 	
 };

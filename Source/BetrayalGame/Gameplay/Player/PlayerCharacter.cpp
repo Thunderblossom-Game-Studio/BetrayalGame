@@ -17,6 +17,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "../../AI/Pawns/Monster.h"
+#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "Components/SphereComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
@@ -70,7 +71,7 @@ void APlayerCharacter::Destroyed()
 {
 	DropAllItems();
 	
-	if (ABetrayalPlayerController* BetrayalPlayerController = GetController<ABetrayalPlayerController>())
+	if (BetrayalPlayerController)
 	{
 		BetrayalPlayerController->DestroyedTransform = GetActorTransform();
 	}
@@ -515,6 +516,7 @@ void APlayerCharacter::ToggleLight()
 
 void APlayerCharacter::Server_ToggleLight_Implementation()
 {
+	UE_LOG(LogTemp, Error, TEXT("LIGHT TOGGLE"));
 	if(AChestlight* Chestlight = Cast<AChestlight>(ChestlightComponent->GetChildActor()))
 		Chestlight->Multicast_ToggleLight();
 }
@@ -566,6 +568,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_ToggleLight), ETriggerEvent::Started, this, &APlayerCharacter::ToggleLight);
+
+		UE_LOG(LogTemp, Error, TEXT("ENHANCED INPUT IS VALID"));
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, "ENHANCED INPUT IS VALID");
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DropHeldItem);
@@ -574,4 +579,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		return;
 	if (ABetrayalGameMode* BetrayalGameMode = GetWorld()->GetAuthGameMode<ABetrayalGameMode>())
 		PlayerInputComponent->BindKey(EKeys::Y, IE_Pressed, BetrayalGameMode, &ABetrayalGameMode::SetNextStage);
+
+	
 }

@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "../Player/Player Components/InventoryComponent.h"
 #include "../Player/BaseCharacter.h"
-#include "../Interactables/Items/ItemActor.h"
-#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "PlayerCharacter.generated.h"
 
+class ABetrayalPlayerController;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
+class AItemActor;
+
 
 UENUM()
 enum EInputActionValue
@@ -64,7 +66,22 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+#pragma region References
+protected:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|References")
+	ABetrayalPlayerController* BetrayalPlayerController;
+
+public:
+	UFUNCTION(BlueprintPure, Category = "Player|References")
+	ABetrayalPlayerController* GetBetrayalPlayerController() const { return BetrayalPlayerController; }
+
+	UFUNCTION(BlueprintCallable, Category = "Player|References")
+	void SetBetrayalPlayerController(ABetrayalPlayerController* NewBetrayalPlayerController) { BetrayalPlayerController = NewBetrayalPlayerController; }
+private:	
+#pragma endregion 
+	
 #pragma region Possession
 
 public:
@@ -280,7 +297,7 @@ public:
 	void Server_ToggleLight();
 private:	
 #pragma endregion 
-                                  
+
 protected:
 	virtual void BeginPlay() override;
 

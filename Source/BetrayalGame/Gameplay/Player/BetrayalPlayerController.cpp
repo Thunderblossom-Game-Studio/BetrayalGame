@@ -2,23 +2,30 @@
 
 
 #include "BetrayalPlayerController.h"
+
+#include "BetrayalGame/BetrayalGameMode.h"
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "BetrayalGame/BetrayalPlayerState.h"
+#include "GameFramework/PlayerStart.h"
 #include "Net/UnrealNetwork.h"
 
 void ABetrayalPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if(HasAuthority())
 	{
 		InitializeReferences();
+		SpawnPlayerCharacter();
+		
 	}
 	else
 	{
 		Server_InitializeReferences();
+		Server_SpawnPlayerCharacter();
+		
 	}
 	
 }
@@ -48,18 +55,71 @@ void ABetrayalPlayerController::InitializeReferences()
 
 	SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
 	BetrayalPlayerState->SetControlledCharacter(GetControlledCharacter());
+}
 
-	FTransform SpawnTransform = FTransform{FQuat::Identity, FVector::ZeroVector, FVector::OneVector };
+void ABetrayalPlayerController::SpawnPlayerCharacter()
+{
+	if(GetPawn())
+	{
+		if (GetPawn()->InputComponent)
+		{
+			GetPawn()->InputComponent->bBlockInput = true;
+			GetPawn()->InputComponent->ClearActionBindings();
+			GetPawn()->InputComponent->ClearAxisBindings();
+			UE_LOG(LogTemp, Error, TEXT("Original Pawn bindings cleared for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
+		}
+		
+		GetPawn()->Destroy();
+		UE_LOG(LogTemp, Error, TEXT("Original Pawn Destroyed for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::SpawnPlayer - GetPawn is not valid | SpawnPlayerCharacter: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
+		return;
+	}
 	
-	AActor* CharacterToPossess = GetWorld()->SpawnActor(ControlledCharacter->GetClass(), &SpawnTransform);
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(CharacterToPossess);
-	
-	Possess(PlayerCharacter);
+	// Get random spawn point from GameMode
+	const ABetrayalGameMode* GameMode = Cast<ABetrayalGameMode>(GetWorld()->GetAuthGameMode());
+	if(!GameMode)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::SpawnPlayer - GameMode is not valid"));
+		return;
+	}
 
-	/*TODO - Player is being spawned at 0,0,0 temporarily. GameMode needs to have a reference to all spawn points and assign them to players
-	  TODO - Input is not working when player spawns, might need to be handled in the controller instead of the character.
-	 */
+	const APlayerStart* SpawnPoint = GameMode->GetRandomSpawnPoint();
+	if(!SpawnPoint)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::SpawnPlayer - SpawnPoint is not valid"));
+		return;
+	}
+	const FTransform SpawnTransform = SpawnPoint->GetTransform();
 	
+	// Spawn the character to possess
+	// AActor* ActorToPossess = GetWorld()->SpawnActor(ControlledCharacter->GetClass(), &SpawnTransform);
+	//
+	// APlayerCharacter* SpawnedActor = GetWorld()->SpawnActor<APlayerCharacter>(ControlledCharacter->GetClass(), SpawnTransform, FActorSpawnParameters());
+	//
+	// APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(ActorToPossess);
+	//
+	// PlayerCharacter->SetBetrayalPlayerController(this); // TODO - Add event to player character for when it the controller is set
+	//
+	
+	Possess(GetWorld()->SpawnActor<APlayerCharacter>(ControlledCharacter->GetClass(), SpawnTransform, FActorSpawnParameters()));
+
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
+	PlayerCharacter->EnableInput(this);
+	PlayerCharacter->SetBetrayalPlayerController(this);
+	PlayerCharacter->InputPriority = 0;
+	
+	UE_LOG(LogTemp, Error, TEXT("New character possessed for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
+	//log player character controller
+	//UE_LOG( LogTemp, Error, TEXT("Player Character Controller: %s"), *PlayerCharacter->GetController()->GetName() );
+	//TODO - Input is not working when player spawns, might need to be handled in the controller instead of the character.
+}
+
+void ABetrayalPlayerController::Server_SpawnPlayerCharacter_Implementation()
+{
+	SpawnPlayerCharacter();
 }
 
 void ABetrayalPlayerController::Server_InitializeReferences_Implementation()
