@@ -150,21 +150,40 @@ void ABetrayalGameMode::ReplacePlayer(const ABetrayalPlayerController* BetrayalP
 	const FRotator Rotation = FRotator::ZeroRotator;
 	if (AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
 	{
-		GetWorld()->GetAuthGameMode()->RestartPlayerAtTransform(AIPlayerController, BetrayalPlayerController->DestroyedTransform);
-		AIPlayerController->EnableAIPlayer();
-
-		// Attempts to replace if traitor or not.
+		//GetWorld()->GetAuthGameMode()->RestartPlayerAtTransform(AIPlayerController, BetrayalPlayerController->DestroyedTransform);
+		
 		const ABetrayalPlayerState* LeavingPlayerState = BetrayalPlayerController->GetPlayerState<ABetrayalPlayerState>();
 		ABetrayalPlayerState* AIState = AIPlayerController->GetPlayerState<ABetrayalPlayerState>();
 		if (!LeavingPlayerState || !AIState)
 		{
 			UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find betrayal player states."));
-			//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Player States Missing");
 			return;			
 		}
-		AIState->SetIsTraitor(LeavingPlayerState->IsTraitor());
-		//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, AIState->GetName() + " is traitor: " + FString::FromInt(AIState->IsTraitor()));
+		const APlayerCharacter* LeavingCharacter = LeavingPlayerState->GetControlledCharacter();
+		if (!LeavingCharacter)
+		{
+			UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find controlled betrayal player character."));
+			return;						
+		}
 
+		FActorSpawnParameters SpawnParams;
+		APlayerCharacter* BotCharacter = GetWorld()->SpawnActor<APlayerCharacter>(LeavingCharacter->StaticClass(), BetrayalPlayerController->DestroyedTransform, SpawnParams);
+		AIPlayerController->Possess(BotCharacter);
+		AIPlayerController->EnableAIPlayer();		
+
+		// Attempts to imitate the leaving players role.
+		AIState->SetIsABot(true);
+		AIState->SetIsTraitor(LeavingPlayerState->IsTraitor());
+		if (LeavingCharacter)
+		{
+			AIState->ChangeCharacter(LeavingCharacter->StaticClass());
+			GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Character: " + LeavingCharacter->GetName());			
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Could not change character, is null");
+		}
+		AIState->SetControlState(CS_AI);
 	}
 }
 
