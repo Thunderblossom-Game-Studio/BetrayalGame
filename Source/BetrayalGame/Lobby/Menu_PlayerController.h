@@ -15,6 +15,7 @@ class BETRAYALGAME_API AMenu_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+	int LoginAttempts = 0;
 public:
 	virtual void BeginPlay() override;
 	FDelegateHandle LoginDelegateHandle;

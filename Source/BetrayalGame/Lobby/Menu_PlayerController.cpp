@@ -28,6 +28,14 @@ void AMenu_PlayerController::Init()
 // TODO: Set up multiple login attempts in case accidental closure or other issues
 void AMenu_PlayerController::Login()
 {
+	if (LoginAttempts >= 3)
+	{
+		Print("Failed to login after 3 attempts!");
+		GetWorld()->Exec(GetWorld(), TEXT("quit"));
+		
+		return;
+	}
+	
 	auto OnlineSubsystem = IOnlineSubsystem::Get();
 	if (!OnlineSubsystem)
 	{
@@ -70,6 +78,10 @@ void AMenu_PlayerController::Login()
 			Print("Failed to login with AuthType: " + AuthType);
 			Identity->ClearOnLoginCompleteDelegate_Handle(0, LoginDelegateHandle);
 			LoginDelegateHandle.Reset();
+
+			//TODO: Jank
+			LoginAttempts++;
+			Login();
 		}
 	}
 	else
@@ -83,6 +95,10 @@ void AMenu_PlayerController::Login()
 			Print("Failed to login with default AuthType");
 			Identity->ClearOnLoginCompleteDelegate_Handle(0, LoginDelegateHandle);
 			LoginDelegateHandle.Reset();
+
+			// TODO: Jank
+			LoginAttempts++;
+			Login();
 		}
 	}
 }
@@ -112,6 +128,8 @@ void AMenu_PlayerController::OnLoginCompleted(int32 LocalUserNum, bool bWasSucce
 
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginDelegateHandle);
 	LoginDelegateHandle.Reset();
+
+	LoginAttempts = 0;
 
 	// TODO: Fix this bs
 	// Set up the voice chat subsystem
@@ -165,11 +183,6 @@ void AMenu_PlayerController::UpdatePlayerList()
 		{
 			CreatePlayerNameTextWidget(PlayerRef->GetPlayerName(), PlayerRef->IsReady(), PlayerList);
 
-			if (UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetGameInstance()->GetSubsystem<
-				UBetrayalGameNetworkSubsystem>())
-			{
-				//NetworkSubsystem->UpdatePlayerNameText(PlayerNameWidget);
-			}
 		}
 	}
 
