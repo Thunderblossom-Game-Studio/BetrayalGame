@@ -552,7 +552,7 @@ void APlayerCharacter::Server_SetupInputSubsystem_Implementation()
 void APlayerCharacter::PawnClientRestart()
 {
 	Super::PawnClientRestart();
-
+	
 	SetupInputSubsystem();
 }
 
@@ -565,8 +565,6 @@ void APlayerCharacter::SetupInputSubsystem()
 			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
-			
-			
 	}
 		
 }

@@ -53,8 +53,8 @@ void ABetrayalPlayerController::InitializeReferences()
 		return;
 	}
 
-	SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
-	BetrayalPlayerState->SetControlledCharacter(GetControlledCharacter());
+	//SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
+	BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
 
 	Server_OnReferenceInitialized();
 }
@@ -69,13 +69,13 @@ void ABetrayalPlayerController::SpawnPlayerCharacter()
 {
 	if(GetPawn())
 	{
-		if (GetPawn()->InputComponent)
-		{
-			GetPawn()->InputComponent->bBlockInput = true;
-			GetPawn()->InputComponent->ClearActionBindings();
-			GetPawn()->InputComponent->ClearAxisBindings();
-			UE_LOG(LogTemp, Error, TEXT("Original Pawn bindings cleared for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
-		}
+		// if (GetPawn()->InputComponent)
+		// {
+		// 	GetPawn()->InputComponent->bBlockInput = true;
+		// 	GetPawn()->InputComponent->ClearActionBindings();
+		// 	GetPawn()->InputComponent->ClearAxisBindings();
+		// 	UE_LOG(LogTemp, , TEXT("Original Pawn bindings cleared for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
+		// }
 		
 		GetPawn()->Destroy();
 		UE_LOG(LogTemp, Error, TEXT("Original Pawn Destroyed for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
@@ -102,22 +102,12 @@ void ABetrayalPlayerController::SpawnPlayerCharacter()
 	}
 	const FTransform SpawnTransform = SpawnPoint->GetTransform();
 	
-	// Spawn the character to possess
-	// AActor* ActorToPossess = GetWorld()->SpawnActor(ControlledCharacter->GetClass(), &SpawnTransform);
-	//
-	// APlayerCharacter* SpawnedActor = GetWorld()->SpawnActor<APlayerCharacter>(ControlledCharacter->GetClass(), SpawnTransform, FActorSpawnParameters());
-	//
-	// APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(ActorToPossess);
-	//
-	// PlayerCharacter->SetBetrayalPlayerController(this); // TODO - Add event to player character for when it the controller is set
-	//
-	
-	Possess(GetWorld()->SpawnActor<APlayerCharacter>(ControlledCharacter->GetClass(), SpawnTransform, FActorSpawnParameters()));
+	Possess(GetWorld()->SpawnActor<APlayerCharacter>(BetrayalPlayerState->GetControlledCharacter()->GetClass(), SpawnTransform, FActorSpawnParameters()));
 
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
-	PlayerCharacter->EnableInput(this);
-	PlayerCharacter->SetBetrayalPlayerController(this);
-	PlayerCharacter->InputPriority = 0;
+	// PlayerCharacter->EnableInput(this);
+	// PlayerCharacter->SetBetrayalPlayerController(this);
+	// PlayerCharacter->InputPriority = 0;
 	
 	UE_LOG(LogTemp, Error, TEXT("New character possessed for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
 	//log player character controller
