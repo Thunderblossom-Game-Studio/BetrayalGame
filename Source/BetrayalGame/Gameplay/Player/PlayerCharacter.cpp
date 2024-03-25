@@ -525,10 +525,15 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(APlayerController* PlayerController = Cast<APlayerController>(Controller))
-		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-
+	// if(HasAuthority())
+	// {
+	// 	SetupInputSubsystem();
+	// }
+	// else
+	// {
+	// 	Server_SetupInputSubsystem();
+	// }
+	
 	BindMontageEvents();
 }
 
@@ -537,6 +542,33 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	
 	TraceForInteractables();
+}
+
+void APlayerCharacter::Server_SetupInputSubsystem_Implementation()
+{
+	SetupInputSubsystem();
+}
+
+void APlayerCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+
+	SetupInputSubsystem();
+}
+
+void APlayerCharacter::SetupInputSubsystem()
+{
+	if(APlayerController* PlayerController = Cast<ABetrayalPlayerController>(Controller))
+	{
+		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+			
+			
+	}
+		
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -568,9 +600,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_DropItem), ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_ToggleLight), ETriggerEvent::Started, this, &APlayerCharacter::ToggleLight);
-
-		UE_LOG(LogTemp, Error, TEXT("ENHANCED INPUT IS VALID"));
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, "ENHANCED INPUT IS VALID");
 	}
 
 	PlayerInputComponent->BindKey(EKeys::L, IE_Pressed, this, &APlayerCharacter::DropHeldItem);

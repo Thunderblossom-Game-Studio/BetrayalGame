@@ -131,6 +131,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	TMap<TEnumAsByte<EInputActionValue>, UInputAction*> InputAction;
 
+	virtual void PawnClientRestart() override;
+	
+	UFUNCTION()
+	void SetupInputSubsystem();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetupInputSubsystem();
+	
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 private:
 #pragma endregion
 
@@ -304,5 +313,5 @@ protected:
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
 };

@@ -55,7 +55,15 @@ void ABetrayalPlayerController::InitializeReferences()
 
 	SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
 	BetrayalPlayerState->SetControlledCharacter(GetControlledCharacter());
+
+	Server_OnReferenceInitialized();
 }
+
+void ABetrayalPlayerController::Server_OnReferenceInitialized_Implementation()
+{
+	OnReferenceInitialized(ControlledCharacter, BetrayalPlayerState);
+}
+
 
 void ABetrayalPlayerController::SpawnPlayerCharacter()
 {
@@ -115,6 +123,8 @@ void ABetrayalPlayerController::SpawnPlayerCharacter()
 	//log player character controller
 	//UE_LOG( LogTemp, Error, TEXT("Player Character Controller: %s"), *PlayerCharacter->GetController()->GetName() );
 	//TODO - Input is not working when player spawns, might need to be handled in the controller instead of the character.
+
+
 }
 
 void ABetrayalPlayerController::Server_SpawnPlayerCharacter_Implementation()

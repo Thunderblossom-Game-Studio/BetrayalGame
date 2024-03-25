@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerCharacter.h"
+#include "BetrayalGame/BetrayalPlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "BetrayalPlayerController.generated.h"
 
@@ -55,11 +57,24 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_InitializeReferences();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Controller|References")
+	void OnReferenceInitialized(APlayerCharacter* ControllerCharacter, ABetrayalPlayerState* State);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_OnReferenceInitialized();
 		
 private:
 #pragma endregion
 
+#pragma region Input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Controller|Input", meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext* DefaultMappingContext;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Controller|Input", meta = (AllowPrivateAccess = "true"))
+	TMap<TEnumAsByte<EInputActionValue>, UInputAction*> InputAction;
+	
+#pragma endregion 
 	UFUNCTION(BlueprintCallable, Category = "Controller|Gameplay")
 	void SpawnPlayerCharacter();
 
