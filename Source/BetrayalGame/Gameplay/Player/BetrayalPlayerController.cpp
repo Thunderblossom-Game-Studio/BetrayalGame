@@ -51,7 +51,7 @@ void ABetrayalPlayerController::SetupPlayerCharacter()
 		DetermineNewOrReplaceCharacter();		
 	else
 		Server_InitializeReferences();
-
+	
 	SetupControllerInput();
 }
 
@@ -63,16 +63,12 @@ void ABetrayalPlayerController::DetermineNewOrReplaceCharacter()
 		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::BeginPlay - Network Subsystem is not valid"));
 		return;		
 	}
-<<<<<<< HEAD
+
 	InitializeReferences();
 	TArray<AActor*> PlayerCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
 	UE_LOG(LogTemp, Display, TEXT("BetrayalPlayerController::BeginPlay - PlayerCharacters Count: %i"), PlayerCharacters.Num());
 	if (PlayerCharacters.Num() >= NetworkSubsystem->MAX_PLAYERS)
-=======
-
-	if (IsLocalController())
->>>>>>> de31a4ab12578c0b2df1ec1afacd600122a64a1c
 	{
 		ReplaceBotWithPlayer();
 	}
@@ -124,10 +120,8 @@ void ABetrayalPlayerController::InitializeReferences()
 	BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
 	
 	Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
-<<<<<<< HEAD
+
 	UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::InitializeReferences - Success."));	
-=======
->>>>>>> de31a4ab12578c0b2df1ec1afacd600122a64a1c
 }
 
 void ABetrayalPlayerController::OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter,

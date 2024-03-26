@@ -402,32 +402,17 @@ void APlayerCharacter::TraceForInteractables()
 			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)
 			{
 				InteractableInFocus = nullptr;
-<<<<<<< HEAD
-				//Server_SetInteractableInFocus(false);
-				//UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
-=======
->>>>>>> de31a4ab12578c0b2df1ec1afacd600122a64a1c
 			}
 				
 		}
 		else if (!HitActor->Implements<UInteractable>())
 		{
 			InteractableInFocus = nullptr;
-<<<<<<< HEAD
-			//Server_SetInteractableInFocus(false);
-			//UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
-=======
->>>>>>> de31a4ab12578c0b2df1ec1afacd600122a64a1c
 		}
 	}
 	else
 	{
 		InteractableInFocus = nullptr;
-<<<<<<< HEAD
-		//Server_SetInteractableInFocus(false);
-		//UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
-=======
->>>>>>> de31a4ab12578c0b2df1ec1afacd600122a64a1c
 	}
 }
 
