@@ -126,6 +126,24 @@ void ABetrayalGameMode::EnableAIPlayerHauntMode()
 	}
 }
 
+void ABetrayalGameMode::UpdateAIPlayerMode(AAIPlayerController* AIPlayerController)
+{
+	switch (MatchStage)
+	{
+	case Lobby:		
+		break;
+	case Exploring:	
+		AIPlayerController->EnableAIPlayer();
+		break;
+	case Haunting:			
+		AIPlayerController->EnableAIPlayer();
+		AIPlayerController->SetHauntBehaviours();
+		break;
+	case Finishing:
+		break;
+	}
+}
+
 TArray<ABetrayalPlayerState*> ABetrayalGameMode::GetAllPlayerStates() const
 {
 	TArray<ABetrayalPlayerState*> OutPlayers;

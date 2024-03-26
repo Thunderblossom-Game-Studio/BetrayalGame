@@ -103,11 +103,13 @@ protected:
 	// The A.I player controller.
 	TSubclassOf<class AController> BotController;
 	
-private:
+public:
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerControllers();
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerHauntMode();
+	UFUNCTION(BlueprintCallable)
+	void UpdateAIPlayerMode(class AAIPlayerController* AIPlayerController);
 	
 // Getters/Setters
 public:
