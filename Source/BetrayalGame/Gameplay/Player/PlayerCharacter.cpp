@@ -65,6 +65,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
 	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
+	DOREPLIFETIME(APlayerCharacter, bIsInteractableInFocus);
 }
 
 void APlayerCharacter::Destroyed()
@@ -305,7 +306,7 @@ void APlayerCharacter::DropItem(FInventorySlot Slot)
 		
 		if(InventorySlot.bIsEmpty)
 			continue;
-
+		
 		AItemActor* SlotItem = InventoryComponent->GetItemInSlot(InventorySlot.ID).Actor.GetDefaultObject();
 		
 		FActorSpawnParameters SpawnParams;
@@ -377,13 +378,18 @@ void APlayerCharacter::Server_UnequipItem_Implementation()
 	UnequipItem();
 }
 
+void APlayerCharacter::Server_SetInteractableInFocus_Implementation(bool bNewValue)
+{
+	bIsInteractableInFocus = bNewValue;
+}
+
 void APlayerCharacter::TraceForInteractables()
 {
 	FVector TraceStart = CameraComponent->GetComponentLocation();
 	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * InteractDistance);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, this);
-
+	
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
 	{
 		AActor* HitActor = HitResult.GetActor();
@@ -393,19 +399,31 @@ void APlayerCharacter::TraceForInteractables()
 		
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Interactable in focus"));
+			
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
+			//Server_SetInteractableInFocus(true);
 			
 			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)
+			{
 				InteractableInFocus = nullptr;
+				//Server_SetInteractableInFocus(false);
+				UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
+			}
+				
 		}
 		else if (!HitActor->Implements<UInteractable>())
 		{
 			InteractableInFocus = nullptr;
+			//Server_SetInteractableInFocus(false);
+			UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 		}
 	}
 	else
 	{
 		InteractableInFocus = nullptr;
+		//Server_SetInteractableInFocus(false);
+		UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 	}
 }
 

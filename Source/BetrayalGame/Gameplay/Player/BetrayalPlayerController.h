@@ -59,11 +59,11 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_InitializeReferences();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Controller|References")
-	void OnReferenceInitialized(APlayerCharacter* ControllerCharacter, ABetrayalPlayerState* State);
+	UFUNCTION(BlueprintNativeEvent, Category = "Controller|References")
+	void OnReferenceInitialized(APlayerCharacter* ControlledPlayerCharacter, ABetrayalPlayerState* State);
 	
-	UFUNCTION(Server, Reliable)
-	void Server_OnReferenceInitialized();
+	UFUNCTION(Server, Reliable, Category = "Controller|References")
+	void Server_OnReferenceInitialized(APlayerCharacter* ControlledPlayerCharacter, ABetrayalPlayerState* State);
 		
 private:
 #pragma endregion

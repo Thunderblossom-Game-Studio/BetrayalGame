@@ -222,6 +222,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
 	class ABaseInteractable* InteractableInFocus;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
+	bool bIsInteractableInFocus;
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetInteractableInFocus(bool bNewValue);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
 	float InteractDistance = 600.0f;
 	
