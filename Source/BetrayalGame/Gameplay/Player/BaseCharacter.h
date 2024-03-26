@@ -55,7 +55,7 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable , Category = "Character|Health")
 	void TakeDamage(float Damage);
 	
 	UFUNCTION(Server, Reliable)

@@ -84,12 +84,19 @@ void ABetrayalPlayerController::InitializeReferences()
 	//SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
 	BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
 
-	Server_OnReferenceInitialized();
+	Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
+	
 }
 
-void ABetrayalPlayerController::Server_OnReferenceInitialized_Implementation()
+void ABetrayalPlayerController::OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter,
+	ABetrayalPlayerState* State)
 {
-	OnReferenceInitialized(ControlledCharacter, BetrayalPlayerState);
+	
+}
+
+void ABetrayalPlayerController::Server_OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter, ABetrayalPlayerState* State)
+{
+	OnReferenceInitialized(ControlledPlayerCharacter, State);
 }
 
 void ABetrayalPlayerController::ReplacePlayerWithBot()
