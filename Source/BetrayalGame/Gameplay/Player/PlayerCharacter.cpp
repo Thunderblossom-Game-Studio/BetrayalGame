@@ -71,12 +71,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void APlayerCharacter::Destroyed()
 {
 	DropAllItems();
-	
-	if (BetrayalPlayerController)
-	{
-		BetrayalPlayerController->DestroyedTransform = GetActorTransform();
-	}
-	
+		
 	Super::Destroyed();
 }
 
@@ -399,7 +394,7 @@ void APlayerCharacter::TraceForInteractables()
 		
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Interactable in focus"));
+			//UE_LOG(LogTemp, Warning, TEXT("Interactable in focus"));
 			
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
 			//Server_SetInteractableInFocus(true);
@@ -408,7 +403,7 @@ void APlayerCharacter::TraceForInteractables()
 			{
 				InteractableInFocus = nullptr;
 				//Server_SetInteractableInFocus(false);
-				UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
+				//UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 			}
 				
 		}
@@ -416,14 +411,14 @@ void APlayerCharacter::TraceForInteractables()
 		{
 			InteractableInFocus = nullptr;
 			//Server_SetInteractableInFocus(false);
-			UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
+			//UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 		}
 	}
 	else
 	{
 		InteractableInFocus = nullptr;
 		//Server_SetInteractableInFocus(false);
-		UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
+		//UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 	}
 }
 

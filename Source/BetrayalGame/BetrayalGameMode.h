@@ -45,9 +45,7 @@ public:
 	
 	virtual void StartMatch() override;
 	virtual void EndMatch() override;
-	
-	virtual void PostLogin(APlayerController* NewPlayer) override;
-	virtual void Logout(AController* Exiting) override;
+
 private:	
 #pragma endregion 
 
@@ -110,9 +108,6 @@ private:
 	void EnableAIPlayerControllers();
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerHauntMode();
-
-	void ReplacePlayer(const class ABetrayalPlayerController* BetrayalPlayerController) const;
-	void ReplaceBot(const class ABetrayalPlayerController* BetrayalPlayerController) const;
 	
 // Getters/Setters
 public:

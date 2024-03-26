@@ -72,21 +72,6 @@ void ABetrayalGameMode::EndMatch()
 	Super::EndMatch();
 }
 
-void ABetrayalGameMode::PostLogin(APlayerController* NewPlayer)
-{
-	Super::PostLogin(NewPlayer);
-	
-	//if (bUsesBots)
-	//	ReplaceBot(Cast<ABetrayalPlayerController>(NewPlayer));
-}
-
-void ABetrayalGameMode::Logout(AController* Exiting)
-{
-	//ReplacePlayer(Cast<ABetrayalPlayerController>(Exiting));
-	
-	Super::Logout(Exiting);
-}
-
 void ABetrayalGameMode::SetStageUseTimer(const bool bUseTimer)
 {
 	bStageUsesTimer = bUseTimer;		
@@ -139,100 +124,6 @@ void ABetrayalGameMode::EnableAIPlayerHauntMode()
 		if (AAIPlayerController* AIPlayerController = Cast<AAIPlayerController>(ControllerActor))
 			AIPlayerController->SetHauntBehaviours();
 	}
-}
-
-void ABetrayalGameMode::ReplacePlayer(const ABetrayalPlayerController* BetrayalPlayerController) const
-{
-	// Spawn replacement bot if bBots is true.
-	if (!bUsesBots)
-		return;
-	
-	if (!BetrayalPlayerController)
-	{
-		UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find betrayal player controller."));
-		return;
-	}
-		
-	const FVector Location = FVector::Zero();
-	const FRotator Rotation = FRotator::ZeroRotator;
-	if (AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
-	{
-		//GetWorld()->GetAuthGameMode()->RestartPlayerAtTransform(AIPlayerController, BetrayalPlayerController->DestroyedTransform);
-		
-		const ABetrayalPlayerState* LeavingPlayerState = BetrayalPlayerController->GetPlayerState<ABetrayalPlayerState>();
-		ABetrayalPlayerState* AIState = AIPlayerController->GetPlayerState<ABetrayalPlayerState>();
-		if (!LeavingPlayerState || !AIState)
-		{
-			UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find betrayal player states."));
-			return;			
-		}
-		const APlayerCharacter* LeavingCharacter = LeavingPlayerState->GetControlledCharacter();
-		if (!LeavingCharacter)
-		{
-			UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find controlled betrayal player character."));
-			return;						
-		}
-
-		FActorSpawnParameters SpawnParams;
-		APlayerCharacter* BotCharacter = GetWorld()->SpawnActor<APlayerCharacter>(LeavingCharacter->StaticClass(), BetrayalPlayerController->DestroyedTransform, SpawnParams);
-		AIPlayerController->Possess(BotCharacter);
-		AIPlayerController->EnableAIPlayer();		
-
-		// Attempts to imitate the leaving players role.
-		AIState->SetIsABot(true);
-		AIState->SetIsTraitor(LeavingPlayerState->IsTraitor());
-		// if (LeavingCharacter)
-		// {
-		// 	AIState->ChangeCharacter(LeavingCharacter->StaticClass());
-		// 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Character: " + LeavingCharacter->GetName());			
-		// }
-		// else
-		// {
-		// 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Could not change character, is null");
-		// }
-		AIState->SetControlState(CS_AI);
-	}
-}
-
-void ABetrayalGameMode::ReplaceBot(const ABetrayalPlayerController* BetrayalPlayerController) const
-{
-	if (!BetrayalPlayerController)
-	{
-		UE_LOG(LogGameMode, Warning, TEXT("Replace Bot Aborted: Can't find betrayal player controller."));
-		return;
-	}
-	TArray<AActor*> BotControllers;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), BotController, BotControllers);
-	if (BotControllers.Num() == 0)
-		return;
-	AAIPlayerController* AICont = Cast<AAIPlayerController>(BotControllers[0]);
-	if (!AICont)
-		return;
-	APawn* Character = BetrayalPlayerController->GetPawn();
-	if (!Character)
-		return;
-
-	// Places player at old bots last location.
-	const FTransform Transform = AICont->GetPawn()->GetActorTransform();
-	Character->SetActorTransform(Transform);
-
-	// Attempts to replace if traitor or not.
-	ABetrayalPlayerState* JoiningPlayerState = BetrayalPlayerController->GetPlayerState<ABetrayalPlayerState>();
-	const ABetrayalPlayerState* AIState = AICont->GetPlayerState<ABetrayalPlayerState>();
-	if (!JoiningPlayerState || !AIState)
-	{
-		UE_LOG(LogGameMode, Warning, TEXT("Replace Bot Aborted: Can't find betrayal player states."));
-		//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Player States Missing");
-	}
-	else
-	{
-		JoiningPlayerState->SetIsTraitor(AIState->IsTraitor());		
-		//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, JoiningPlayerState->GetName() + " is traitor: " + FString::FromInt(JoiningPlayerState->IsTraitor()));
-	}
-
-	// Destroys bot.
-	AICont->GetPawn()->Destroy();
-	AICont->Destroy();
 }
 
 TArray<ABetrayalPlayerState*> ABetrayalGameMode::GetAllPlayerStates() const

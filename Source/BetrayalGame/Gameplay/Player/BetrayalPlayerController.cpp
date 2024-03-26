@@ -12,6 +12,21 @@
 #include "GameFramework/PlayerStart.h"
 #include "Net/UnrealNetwork.h"
 
+void ABetrayalPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	SetupPlayerCharacter();	
+}
+
+void ABetrayalPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABetrayalPlayerController, ControlledCharacter);
+	DOREPLIFETIME(ABetrayalPlayerController, BetrayalPlayerState);
+}
+
 void ABetrayalPlayerController::PawnLeavingGame()
 {
 	if (!HasAuthority())
@@ -30,73 +45,59 @@ void ABetrayalPlayerController::PawnLeavingGame()
 	ReplacePlayerWithBot();
 }
 
-void ABetrayalPlayerController::BeginPlay()
+void ABetrayalPlayerController::SetupPlayerCharacter()
 {
-	Super::BeginPlay();
-	
+	if (HasAuthority())
+		DetermineNewOrReplaceCharacter();		
+	else
+		Server_InitializeReferences();
+
+	SetupControllerInput();
+}
+
+void ABetrayalPlayerController::DetermineNewOrReplaceCharacter()
+{
 	UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetGameInstance()->GetSubsystem<UBetrayalGameNetworkSubsystem>();
 	if (!NetworkSubsystem)
 	{
 		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::BeginPlay - Network Subsystem is not valid"));
 		return;		
 	}
-
-	if (HasAuthority())
+	InitializeReferences();
+	TArray<AActor*> PlayerCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
+	UE_LOG(LogTemp, Display, TEXT("BetrayalPlayerController::BeginPlay - PlayerCharacters Count: %i"), PlayerCharacters.Num());
+	if (PlayerCharacters.Num() >= NetworkSubsystem->MAX_PLAYERS)
 	{
-		TArray<AActor*> PlayerCharacters;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
-		UE_LOG(LogTemp, Display, TEXT("BetrayalPlayerController::BeginPlay - PlayerCharacters Count: %i"), PlayerCharacters.Num());
-		if (PlayerCharacters.Num() >= NetworkSubsystem->MAX_PLAYERS)
-		{
-			Server_InitializeReferences();
-			ReplaceBotWithPlayer();
-
-			// APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>();
-			// if (!PlayerCharacter)
-			// {
-			// 	UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::BeginPlay - Couldn't find PlayerCharacter"));
-			// 	return;				
-			// }
-			// PlayerCharacter->SetupInputSubsystem();		
-		}
-		else
-		{
-			InitializeNewCharacter();
-		}		
+		ReplaceBotWithPlayer();
 	}
-	
+	else
+	{
+		InitializeNewCharacter();
+	}
+}
+
+void ABetrayalPlayerController::SetupControllerInput()
+{
 	APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>();
 	if (!PlayerCharacter)
 	{
 		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::BeginPlay - Couldn't find PlayerCharacter"));
 		return;				
 	}
-	PlayerCharacter->SetupInputSubsystem();	
-}
-
-void ABetrayalPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ABetrayalPlayerController, ControlledCharacter);
-	DOREPLIFETIME(ABetrayalPlayerController, BetrayalPlayerState);
+	PlayerCharacter->SetupInputSubsystem();
 }
 
 void ABetrayalPlayerController::InitializeNewCharacter()
 {
-	// if (HasAuthority())
-	// {		
-	// 	InitializeReferences();
-	// 	SpawnPlayerCharacter();		
-	// }
-	// else
-	// {		
-	// 	Server_InitializeReferences();
-	// 	Server_SpawnPlayerCharacter();
-	// }
-	
-	Server_InitializeReferences();
-	Server_SpawnPlayerCharacter();
+	if (HasAuthority())
+	{		
+		SpawnPlayerCharacter();		
+	}
+	else
+	{		
+		Server_SpawnPlayerCharacter();
+	}
 }
 
 void ABetrayalPlayerController::InitializeReferences()
@@ -116,15 +117,9 @@ void ABetrayalPlayerController::InitializeReferences()
 
 	//SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
 	BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
-
-<<<<<<< HEAD
-	Server_OnReferenceInitialized();
 	
-	UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::InitializeReferences - Success."));
-=======
 	Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
-	
->>>>>>> 2a1b1e5d68533c1fe5d21ded148c5c90b46a0480
+	UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::InitializeReferences - Success."));	
 }
 
 void ABetrayalPlayerController::OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter,
