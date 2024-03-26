@@ -15,6 +15,7 @@ class BETRAYALGAME_API AMenu_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+	int LoginAttempts = 0;
 public:
 	virtual void BeginPlay() override;
 	FDelegateHandle LoginDelegateHandle;
@@ -46,40 +47,40 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI|PlayerList")
 	TSubclassOf<UUserWidget> WB_PlayerNameTextClass;
 
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UUserWidget* WB_MainMenu;
 
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UUserWidget* WB_Lobby;
 
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UUserWidget* WB_LobbyRoom;
 
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	UUserWidget* WB_PasswordField;
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ShowMainMenu();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void HideMainMenu();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ShowLobby();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void HideLobby();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ShowPasswordField();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void HidePasswordField();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ShowLobbyRoom();
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void HideLobbyRoom();
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
@@ -97,6 +98,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void CreatePlayerNameTextWidget(const FString& PlayerName, bool bIsReady, UPanelWidget* ParentWidget);
 
-	//UFUNCTION(BlueprintCallable, Category = "UI")
-	//void AddPlayerNameTextWidget(UUserWidget* PlayerNameText);
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UUserWidget* GetMainMenuWidget() { return WB_MainMenu; }
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UUserWidget* GetLobbyWidget() { return WB_Lobby; }
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UUserWidget* GetLobbyRoomWidget() { return WB_LobbyRoom; }
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UUserWidget* GetPasswordFieldWidget() { return WB_PasswordField; }
 };

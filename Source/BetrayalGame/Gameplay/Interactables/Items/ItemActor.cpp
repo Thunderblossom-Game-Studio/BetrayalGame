@@ -14,7 +14,7 @@ AItemActor::AItemActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SetReplicateMovement(true);
+	
 	
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetupAttachment(RootComponent);
@@ -26,6 +26,11 @@ AItemActor::AItemActor()
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	SetReplicateMovement(true);
+	
+	bCanPickup = true;
+
 	
 }
 
@@ -74,7 +79,6 @@ void AItemActor::NetMulticast_EnableItemPhysics_Implementation(bool bState)
 	{
 		ItemMesh->SetSimulatePhysics(false);
 		ItemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
-	
 	}
 }
 

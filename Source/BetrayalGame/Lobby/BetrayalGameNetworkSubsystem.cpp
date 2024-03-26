@@ -130,15 +130,18 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 	if (!_MenuController)
 	{
 		_MenuController = Cast<AMenu_PlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+
+		// This feels janky as fuck
+		if (!_MenuController)
+		{
+			Print("UBetrayalGameNetworkSubsystem::ResetSessionSearch(): MenuController is null!");
+			return;
+		}
 	}
 
-	if (_MenuController && !_MenuController->SessionPassword.IsEmpty())
+	if (_MenuController->SessionPassword.IsEmpty())
 	{
 		_MenuController->SessionPassword = "";
-	}
-	else
-	{
-		Print("UBetrayalGameNetworkSubsystem::ResetSessionSearch(): MenuController is null!");
 	}
 
 	_MenuController->HidePasswordField();
@@ -321,29 +324,32 @@ ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<cons
 
 	IOnlineSessionPtr Sessions = GetSessionInterface();
 
-	if (Sessions.IsValid() && UserId.IsValid())
+	if (!Sessions.IsValid())
 	{
-		// Build session search parameters
-		SessionSearch = MakeShareable(new FOnlineSessionSearch());
-
-		SessionSearch->bIsLanQuery = bIsLAN;
-		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
-		SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
-
-		TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
-
-		OnFindSessionsCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(
-			OnFindSessionsCompleteDelegate);
-
-		Sessions->FindSessions(*UserId, SearchSettingsRef);
-		return ESessionSearchResult::SSR_Success;
-	}
-	else
-	{
-		Print("No Session Interface found!");
-		OnFindSessionsComplete(false);
+		Print("UBetrayalGameNetworkSubsystem::FindSessions(): SessionInterface is null!");
 		return ESessionSearchResult::SSR_Failure;
 	}
+
+	if (!UserId.IsValid())
+	{
+		Print("UBetrayalGameNetworkSubsystem::FindSessions(): UserId is null!");
+		return ESessionSearchResult::SSR_Failure;
+	}
+
+	// Build session search parameters
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+
+	SessionSearch->bIsLanQuery = bIsLAN;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, bIsPresence, EOnlineComparisonOp::Equals);
+	SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+
+	TSharedRef<FOnlineSessionSearch> SearchSettingsRef = SessionSearch.ToSharedRef();
+
+	OnFindSessionsCompleteDelegateHandle = Sessions->AddOnFindSessionsCompleteDelegate_Handle(
+		OnFindSessionsCompleteDelegate);
+
+	Sessions->FindSessions(*UserId, SearchSettingsRef);
+	return ESessionSearchResult::SSR_Success;
 }
 
 void UBetrayalGameNetworkSubsystem::BP_FindSessions(bool bIsLAN, bool bIsPresence, ESessionSearchResult& Result)
@@ -474,7 +480,7 @@ void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasS
 	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " +
 		InviteResult.GetSessionIdStr());
 	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
-	
+
 	SetupNotifications();
 }
 

@@ -20,6 +20,7 @@ enum EInputActionValue
 {
 	IAV_None UMETA(DisplayName = "None"),
 	IAV_Move UMETA(DisplayName = "Move"),
+	IAV_Jump UMETA(DisplayName = "Jump"),
 	IAV_Look UMETA(DisplayName = "Look"),
 	IAV_Run UMETA(DisplayName = "Run"),
 	IAV_Interact UMETA(DisplayName = "Interact"),
