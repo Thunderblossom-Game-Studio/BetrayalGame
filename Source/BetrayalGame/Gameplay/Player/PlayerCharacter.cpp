@@ -17,6 +17,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "../../AI/Pawns/Monster.h"
+#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "Components/SphereComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 
@@ -64,13 +65,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	
 	DOREPLIFETIME(APlayerCharacter, HeldItem);
 	DOREPLIFETIME(APlayerCharacter, bIsAttacking);
+	DOREPLIFETIME(APlayerCharacter, bIsInteractableInFocus);
 }
 
 void APlayerCharacter::Destroyed()
 {
 	DropAllItems();
 	
-	if (ABetrayalPlayerController* BetrayalPlayerController = GetController<ABetrayalPlayerController>())
+	if (BetrayalPlayerController)
 	{
 		BetrayalPlayerController->DestroyedTransform = GetActorTransform();
 	}
@@ -130,6 +132,13 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(RightDirection , MovementInput.X);
 		
 	}
+}
+
+void APlayerCharacter::Move(const FVector2D Value)
+{
+	Super::Move(Value);
+
+	
 }
 
 void APlayerCharacter::SelectSlot1()
@@ -297,13 +306,14 @@ void APlayerCharacter::DropItem(FInventorySlot Slot)
 		
 		if(InventorySlot.bIsEmpty)
 			continue;
-
+		
 		AItemActor* SlotItem = InventoryComponent->GetItemInSlot(InventorySlot.ID).Actor.GetDefaultObject();
 		
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = this;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		
 	
 		if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(SlotItem->GetClass(), SpawnParams))
 		{
@@ -369,13 +379,18 @@ void APlayerCharacter::Server_UnequipItem_Implementation()
 	UnequipItem();
 }
 
+void APlayerCharacter::Server_SetInteractableInFocus_Implementation(bool bNewValue)
+{
+	bIsInteractableInFocus = bNewValue;
+}
+
 void APlayerCharacter::TraceForInteractables()
 {
 	FVector TraceStart = CameraComponent->GetComponentLocation();
 	FVector TraceEnd = TraceStart + (CameraComponent->GetForwardVector() * InteractDistance);
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, this);
-
+	
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,ECC_PhysicsBody, TraceParams))
 	{
 		AActor* HitActor = HitResult.GetActor();
@@ -385,10 +400,15 @@ void APlayerCharacter::TraceForInteractables()
 		
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Interactable in focus"));
+			
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
 			
 			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)
+			{
 				InteractableInFocus = nullptr;
+			}
+				
 		}
 		else if (!HitActor->Implements<UInteractable>())
 		{
@@ -515,6 +535,7 @@ void APlayerCharacter::ToggleLight()
 
 void APlayerCharacter::Server_ToggleLight_Implementation()
 {
+	UE_LOG(LogTemp, Error, TEXT("LIGHT TOGGLE"));
 	if(AChestlight* Chestlight = Cast<AChestlight>(ChestlightComponent->GetChildActor()))
 		Chestlight->Multicast_ToggleLight();
 }
@@ -523,10 +544,15 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(APlayerController* PlayerController = Cast<APlayerController>(Controller))
-		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-
+	// if(HasAuthority())
+	// {
+	// 	SetupInputSubsystem();
+	// }
+	// else
+	// {
+	// 	Server_SetupInputSubsystem();
+	// }
+	
 	BindMontageEvents();
 }
 
@@ -537,6 +563,36 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	TraceForInteractables();
 }
 
+void APlayerCharacter::Server_SetupInputSubsystem_Implementation()
+{
+	SetupInputSubsystem();
+}
+
+void APlayerCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+
+	if (ABetrayalPlayerState* State = GetPlayerState<ABetrayalPlayerState>())
+	{
+		if (State->IsABot())
+			return;
+		SetupInputSubsystem();
+	}
+}
+
+void APlayerCharacter::SetupInputSubsystem()
+{
+	if(APlayerController* PlayerController = Cast<ABetrayalPlayerController>(Controller))
+	{
+		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+		
+}
+
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -544,6 +600,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Jump), ETriggerEvent::Triggered, this, &APlayerCharacter::Jump);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::TurnLook);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);
@@ -574,4 +632,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		return;
 	if (ABetrayalGameMode* BetrayalGameMode = GetWorld()->GetAuthGameMode<ABetrayalGameMode>())
 		PlayerInputComponent->BindKey(EKeys::Y, IE_Pressed, BetrayalGameMode, &ABetrayalGameMode::SetNextStage);
+
+	
 }

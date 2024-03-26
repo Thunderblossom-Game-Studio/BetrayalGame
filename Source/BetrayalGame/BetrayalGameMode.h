@@ -7,6 +7,10 @@
 #include "BetrayalGame/BetrayalGameState.h"
 #include "BetrayalGameMode.generated.h"
 
+// Spawning at ai, the back at player start on join
+// AI spawns somewhere random on leave
+
+
 /**
  * Holds information about a stage in the match
  */
@@ -35,6 +39,8 @@ public:
 #pragma region Game Mode Functions
 public:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	virtual void Tick(float DeltaSeconds) override;
 	
 	virtual void StartMatch() override;
@@ -107,7 +113,7 @@ private:
 
 	void ReplacePlayer(const class ABetrayalPlayerController* BetrayalPlayerController) const;
 	void ReplaceBot(const class ABetrayalPlayerController* BetrayalPlayerController) const;
-
+	
 // Getters/Setters
 public:
 	void SetUseBots(const bool Bots) { bUsesBots = Bots; }
@@ -119,13 +125,30 @@ public:
 public:
 	UFUNCTION(BlueprintCallable)
 	TArray<ABetrayalPlayerState*> GetAllPlayerStates() const;
+	
 	UFUNCTION(BlueprintCallable)
 	TArray<APlayerCharacter*> GetAllPlayerCharacters() const;
+	
 	UFUNCTION(BlueprintCallable)
 	ABetrayalPlayerState* GetRandomPlayer() const;
+
+	
+
+	
 private:
 #pragma endregion
 
+#pragma region Spawn Points
+public:
+	UFUNCTION(BlueprintCallable)
+	TArray<APlayerStart*> GetAllSpawnPoints() const;
+
+	UFUNCTION(BlueprintCallable)
+	APlayerStart* GetRandomSpawnPoint() const;
+	
+private:
+#pragma endregion 
+	
 #pragma region Haunt Handling
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Haunt")

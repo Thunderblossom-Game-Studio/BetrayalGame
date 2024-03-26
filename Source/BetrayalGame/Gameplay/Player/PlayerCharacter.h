@@ -3,21 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "../Player/Player Components/InventoryComponent.h"
 #include "../Player/BaseCharacter.h"
-#include "../Interactables/Items/ItemActor.h"
-#include "BetrayalGame/Gameplay/Chestlight.h"
 #include "PlayerCharacter.generated.h"
 
+class ABetrayalPlayerController;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
+class AItemActor;
+
 
 UENUM()
 enum EInputActionValue
 {
 	IAV_None UMETA(DisplayName = "None"),
 	IAV_Move UMETA(DisplayName = "Move"),
+	IAV_Jump UMETA(DisplayName = "Jump"),
 	IAV_Look UMETA(DisplayName = "Look"),
 	IAV_Run UMETA(DisplayName = "Run"),
 	IAV_Interact UMETA(DisplayName = "Interact"),
@@ -64,7 +67,22 @@ public:
 	void DebugInput();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+#pragma region References
+protected:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|References")
+	ABetrayalPlayerController* BetrayalPlayerController;
+
+public:
+	UFUNCTION(BlueprintPure, Category = "Player|References")
+	ABetrayalPlayerController* GetBetrayalPlayerController() const { return BetrayalPlayerController; }
+
+	UFUNCTION(BlueprintCallable, Category = "Player|References")
+	void SetBetrayalPlayerController(ABetrayalPlayerController* NewBetrayalPlayerController) { BetrayalPlayerController = NewBetrayalPlayerController; }
+private:	
+#pragma endregion 
+	
 #pragma region Possession
 
 public:
@@ -114,12 +132,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Input", meta = (AllowPrivateAccess = "true"))
 	TMap<TEnumAsByte<EInputActionValue>, UInputAction*> InputAction;
 
+	virtual void PawnClientRestart() override;
+	
+	UFUNCTION()
+	void SetupInputSubsystem();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetupInputSubsystem();
+	
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 private:
 #pragma endregion
 
 #pragma region Movement
 public:
 	virtual void Move(const FInputActionValue& Value) override;
+	virtual void Move(const FVector2D Value) override;;
 	
 	UFUNCTION(Server, Reliable)
 	void RunStart();
@@ -195,6 +223,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
 	class ABaseInteractable* InteractableInFocus;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
+	bool bIsInteractableInFocus;
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetInteractableInFocus(bool bNewValue);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Interaction")
 	float InteractDistance = 600.0f;
 	
@@ -280,12 +314,12 @@ public:
 	void Server_ToggleLight();
 private:	
 #pragma endregion 
-                                  
+
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
 };

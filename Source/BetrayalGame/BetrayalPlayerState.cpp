@@ -61,6 +61,7 @@ void ABetrayalPlayerState::Server_SetControlledCharacter_Implementation(APlayerC
 
 void ABetrayalPlayerState::ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter)
 {
+	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Blue, "Attempting to change character");
 	APawn* PreviousCharacter = GetOwningController()->GetPawn();
 	if(!PreviousCharacter)
 	{
@@ -70,12 +71,13 @@ void ABetrayalPlayerState::ChangeCharacter(TSubclassOf<APlayerCharacter> NewCont
 
 	// Save the transform before destroying the previous character
 	const FTransform Transform = PreviousCharacter->GetTransform();
-
+	
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = GetOwningController();
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
 	AActor* NewCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewControlledCharacter, Transform, SpawnParameters);
+	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Transform: " + Transform.ToString() );
 	if(!NewCharacter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No new character"));

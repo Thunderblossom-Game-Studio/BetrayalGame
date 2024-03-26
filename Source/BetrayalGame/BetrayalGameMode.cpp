@@ -6,6 +6,7 @@
 #include "BetrayalGameInstance.h"
 #include "BetrayalGame/AI/Controllers/AIPlayerController.h"
 #include "GameFramework/GameSession.h"
+#include "GameFramework/PlayerStart.h"
 #include "Gameplay/Haunts/HiddenAsymmetricalHaunt.h"
 #include "Gameplay/Player/BetrayalPlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,10 +21,16 @@ ABetrayalGameMode::ABetrayalGameMode()
 void ABetrayalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	BetrayalGameState = GetGameState<ABetrayalGameState>();
 	SetMatchStage(Lobby);
 
 	SetupHaunt();	
+}
+
+void ABetrayalGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{		
+	Super::EndPlay(EndPlayReason);	
 }
 
 void ABetrayalGameMode::SetNextStage()
@@ -69,13 +76,13 @@ void ABetrayalGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 	
-	if (bUsesBots)
-		ReplaceBot(Cast<ABetrayalPlayerController>(NewPlayer));
+	//if (bUsesBots)
+	//	ReplaceBot(Cast<ABetrayalPlayerController>(NewPlayer));
 }
 
 void ABetrayalGameMode::Logout(AController* Exiting)
 {
-	ReplacePlayer(Cast<ABetrayalPlayerController>(Exiting));
+	//ReplacePlayer(Cast<ABetrayalPlayerController>(Exiting));
 	
 	Super::Logout(Exiting);
 }
@@ -105,7 +112,7 @@ void ABetrayalGameMode::EnableAIPlayerControllers()
 	for (int i = 0; i < Inst->GetSubsystem<UBetrayalGameNetworkSubsystem>()->MAX_PLAYERS - PlayerCount; ++i)
 	{
 		if (AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
-		{
+		{;
 			RestartPlayer(AIPlayerController);			
 			AIPlayerController->EnableAIPlayer();
 		}
@@ -136,34 +143,54 @@ void ABetrayalGameMode::EnableAIPlayerHauntMode()
 
 void ABetrayalGameMode::ReplacePlayer(const ABetrayalPlayerController* BetrayalPlayerController) const
 {
+	// Spawn replacement bot if bBots is true.
+	if (!bUsesBots)
+		return;
+	
 	if (!BetrayalPlayerController)
 	{
 		UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find betrayal player controller."));
 		return;
 	}
 		
-	// Spawn replacement bot if bBots is true.
-	if (!bUsesBots)
-		return;
 	const FVector Location = FVector::Zero();
 	const FRotator Rotation = FRotator::ZeroRotator;
 	if (AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
 	{
-		GetWorld()->GetAuthGameMode()->RestartPlayerAtTransform(AIPlayerController, BetrayalPlayerController->DestroyedTransform);
-		AIPlayerController->EnableAIPlayer();
-
-		// Attempts to replace if traitor or not.
+		//GetWorld()->GetAuthGameMode()->RestartPlayerAtTransform(AIPlayerController, BetrayalPlayerController->DestroyedTransform);
+		
 		const ABetrayalPlayerState* LeavingPlayerState = BetrayalPlayerController->GetPlayerState<ABetrayalPlayerState>();
 		ABetrayalPlayerState* AIState = AIPlayerController->GetPlayerState<ABetrayalPlayerState>();
 		if (!LeavingPlayerState || !AIState)
 		{
 			UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find betrayal player states."));
-			//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Player States Missing");
 			return;			
 		}
-		AIState->SetIsTraitor(LeavingPlayerState->IsTraitor());
-		//GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, AIState->GetName() + " is traitor: " + FString::FromInt(AIState->IsTraitor()));
+		const APlayerCharacter* LeavingCharacter = LeavingPlayerState->GetControlledCharacter();
+		if (!LeavingCharacter)
+		{
+			UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find controlled betrayal player character."));
+			return;						
+		}
 
+		FActorSpawnParameters SpawnParams;
+		APlayerCharacter* BotCharacter = GetWorld()->SpawnActor<APlayerCharacter>(LeavingCharacter->StaticClass(), BetrayalPlayerController->DestroyedTransform, SpawnParams);
+		AIPlayerController->Possess(BotCharacter);
+		AIPlayerController->EnableAIPlayer();		
+
+		// Attempts to imitate the leaving players role.
+		AIState->SetIsABot(true);
+		AIState->SetIsTraitor(LeavingPlayerState->IsTraitor());
+		// if (LeavingCharacter)
+		// {
+		// 	AIState->ChangeCharacter(LeavingCharacter->StaticClass());
+		// 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Character: " + LeavingCharacter->GetName());			
+		// }
+		// else
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Could not change character, is null");
+		// }
+		AIState->SetControlState(CS_AI);
 	}
 }
 
@@ -235,6 +262,29 @@ ABetrayalPlayerState* ABetrayalGameMode::GetRandomPlayer() const
 	{
 		const int RandomIndex = FMath::RandRange(0, AllPlayers.Num() - 1);
 		return AllPlayers[RandomIndex];
+	}
+	return nullptr;
+}
+
+TArray<APlayerStart*> ABetrayalGameMode::GetAllSpawnPoints() const
+{
+	TArray<APlayerStart*> OutSpawnPoints;
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), FoundActors);
+	for (AActor* Actor : FoundActors)
+	{
+		OutSpawnPoints.Add(Cast<APlayerStart>(Actor));
+	}
+	return OutSpawnPoints;
+}
+
+APlayerStart* ABetrayalGameMode::GetRandomSpawnPoint() const
+{
+	TArray<APlayerStart*> AllSpawnPoints = GetAllSpawnPoints();
+	if (AllSpawnPoints.Num() > 0)
+	{
+		const int RandomIndex = FMath::RandRange(0, AllSpawnPoints.Num() - 1);
+		return AllSpawnPoints[RandomIndex];
 	}
 	return nullptr;
 }

@@ -37,14 +37,13 @@ protected:
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	TEnumAsByte<EControlState> ControlState = CS_Player;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State")
-	TSubclassOf<APlayerCharacter> CharacterClassTest;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	APlayerCharacter* ControlledCharacter;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State")
+	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
 	
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void SetControlState(EControlState NewControlState) { ControlState = NewControlState; }
@@ -60,7 +59,7 @@ public:
 
 	UFUNCTION()
 	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Blueprintable, Server, Reliable)
 	void Server_SetControlledCharacter(APlayerCharacter* NewControlledCharacter);
 
 	
