@@ -38,7 +38,6 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	TEnumAsByte<EControlState> ControlState = CS_Player;
 	
-
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	APlayerCharacter* ControlledCharacter;
 
@@ -60,7 +59,7 @@ public:
 
 	UFUNCTION()
 	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Blueprintable, Server, Reliable)
 	void Server_SetControlledCharacter(APlayerCharacter* NewControlledCharacter);
 
 	

@@ -41,7 +41,7 @@ void ABetrayalPlayerController::BeginPlay()
 		return;		
 	}
 
-	if (HasAuthority())
+	if (IsLocalController())
 	{
 		TArray<AActor*> PlayerCharacters;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
@@ -116,15 +116,8 @@ void ABetrayalPlayerController::InitializeReferences()
 
 	//SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
 	BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
-
-<<<<<<< HEAD
-	Server_OnReferenceInitialized();
 	
-	UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::InitializeReferences - Success."));
-=======
 	Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
-	
->>>>>>> 2a1b1e5d68533c1fe5d21ded148c5c90b46a0480
 }
 
 void ABetrayalPlayerController::OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter,
@@ -221,14 +214,6 @@ void ABetrayalPlayerController::SpawnPlayerCharacter()
 {
 	if(GetPawn())
 	{
-		// if (GetPawn()->InputComponent)
-		// {
-		// 	GetPawn()->InputComponent->bBlockInput = true;
-		// 	GetPawn()->InputComponent->ClearActionBindings();
-		// 	GetPawn()->InputComponent->ClearAxisBindings();
-		// 	UE_LOG(LogTemp, , TEXT("Original Pawn bindings cleared for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
-		// }
-		
 		GetPawn()->Destroy();
 		UE_LOG(LogTemp, Error, TEXT("Original Pawn Destroyed for: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
 	}

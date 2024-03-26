@@ -313,6 +313,7 @@ void APlayerCharacter::DropItem(FInventorySlot Slot)
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = this;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		
 	
 		if(AItemActor* ItemActor = GetWorld()->SpawnActor<AItemActor>(SlotItem->GetClass(), SpawnParams))
 		{
@@ -402,28 +403,21 @@ void APlayerCharacter::TraceForInteractables()
 			UE_LOG(LogTemp, Warning, TEXT("Interactable in focus"));
 			
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
-			//Server_SetInteractableInFocus(true);
 			
 			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)
 			{
 				InteractableInFocus = nullptr;
-				//Server_SetInteractableInFocus(false);
-				UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 			}
 				
 		}
 		else if (!HitActor->Implements<UInteractable>())
 		{
 			InteractableInFocus = nullptr;
-			//Server_SetInteractableInFocus(false);
-			UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 		}
 	}
 	else
 	{
 		InteractableInFocus = nullptr;
-		//Server_SetInteractableInFocus(false);
-		UE_LOG(LogTemp, Warning, TEXT("Interactable is not interactable"));
 	}
 }
 
@@ -606,6 +600,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Move), ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+
+		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Jump), ETriggerEvent::Triggered, this, &APlayerCharacter::Jump);
 
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::TurnLook);
 		EnhancedInputComponent->BindAction(*InputAction.Find(IAV_Look), ETriggerEvent::Triggered, this, &APlayerCharacter::UpDownLook);

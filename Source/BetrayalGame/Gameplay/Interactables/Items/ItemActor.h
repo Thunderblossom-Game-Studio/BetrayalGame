@@ -96,7 +96,7 @@ public:
 
 protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Item")
-	bool bCanPickup = true;
+	bool bCanPickup;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
@@ -109,7 +109,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_EnableItemPhysics(bool bState);
-	
+
 #pragma endregion 
 
 };
