@@ -57,8 +57,13 @@ void ABetrayalPlayerController::SetupPlayerCharacter()
 	if (HasAuthority())
 		DetermineNewOrReplaceCharacter();		
 	else
+<<<<<<< HEAD
 		InitializeReferences();
 
+=======
+		Server_InitializeReferences();
+	
+>>>>>>> 2d1a663ffbae44b9d57be406529b3655465990e0
 	SetupControllerInput();
 }
 
@@ -70,7 +75,11 @@ void ABetrayalPlayerController::DetermineNewOrReplaceCharacter()
 		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::DetermineNewOrReplaceCharacter: Network Subsystem is not valid"));
 		return;		
 	}
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> 2d1a663ffbae44b9d57be406529b3655465990e0
 	InitializeReferences();
 	TArray<AActor*> PlayerCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
