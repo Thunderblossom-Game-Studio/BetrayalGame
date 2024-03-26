@@ -8,26 +8,48 @@
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "BetrayalGame/BetrayalPlayerState.h"
+#include "BetrayalGame/Lobby/BetrayalGameNetworkSubsystem.h"
 #include "GameFramework/PlayerStart.h"
 #include "Net/UnrealNetwork.h"
+
+void ABetrayalPlayerController::PawnLeavingGame()
+{
+	if (!HasAuthority())
+	{
+		Super::PawnLeavingGame();
+		return;
+	}
+	
+	const ABetrayalGameMode* GameMode = GetWorld()->GetAuthGameMode<ABetrayalGameMode>();	
+	if (!GameMode->UseBots())
+	{
+		Super::PawnLeavingGame();
+		return;
+	}
+	ReplacePlayerWithBot();
+}
 
 void ABetrayalPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if(HasAuthority())
+	UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetGameInstance()->GetSubsystem<UBetrayalGameNetworkSubsystem>();
+	if (!NetworkSubsystem)
 	{
-		InitializeReferences();
-		SpawnPlayerCharacter();
-		
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::BeginPlay - NetworkSubsystem is not valid"));
+		return;		
+	}
+
+	TArray<AActor*> PlayerCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
+	if (PlayerCharacters.Num() <= NetworkSubsystem->MAX_PLAYERS)
+	{	
+		InitializeNewCharacter();
 	}
 	else
 	{
-		Server_InitializeReferences();
-		Server_SpawnPlayerCharacter();
-		
+		ReplaceBotWithPlayer();	
 	}
-	
 }
 
 void ABetrayalPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -36,6 +58,12 @@ void ABetrayalPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 	DOREPLIFETIME(ABetrayalPlayerController, ControlledCharacter);
 	DOREPLIFETIME(ABetrayalPlayerController, BetrayalPlayerState);
+}
+
+void ABetrayalPlayerController::InitializeNewCharacter()
+{	
+	Server_InitializeReferences();
+	Server_SpawnPlayerCharacter();
 }
 
 void ABetrayalPlayerController::InitializeReferences()
@@ -64,6 +92,77 @@ void ABetrayalPlayerController::Server_OnReferenceInitialized_Implementation()
 	OnReferenceInitialized(ControlledCharacter, BetrayalPlayerState);
 }
 
+void ABetrayalPlayerController::ReplacePlayerWithBot()
+{
+	APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn)
+	{
+		UE_LOG(LogGameMode, Warning, TEXT("Replace With Bot Aborted: Failed to find controlled pawn."));
+		return;
+	}
+	UnPossess();
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogGameMode, Warning, TEXT("Replace With Bot Aborted: Failed to find world."));
+		return;
+	}
+	
+	const FVector Location = FVector::Zero();
+	const FRotator Rotation = FRotator::ZeroRotator;
+	if (AAIPlayerController* AIPlayerController = World->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
+	{
+		AIPlayerController->Possess(ControlledPawn);
+		ABetrayalPlayerState* AIState = AIPlayerController->GetPlayerState<ABetrayalPlayerState>();
+		AIPlayerController->EnableAIPlayer();
+		
+		// Sets AI state to correct values.
+		AIState->SetIsABot(true);
+		AIState->SetControlState(CS_AI);
+		UE_LOG(LogGameMode, Warning, TEXT("Replace With Bot: Success."));
+	}
+	UE_LOG(LogGameMode, Warning, TEXT("Replace With Bot: Failed."));
+}
+
+void ABetrayalPlayerController::ReplaceBotWithPlayer()
+{
+	const UBetrayalGameNetworkSubsystem* NetworkSubsystem = GetGameInstance()->GetSubsystem<UBetrayalGameNetworkSubsystem>();
+	if (!NetworkSubsystem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::ReplaceBotWithPlayer - NetworkSubsystem is not valid"));
+		return;		
+	}
+	TArray<AActor*> PlayerCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
+	
+	ABetrayalPlayerState* State = nullptr;
+	for (int32 i = 0; i < PlayerCharacters.Num(); ++i)
+	{
+		State = Cast<ABetrayalPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), i));
+		if (!State)
+			continue;
+		if (State->IsABot())
+			break;
+	}
+	if (!State)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::ReplaceBotWithPlayer - No available bot Player States"));
+		return;			
+	}
+
+	AAIPlayerController* AICont = Cast<AAIPlayerController>(State->GetOwningController());
+	if (!AICont)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::ReplaceBotWithPlayer - Invalid Player State, not actually a bot"));
+		return;					
+	}
+	
+	// Destroys bot.
+	APawn* ControlledPawn = AICont->GetPawn();	
+	AICont->UnPossess();
+	Possess(ControlledPawn);
+	AICont->Destroy();
+}
 
 void ABetrayalPlayerController::SpawnPlayerCharacter()
 {

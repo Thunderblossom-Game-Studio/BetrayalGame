@@ -133,6 +133,13 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+void APlayerCharacter::Move(const FVector2D Value)
+{
+	Super::Move(Value);
+
+	
+}
+
 void APlayerCharacter::SelectSlot1()
 {
 	if(HasAuthority())
@@ -552,8 +559,13 @@ void APlayerCharacter::Server_SetupInputSubsystem_Implementation()
 void APlayerCharacter::PawnClientRestart()
 {
 	Super::PawnClientRestart();
-	
-	SetupInputSubsystem();
+
+	if (ABetrayalPlayerState* State = GetPlayerState<ABetrayalPlayerState>())
+	{
+		if (State->IsABot())
+			return;
+		SetupInputSubsystem();
+	}
 }
 
 void APlayerCharacter::SetupInputSubsystem()

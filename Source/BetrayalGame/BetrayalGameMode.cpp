@@ -21,10 +21,16 @@ ABetrayalGameMode::ABetrayalGameMode()
 void ABetrayalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	BetrayalGameState = GetGameState<ABetrayalGameState>();
 	SetMatchStage(Lobby);
 
 	SetupHaunt();	
+}
+
+void ABetrayalGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{		
+	Super::EndPlay(EndPlayReason);	
 }
 
 void ABetrayalGameMode::SetNextStage()
@@ -70,13 +76,13 @@ void ABetrayalGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 	
-	if (bUsesBots)
-		ReplaceBot(Cast<ABetrayalPlayerController>(NewPlayer));
+	//if (bUsesBots)
+	//	ReplaceBot(Cast<ABetrayalPlayerController>(NewPlayer));
 }
 
 void ABetrayalGameMode::Logout(AController* Exiting)
 {
-	ReplacePlayer(Cast<ABetrayalPlayerController>(Exiting));
+	//ReplacePlayer(Cast<ABetrayalPlayerController>(Exiting));
 	
 	Super::Logout(Exiting);
 }
@@ -106,7 +112,7 @@ void ABetrayalGameMode::EnableAIPlayerControllers()
 	for (int i = 0; i < Inst->GetSubsystem<UBetrayalGameNetworkSubsystem>()->MAX_PLAYERS - PlayerCount; ++i)
 	{
 		if (AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
-		{
+		{;
 			RestartPlayer(AIPlayerController);			
 			AIPlayerController->EnableAIPlayer();
 		}
@@ -137,15 +143,16 @@ void ABetrayalGameMode::EnableAIPlayerHauntMode()
 
 void ABetrayalGameMode::ReplacePlayer(const ABetrayalPlayerController* BetrayalPlayerController) const
 {
+	// Spawn replacement bot if bBots is true.
+	if (!bUsesBots)
+		return;
+	
 	if (!BetrayalPlayerController)
 	{
 		UE_LOG(LogGameMode, Warning, TEXT("Replace Player Aborted: Can't find betrayal player controller."));
 		return;
 	}
 		
-	// Spawn replacement bot if bBots is true.
-	if (!bUsesBots)
-		return;
 	const FVector Location = FVector::Zero();
 	const FRotator Rotation = FRotator::ZeroRotator;
 	if (AAIPlayerController* AIPlayerController = GetWorld()->SpawnActor<AAIPlayerController>(BotController, Location, Rotation))
@@ -174,15 +181,15 @@ void ABetrayalGameMode::ReplacePlayer(const ABetrayalPlayerController* BetrayalP
 		// Attempts to imitate the leaving players role.
 		AIState->SetIsABot(true);
 		AIState->SetIsTraitor(LeavingPlayerState->IsTraitor());
-		if (LeavingCharacter)
-		{
-			AIState->ChangeCharacter(LeavingCharacter->StaticClass());
-			GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Character: " + LeavingCharacter->GetName());			
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Could not change character, is null");
-		}
+		// if (LeavingCharacter)
+		// {
+		// 	AIState->ChangeCharacter(LeavingCharacter->StaticClass());
+		// 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Green, "Character: " + LeavingCharacter->GetName());			
+		// }
+		// else
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Red, "Could not change character, is null");
+		// }
 		AIState->SetControlState(CS_AI);
 	}
 }

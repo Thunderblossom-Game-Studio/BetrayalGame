@@ -17,7 +17,8 @@ class BETRAYALGAME_API ABetrayalPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	
+	virtual void PawnLeavingGame() override;
+	void InitializeNewCharacter();
 
 	void BeginPlay() override;
 
@@ -75,6 +76,20 @@ private:
 	TMap<TEnumAsByte<EInputActionValue>, UInputAction*> InputAction;
 	
 #pragma endregion 
+
+#pragma region AI Integration
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Bots)
+	// The A.I player controller.
+	TSubclassOf<class AController> BotController;
+	
+private:
+	void ReplacePlayerWithBot();
+	void ReplaceBotWithPlayer();
+	
+
+#pragma endregion
+
 	UFUNCTION(BlueprintCallable, Category = "Controller|Gameplay")
 	void SpawnPlayerCharacter();
 

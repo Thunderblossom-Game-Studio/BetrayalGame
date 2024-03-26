@@ -146,6 +146,7 @@ private:
 #pragma region Movement
 public:
 	virtual void Move(const FInputActionValue& Value) override;
+	virtual void Move(const FVector2D Value) override;;
 	
 	UFUNCTION(Server, Reliable)
 	void RunStart();
