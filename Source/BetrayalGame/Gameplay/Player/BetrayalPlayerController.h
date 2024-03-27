@@ -29,21 +29,9 @@ protected:
 	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
 	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Controller|References")
-	APlayerCharacter* ControlledCharacter;
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Controller|References")
 	ABetrayalPlayerState* BetrayalPlayerState;
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Controller|References")
-	APlayerCharacter* GetControlledCharacter() const { return ControlledCharacter; }
-
-	UFUNCTION(BlueprintCallable, Category = "Controller|References")
-	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
-
-	UFUNCTION(Server, Reliable)
-	void Server_SetControlledCharacter(APlayerCharacter* NewControlledCharacter);
-	
 	UFUNCTION(BlueprintPure, Category = "Controller|References")
 	ABetrayalPlayerState* GetBetrayalPlayerState() const { return BetrayalPlayerState; }
 
@@ -51,7 +39,7 @@ public:
 	void SetBetrayalPlayerState(ABetrayalPlayerState* NewBetrayalPlayerState) { BetrayalPlayerState = NewBetrayalPlayerState; }
 
 	UFUNCTION()
-	void InitializeReferences();
+	void InitBetrayalPlayerState();
 	
 	UFUNCTION(Server, Reliable)
 	void Server_InitializeReferences();

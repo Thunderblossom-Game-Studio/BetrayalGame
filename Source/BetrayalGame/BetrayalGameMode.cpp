@@ -25,7 +25,7 @@ void ABetrayalGameMode::BeginPlay()
 	BetrayalGameState = GetGameState<ABetrayalGameState>();
 	SetMatchStage(Lobby);
 
-	SetupHaunt();	
+	SetupHaunt();
 }
 
 void ABetrayalGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)

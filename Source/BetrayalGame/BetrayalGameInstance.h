@@ -8,6 +8,8 @@
 #include "BetrayalGameInstance.generated.h"
 
 #pragma region Save/Load
+
+
 USTRUCT(BlueprintType)
 struct FPlayerProfile
 {
@@ -15,6 +17,8 @@ struct FPlayerProfile
 	FString PlayerName;
 };
 #pragma endregion
+
+class APlayerCharacter;
 
 /**
  * 
@@ -60,5 +64,10 @@ public:
 	FName LevelToLoad = "";
 
 #pragma endregion
-	
+#pragma region Character Selection
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character Selection")
+	APlayerCharacter* SelectedCharacter;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Selection")
+	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
+#pragma endregion 
 };

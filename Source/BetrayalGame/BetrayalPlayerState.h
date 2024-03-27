@@ -17,7 +17,6 @@ enum EControlState
 	CS_Spectator UMETA(DisplayName = "Spectator")
 };
 
-
 UCLASS()
 class BETRAYALGAME_API ABetrayalPlayerState : public APlayerState
 {
@@ -31,52 +30,20 @@ class BETRAYALGAME_API ABetrayalPlayerState : public APlayerState
 
 
 protected:
-
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
-	FName DisplayName = "Dave";
-	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	TEnumAsByte<EControlState> ControlState = CS_Player;
 	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State")
-	APlayerCharacter* ControlledCharacter;
-
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State")
-	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
-	
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void SetControlState(EControlState NewControlState) { ControlState = NewControlState; }
 
 	UFUNCTION(BlueprintPure, Category = "State")
 	EControlState GetControlState() const { return ControlState; }
-
-	UFUNCTION(BlueprintCallable, Category = "State")
-	void SetDisplayName(FName NewDisplayName) { DisplayName = NewDisplayName; }
 	
-	UFUNCTION(BlueprintPure, Category = "State")
-	FName GetDisplayName() const { return DisplayName; }
-
-	UFUNCTION()
-	void SetControlledCharacter(APlayerCharacter* NewControlledCharacter) { ControlledCharacter = NewControlledCharacter; }
-	UFUNCTION(Blueprintable, Server, Reliable)
-	void Server_SetControlledCharacter(APlayerCharacter* NewControlledCharacter);
-
-	UFUNCTION(BlueprintCallable, Category = "State")
-	void SelectCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
-	
-	
-	UFUNCTION(BlueprintPure, Category = "State")
-	APlayerCharacter* GetControlledCharacter() const { return ControlledCharacter; }
-
 	UFUNCTION(BlueprintCallable, Category = "State")
 	void ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
 	UFUNCTION(BlueprintCallable, Server, Reliable , Category = "State")
 	void Server_ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "State")
-	void OnCharacterChanged();
-	
 #pragma region AI
 
 
@@ -125,7 +92,31 @@ public:
 private:
 #pragma endregion
 
+#pragma region Character Selection
+protected:
+	//Default character in case of no character being selected
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State|Character Selection")
+	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
 	
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State|Character Selection")
+	APlayerCharacter* SelectedCharacter;
+
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category = "State|Character Selection")
+	void OnSelectedCharacterChanged(APlayerCharacter* NewSelectedCharacter);
+	
+	void SetSelectedCharacter(APlayerCharacter* NewSelectedCharacter);
+	
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "State|Character Selection")
+	void SetSelectedCharacter(TSubclassOf<APlayerCharacter> NewSelectedCharacter);
+
+	UFUNCTION(BlueprintGetter, Category = "State|Character Selection")
+	APlayerCharacter* GetSelectedCharacter() const { return SelectedCharacter; }
+	
+	UFUNCTION(BlueprintGetter, Category = "State|Character Selection")
+	APlayerCharacter* GetDefaultCharacter() const { return DefaultCharacterBlueprint.GetDefaultObject(); }
+private:
+#pragma endregion 
 
 #pragma endregion
 	
