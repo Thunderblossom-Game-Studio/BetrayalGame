@@ -59,6 +59,18 @@ void ABetrayalPlayerState::Server_SetControlledCharacter_Implementation(APlayerC
 	SetControlledCharacter(NewControlledCharacter);
 }
 
+void ABetrayalPlayerState::SelectCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter)
+{
+	if(HasAuthority())
+	{
+		SetControlledCharacter(NewControlledCharacter.GetDefaultObject());
+	}
+	else
+	{
+		Server_SetControlledCharacter(NewControlledCharacter.GetDefaultObject());
+	}
+}
+
 void ABetrayalPlayerState::ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter)
 {
 	GEngine->AddOnScreenDebugMessage(-10, 10.0f, FColor::Blue, "Attempting to change character");

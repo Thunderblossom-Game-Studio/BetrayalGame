@@ -57,13 +57,8 @@ void ABetrayalPlayerController::SetupPlayerCharacter()
 	if (HasAuthority())
 		DetermineNewOrReplaceCharacter();		
 	else
-<<<<<<< HEAD
 		InitializeReferences();
-
-=======
-		Server_InitializeReferences();
 	
->>>>>>> 2d1a663ffbae44b9d57be406529b3655465990e0
 	SetupControllerInput();
 }
 
@@ -75,11 +70,6 @@ void ABetrayalPlayerController::DetermineNewOrReplaceCharacter()
 		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::DetermineNewOrReplaceCharacter: Network Subsystem is not valid"));
 		return;		
 	}
-<<<<<<< HEAD
-	
-=======
-
->>>>>>> 2d1a663ffbae44b9d57be406529b3655465990e0
 	InitializeReferences();
 	TArray<AActor*> PlayerCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
@@ -125,11 +115,18 @@ void ABetrayalPlayerController::InitializeReferences()
 		return;
 	}
 
-	//SetControlledCharacter(DefaultCharacterBlueprint.GetDefaultObject());
-	BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
+	if(!BetrayalPlayerState->GetControlledCharacter())
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::InitializeReferences - ControlledCharacter is not valid"));
+		BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->DefaultCharacterBlueprint.GetDefaultObject());
+		Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
+	}
+	// else
+	// {
+	// 	//BetrayalPlayerState->SetControlledCharacter(BetrayalPlayerState->GetControlledCharacter());
+	// 	//Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
+	// }
 	
-	Server_OnReferenceInitialized(BetrayalPlayerState->GetControlledCharacter(), BetrayalPlayerState);
-
 	UE_LOG(LogTemp, Warning, TEXT("BetrayalPlayerController::InitializeReferences - Success."));	
 }
 
