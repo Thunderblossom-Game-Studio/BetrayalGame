@@ -17,14 +17,11 @@ class BETRAYALGAME_API ABetrayalPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	virtual void PawnLeavingGame() override;
-	void InitializeNewCharacter();
-
 	void BeginPlay() override;
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	FTransform DestroyedTransform; //TODO - Make protected later
+	virtual void PawnLeavingGame() override;
 
 #pragma region References 
 protected:
@@ -82,12 +79,26 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Bots)
 	// The A.I player controller.
 	TSubclassOf<class AController> BotController;
-	
+
 private:
+	// Starts the process of choosing a pawn.
+	void SetupPlayerCharacter();
+
+	// Checks if the lobbies full and if it is the controller replaces a bot controller, otherwise it creates a new character.
+	void DetermineNewOrReplaceCharacter();
+	
+	// Sets up the pawns input system.
+	void SetupControllerInput();
+	
+	// Creates a new player character
+	void InitializeNewCharacter();
+	
+	// Replaces the player with an AI controller.
 	void ReplacePlayerWithBot();
+	
+	// Takes control of an AI controller's pawn.
 	void ReplaceBotWithPlayer();
 	
-
 #pragma endregion
 
 	UFUNCTION(BlueprintCallable, Category = "Controller|Gameplay")

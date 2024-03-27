@@ -71,12 +71,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void APlayerCharacter::Destroyed()
 {
 	DropAllItems();
-	
-	if (BetrayalPlayerController)
-	{
-		BetrayalPlayerController->DestroyedTransform = GetActorTransform();
-	}
-	
+		
 	Super::Destroyed();
 }
 
@@ -399,9 +394,7 @@ void APlayerCharacter::TraceForInteractables()
 			return;
 		
 		if(HitActor->Implements<UInteractable>() && HitActor != InteractableInFocus)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Interactable in focus"));
-			
+		{			
 			InteractableInFocus = Cast<ABaseInteractable>(HitActor);
 			
 			if(InteractableInFocus && !InteractableInFocus->bIsInteractable)

@@ -45,9 +45,7 @@ public:
 	
 	virtual void StartMatch() override;
 	virtual void EndMatch() override;
-	
-	virtual void PostLogin(APlayerController* NewPlayer) override;
-	virtual void Logout(AController* Exiting) override;
+
 private:	
 #pragma endregion 
 
@@ -105,14 +103,13 @@ protected:
 	// The A.I player controller.
 	TSubclassOf<class AController> BotController;
 	
-private:
+public:
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerControllers();
 	UFUNCTION(BlueprintCallable)
 	void EnableAIPlayerHauntMode();
-
-	void ReplacePlayer(const class ABetrayalPlayerController* BetrayalPlayerController) const;
-	void ReplaceBot(const class ABetrayalPlayerController* BetrayalPlayerController) const;
+	UFUNCTION(BlueprintCallable)
+	void UpdateAIPlayerMode(class AAIPlayerController* AIPlayerController);
 	
 // Getters/Setters
 public:

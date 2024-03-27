@@ -62,6 +62,9 @@ public:
 	UFUNCTION(Blueprintable, Server, Reliable)
 	void Server_SetControlledCharacter(APlayerCharacter* NewControlledCharacter);
 
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SelectCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter);
+	
 	
 	UFUNCTION(BlueprintPure, Category = "State")
 	APlayerCharacter* GetControlledCharacter() const { return ControlledCharacter; }
