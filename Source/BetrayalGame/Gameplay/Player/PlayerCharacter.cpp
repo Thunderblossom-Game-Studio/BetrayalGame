@@ -197,7 +197,7 @@ void APlayerCharacter::EquipItem(int SlotID)
 {
 	InventoryComponent->Server_SelectSlot(SlotID);
 	
-	OnSlotSelected(InventoryComponent->GetSelectedSlot());
+	OnSlotSelected(BetrayalPlayerController->WB_HUD, InventoryComponent->GetSelectedSlot());
 	
 	AItemActor* Item = InventoryComponent->GetItemInSlot(SlotID).Actor.GetDefaultObject();
 	
@@ -215,7 +215,7 @@ void APlayerCharacter::EquipItem(int SlotID)
 	{
 		UnequipItem();
 		InventoryComponent->Server_DeselectSlot(SlotID);
-		OnSlotSelected(InventoryComponent->GetSelectedSlot());
+		OnSlotSelected(BetrayalPlayerController->WB_HUD, InventoryComponent->GetSelectedSlot());
 		return;
 	}
 	else
@@ -281,7 +281,7 @@ void APlayerCharacter::Server_DropHeldItem_Implementation()
 
 	InventoryComponent->Server_RemoveItemFromInventory(InventoryComponent->GetSelectedSlot().ID);
 	InventoryComponent->Server_DeselectSlot(InventoryComponent->GetSelectedSlot().ID);
-	OnItemRemovedFromInventory(InventoryComponent->GetSelectedSlot());
+	OnItemRemovedFromInventory(BetrayalPlayerController->WB_HUD, InventoryComponent->GetSelectedSlot());
 	
 	//GEngine->AddOnScreenDebugMessage(-10, 2.0f, FColor::Green, "Dropping item at: " + ItemDropLocation->GetComponentLocation().ToString());
 }
@@ -323,7 +323,7 @@ void APlayerCharacter::DropItem(FInventorySlot Slot)
 		if(InventorySlot.bIsSelected)
 			InventoryComponent->Server_DeselectSlot(InventorySlot.ID);
 			
-		OnItemRemovedFromInventory(InventoryComponent->GetSlot(InventorySlot.ID));
+		OnItemRemovedFromInventory(BetrayalPlayerController->WB_HUD, InventoryComponent->GetSlot(InventorySlot.ID));
 	}
 }
 
@@ -536,15 +536,6 @@ void APlayerCharacter::Server_ToggleLight_Implementation()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// if(HasAuthority())
-	// {
-	// 	SetupInputSubsystem();
-	// }
-	// else
-	// {
-	// 	Server_SetupInputSubsystem();
-	// }
 	
 	BindMontageEvents();
 }

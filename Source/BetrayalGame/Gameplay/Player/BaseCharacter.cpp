@@ -3,7 +3,9 @@
 
 #include "BaseCharacter.h"
 
+#include "BetrayalPlayerController.h"
 #include "PlayerCharacter.h"
+#include "BetrayalGame/StaticUtils.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -129,7 +131,7 @@ void ABaseCharacter::TakeDamage(float Damage)
 		return;
 	}
 	
-	OnDamageTaken(Damage);
+	OnDamageTaken(BetrayalPlayerController->WB_HUD, Damage);
 }
 
 void ABaseCharacter::Heal(float Amount)
@@ -139,7 +141,7 @@ void ABaseCharacter::Heal(float Amount)
 	else
 		CurrentHealth += Amount;
 
-	OnHeal(Amount);
+	OnHeal(BetrayalPlayerController->WB_HUD, Amount);
 }
 
 void ABaseCharacter::Server_Heal_Implementation(float Amount)
@@ -186,6 +188,22 @@ void ABaseCharacter::StopStun()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(IsLocallyControlled())
+	{
+		if(!GetController())
+		{
+			PrintError("ABaseCharacter::BeginPlay(): Controller is null!");
+			return;
+		}
+
+		BetrayalPlayerController = Cast<ABetrayalPlayerController>(GetController());
+	}
+	else
+	{
+		
+	}
+		
 	
 	CurrentHealth = MaxHealth;
 

@@ -18,6 +18,15 @@ struct FPlayerProfile
 };
 #pragma endregion
 
+
+UENUM()
+enum ECharacter
+{
+	C_Default UMETA(DisplayName = "Default"),
+	C_Heisenburger UMETA(DisplayName = "Heisenburger"),
+	C_Vasco UMETA(DisplayName = "Vasco"),
+};
+
 class APlayerCharacter;
 
 /**
@@ -65,9 +74,18 @@ public:
 
 #pragma endregion
 #pragma region Character Selection
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character Selection")
-	APlayerCharacter* SelectedCharacter;
+	TEnumAsByte<ECharacter> SelectedCharacter = C_Default;
+	
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Selection")
-	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
+	TMap<TEnumAsByte<ECharacter>,TSubclassOf<APlayerCharacter>> CharacterBlueprints;
+	
+	UFUNCTION(BlueprintCallable, Category = "Character Selection")
+	void SetSelectedCharacter(TEnumAsByte<ECharacter> NewSelectedCharacter) { SelectedCharacter = NewSelectedCharacter; }
+
+	UFUNCTION(BlueprintPure, Category = "Character Selection")
+	TEnumAsByte<ECharacter> GetSelectedCharacter() const { return SelectedCharacter; }
 #pragma endregion 
 };

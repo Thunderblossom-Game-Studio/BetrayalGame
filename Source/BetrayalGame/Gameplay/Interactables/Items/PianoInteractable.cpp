@@ -4,6 +4,8 @@
 #include "PianoInteractable.h"
 
 #include "../../Player/PlayerCharacter.h"
+#include "../../Player/BetrayalPlayerController.h"
+
 #include "Net/UnrealNetwork.h"
 
 
@@ -34,7 +36,7 @@ void APianoInteractable::OnInteract(AActor* Interactor)
 
 			Player->InventoryComponent->DeselectSlot(InventorySlot.ID);
 			
-			Player->OnItemRemovedFromInventory(Player->InventoryComponent->GetSelectedSlot());
+			Player->OnItemRemovedFromInventory(Player->BetrayalPlayerController->WB_HUD, Player->InventoryComponent->GetSelectedSlot());
 			
 			if(CurrentSheets == NecessarySheets)
 				OnPianoComplete();

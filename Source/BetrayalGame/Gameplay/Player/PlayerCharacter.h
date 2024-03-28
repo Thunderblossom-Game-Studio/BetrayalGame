@@ -68,21 +68,6 @@ public:
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-#pragma region References
-protected:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|References")
-	ABetrayalPlayerController* BetrayalPlayerController;
-
-public:
-	UFUNCTION(BlueprintPure, Category = "Player|References")
-	ABetrayalPlayerController* GetBetrayalPlayerController() const { return BetrayalPlayerController; }
-
-	UFUNCTION(BlueprintCallable, Category = "Player|References")
-	void SetBetrayalPlayerController(ABetrayalPlayerController* NewBetrayalPlayerController) { BetrayalPlayerController = NewBetrayalPlayerController; }
-private:	
-#pragma endregion 
-	
 #pragma region Possession
 
 public:
@@ -209,10 +194,10 @@ public:
 	void Server_DropAllItems();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnSlotSelected(FInventorySlot Slot);
+	void OnSlotSelected(UUserWidget* HUD, FInventorySlot Slot);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Inventory")
-	void OnItemRemovedFromInventory(FInventorySlot Slot);
+	void OnItemRemovedFromInventory(UUserWidget* HUD, FInventorySlot Slot);
 	
 private:	
 #pragma endregion 
@@ -235,7 +220,7 @@ public:
 	void TraceForInteractables();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Player|Interaction")
-	void OnItemPickedUp(FInventorySlot Slot);
+	void OnItemPickedUp(UUserWidget* HUD, FInventorySlot Slot);
 	
 	void LocalInteract();
 	

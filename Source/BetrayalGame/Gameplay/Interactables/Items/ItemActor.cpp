@@ -6,6 +6,7 @@
 #include "../../Player/BaseCharacter.h"
 #include "../../Player/Player Components/InventoryComponent.h"
 #include "../../Player/PlayerCharacter.h"
+#include "../../Player/BetrayalPlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -61,7 +62,8 @@ void AItemActor::OnInteract(AActor* Interactor)
 	
 	Player->InventoryComponent->Server_AddItemToInventory(Item);
 
-	Player->OnItemPickedUp(Player->InventoryComponent->GetLastSlotAdded());
+	Player->OnItemPickedUp(Player->BetrayalPlayerController->WB_HUD,
+	                       Player->InventoryComponent->GetLastSlotAdded());
 
 	OnPickup(Player);
 	

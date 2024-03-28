@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BetrayalGameInstance.h"
 #include "GameFramework/PlayerState.h"
 #include "Gameplay/Player/PlayerCharacter.h"
 #include "BetrayalPlayerState.generated.h"
@@ -16,6 +17,9 @@ enum EControlState
 	CS_AI UMETA(DisplayName = "AI"),
 	CS_Spectator UMETA(DisplayName = "Spectator")
 };
+
+
+
 
 UCLASS()
 class BETRAYALGAME_API ABetrayalPlayerState : public APlayerState
@@ -94,27 +98,13 @@ private:
 
 #pragma region Character Selection
 protected:
-	//Default character in case of no character being selected
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State|Character Selection")
-	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
 	
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "State|Character Selection")
-	APlayerCharacter* SelectedCharacter;
-
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "State|Character Selection")
-	void OnSelectedCharacterChanged(APlayerCharacter* NewSelectedCharacter);
+	void OnSelectedCharacterChanged(ECharacter NewSelectedCharacter);
 	
-	void SetSelectedCharacter(APlayerCharacter* NewSelectedCharacter);
-	
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "State|Character Selection")
-	void SetSelectedCharacter(TSubclassOf<APlayerCharacter> NewSelectedCharacter);
+	void SetSelectedCharacter(TEnumAsByte<ECharacter> NewSelectedCharacter);
 
-	UFUNCTION(BlueprintGetter, Category = "State|Character Selection")
-	APlayerCharacter* GetSelectedCharacter() const { return SelectedCharacter; }
-	
-	UFUNCTION(BlueprintGetter, Category = "State|Character Selection")
-	APlayerCharacter* GetDefaultCharacter() const { return DefaultCharacterBlueprint.GetDefaultObject(); }
 private:
 #pragma endregion 
 

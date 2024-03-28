@@ -6,7 +6,9 @@
 #include "PlayerCharacter.h"
 #include "BetrayalGame/BetrayalPlayerState.h"
 #include "GameFramework/PlayerController.h"
+#include "Blueprint/UserWidget.h"
 #include "BetrayalPlayerController.generated.h"
+
 
 class ABetrayalPlayerState;
 class APlayerCharacter;
@@ -25,9 +27,6 @@ public:
 
 #pragma region References 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Controller|References")
-	TSubclassOf<APlayerCharacter> DefaultCharacterBlueprint;
-	
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Controller|References")
 	ABetrayalPlayerState* BetrayalPlayerState;
 
@@ -44,7 +43,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_InitializeReferences();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Controller|References")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Controller|References")
 	void OnReferenceInitialized(APlayerCharacter* ControlledPlayerCharacter, ABetrayalPlayerState* State);
 	
 	UFUNCTION(Server, Reliable, Category = "Controller|References")
@@ -94,5 +93,15 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SpawnPlayerCharacter();
+
+#pragma region UI
+protected:
+	
+	
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Controller|UI")
+	UUserWidget* WB_HUD;
+private:
+#pragma endregion 
 	
 };

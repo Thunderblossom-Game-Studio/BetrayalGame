@@ -18,9 +18,7 @@ void ABetrayalPlayerState::CopyProperties(APlayerState* PlayerState)
 		if(IsValid(BetrayalPlayerState))
 		{
 			bIsTraitor = BetrayalPlayerState->bIsTraitor;
-			SelectedCharacter = BetrayalPlayerState->SelectedCharacter;
 			ControlState = BetrayalPlayerState->ControlState;
-			DefaultCharacterBlueprint = BetrayalPlayerState->DefaultCharacterBlueprint;
 		}
 	}
 }
@@ -35,9 +33,7 @@ void ABetrayalPlayerState::OverrideWith(APlayerState* PlayerState)
 		if(IsValid(BetrayalPlayerState))
 		{
 			bIsTraitor = BetrayalPlayerState->bIsTraitor;
-			SelectedCharacter = BetrayalPlayerState->SelectedCharacter;
 			ControlState = BetrayalPlayerState->ControlState;
-			DefaultCharacterBlueprint = BetrayalPlayerState->DefaultCharacterBlueprint;
 		}
 	}
 }
@@ -47,7 +43,6 @@ void ABetrayalPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABetrayalPlayerState, bIsTraitor);
-	DOREPLIFETIME(ABetrayalPlayerState, SelectedCharacter);
 	DOREPLIFETIME(ABetrayalPlayerState, ControlState);
 }
 
@@ -58,35 +53,55 @@ void ABetrayalPlayerState::Server_ChangeCharacter_Implementation(TSubclassOf<APl
 
 void ABetrayalPlayerState::ChangeCharacter(TSubclassOf<APlayerCharacter> NewControlledCharacter)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attempting to change character"));
-	APawn* PreviousCharacter = GetOwningController()->GetPawn();
-	if(!PreviousCharacter)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No previous character"));
-		return;
-	}
-
-	// Save the transform before destroying the previous character
-	const FTransform Transform = PreviousCharacter->GetTransform();
-
-	// Destroy the previous character
-	PreviousCharacter->Destroy();
-
-	// Setup spawn parameters for the new character
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = GetOwningController();
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	
-	APlayerCharacter* NewPlayerCharacter = GetWorld()->SpawnActor<APlayerCharacter>(NewControlledCharacter, Transform, SpawnParameters);
-	if(!NewPlayerCharacter)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No new character"));
-		return;
-	}
-	
-	SetSelectedCharacter(NewPlayerCharacter);
-	
-	GetOwningController()->Possess(NewPlayerCharacter);
+	// UE_LOG(LogTemp, Warning, TEXT("Attempting to change character"));
+	// APawn* PreviousCharacter = GetOwningController()->GetPawn();
+	// if(!PreviousCharacter)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("No previous character"));
+	// 	return;
+	// }
+	//
+	// // Save the transform before destroying the previous character
+	// const FTransform Transform = PreviousCharacter->GetTransform();
+	//
+	// // Destroy the previous character
+	// PreviousCharacter->Destroy();
+	//
+	// // Setup spawn parameters for the new character
+	// FActorSpawnParameters SpawnParameters;
+	// SpawnParameters.Owner = GetOwningController();
+	// SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	//
+	//
+	// UBetrayalGameInstance* GameInstance = GetWorld()->GetGameInstance<UBetrayalGameInstance>();
+	// if(!GameInstance)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("No GameInstance"));
+	// 	return;
+	// }
+	//
+	// APlayerCharacter* NewPlayerCharacter;
+	//
+	// switch (GameInstance->GetSelectedCharacter())
+	// {
+	// case C_Default:
+	// 	NewPlayerCharacter = GetWorld()->SpawnActor<APlayerCharacter>(GameInstance->CharacterBlueprints.Find(GameInstance->GetSelectedCharacter())->GetDefaultObject()->GetClass(), Transform, SpawnParameters);
+	// 	break;
+	// case C_Heisenburger:
+	// 	NewPlayerCharacter = GetWorld()->SpawnActor<APlayerCharacter>(HeisenburgerCharacterBlueprint, Transform, SpawnParameters);
+	// 	break;
+	// }
+	//
+	//
+	// if(!NewPlayerCharacter)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("No new character"));
+	// 	return;
+	// }
+	//
+	// SetSelectedCharacter(NewPlayerCharacter);
+	//
+	// GetOwningController()->Possess(NewPlayerCharacter);
 }
 
 void ABetrayalPlayerState::OnRep_IsTraitor()
@@ -94,19 +109,22 @@ void ABetrayalPlayerState::OnRep_IsTraitor()
 	OnIsTraitorChanged(bIsTraitor);
 }
 
-void ABetrayalPlayerState::SetSelectedCharacter(APlayerCharacter* NewSelectedCharacter)
+void ABetrayalPlayerState::SetSelectedCharacter(TEnumAsByte<ECharacter> NewSelectedCharacter)
 {
-	SelectedCharacter = NewSelectedCharacter;
-	OnSelectedCharacterChanged(SelectedCharacter);
-	GetWorld()->GetGameInstance<UBetrayalGameInstance>()->SelectedCharacter = NewSelectedCharacter;
-	PrintWarning("FUNCTION: Character changed -> " + SelectedCharacter->GetName());
+	UBetrayalGameInstance* GameInstance = GetWorld()->GetGameInstance<UBetrayalGameInstance>();
+	if(!GameInstance)
+	{
+		PrintError("No GameInstance found");
+		return;
+	}
+
+	GameInstance->SetSelectedCharacter(NewSelectedCharacter);
+	
+	OnSelectedCharacterChanged(NewSelectedCharacter);
+	
+	PrintWarning("FUNCTION: Character changed -> " + NewSelectedCharacter);
 }
 
-void ABetrayalPlayerState::SetSelectedCharacter_Implementation(TSubclassOf<APlayerCharacter> NewSelectedCharacter)
-{
-	SetSelectedCharacter(NewSelectedCharacter.GetDefaultObject());
-	PrintWarning("BLUEPRINT: Character changed -> " + SelectedCharacter->GetName());
-}
 
 void ABetrayalPlayerState::SetIsReady_Implementation(bool bReady)
 {

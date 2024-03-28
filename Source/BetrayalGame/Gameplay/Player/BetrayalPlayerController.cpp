@@ -75,8 +75,6 @@ void ABetrayalPlayerController::DetermineNewOrReplaceCharacter()
 		return;		
 	}
 	
-	InitBetrayalPlayerState();
-	
 	TArray<AActor*> PlayerCharacters;
 	
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerCharacters);
@@ -92,7 +90,7 @@ void ABetrayalPlayerController::DetermineNewOrReplaceCharacter()
 		InitializeNewCharacter();
 	}
 
-	
+	InitBetrayalPlayerState();
 }
 
 void ABetrayalPlayerController::SetupControllerInput()
@@ -113,6 +111,10 @@ void ABetrayalPlayerController::InitializeNewCharacter()
 
 void ABetrayalPlayerController::InitBetrayalPlayerState()
 {
+	// if(!IsLocalController())
+	// 	return;
+	//
+	
 	BetrayalPlayerState = GetPlayerState<ABetrayalPlayerState>();
 	if(BetrayalPlayerState)
 	{
@@ -121,35 +123,22 @@ void ABetrayalPlayerController::InitBetrayalPlayerState()
 	else
 	{
 		PrintError("BetrayerPlayerController::InitBetrayalPlayerState - BetrayalPlayerState is not valid");
+		return;
 	}
-
-	UBetrayalGameInstance* GameInstance = GetGameInstance<UBetrayalGameInstance>();
-	if(GameInstance)
-	{
-		PrintWarning("BetrayerPlayerController::InitBetrayalPlayerState - GameInstance is valid");
-
-		if(GameInstance->SelectedCharacter)
-		{
-			Server_OnReferenceInitialized(GameInstance->SelectedCharacter, BetrayalPlayerState);
-			PrintWarning("BetrayerPlayerController::InitBetrayalPlayerState - SelectedCharacter is valid");
-		}
-		else
-		{
-			PrintError("BetrayerPlayerController::InitBetrayalPlayerState - SelectedCharacter is not valid. Using default character blueprint...");
-			BetrayalPlayerState->SetSelectedCharacter(GameInstance->DefaultCharacterBlueprint);
-			Server_OnReferenceInitialized(BetrayalPlayerState->GetSelectedCharacter(), BetrayalPlayerState);
-		}
-	}
-	else
-	{
-		PrintError("BetrayerPlayerController::InitBetrayalPlayerState - GameInstance is not valid");
-	}
-}
-
-void ABetrayalPlayerController::OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter,
-	ABetrayalPlayerState* State)
-{
 	
+	UBetrayalGameInstance* GameInstance = GetGameInstance<UBetrayalGameInstance>();
+	if(!GameInstance)
+	{
+		PrintError("BetrayerPlayerController::InitBetrayalPlayerState - GameInstance is invalid");
+	}
+	
+	if(GameInstance->CharacterBlueprints.Num() == 0)
+	{
+		PrintError("BetrayalPlayerController::SpawnPlayer - CharacterBlueprints is empty");
+		return;
+	}
+	
+	OnReferenceInitialized(GameInstance->CharacterBlueprints.Find(GameInstance->GetSelectedCharacter())->GetDefaultObject(), BetrayalPlayerState);
 }
 
 void ABetrayalPlayerController::Server_OnReferenceInitialized_Implementation(APlayerCharacter* ControlledPlayerCharacter, ABetrayalPlayerState* State)
@@ -272,33 +261,30 @@ void ABetrayalPlayerController::SpawnPlayerCharacter()
 	}
 	const FTransform SpawnTransform = SpawnPoint->GetTransform();
 
-	if(BetrayalPlayerState->GetSelectedCharacter())
-	{
-		APlayerCharacter* PlayerCharacter = GetWorld()->SpawnActor<APlayerCharacter>(BetrayalPlayerState->GetSelectedCharacter()->GetClass(), SpawnTransform, FActorSpawnParameters());
 
-		BetrayalPlayerState->SetSelectedCharacter(PlayerCharacter);
+	UBetrayalGameInstance* GameInstance = GetGameInstance<UBetrayalGameInstance>();
+	if(!GameInstance)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::SpawnPlayer - GameInstance is not valid"));
+		return;
+	}
+
+	if(GameInstance->CharacterBlueprints.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("BetrayalPlayerController::SpawnPlayer - CharacterBlueprints is empty"));
+		return;
+	}
+
+	APlayerCharacter* PlayerCharacter = GetWorld()->SpawnActor<APlayerCharacter>(GameInstance->CharacterBlueprints.Find(GameInstance->GetSelectedCharacter())->GetDefaultObject()->GetClass(), SpawnTransform, FActorSpawnParameters());
 	
-		Possess(PlayerCharacter);
+	Possess(PlayerCharacter);
 
-		//Server_OnReferenceInitialized(BetrayalPlayerState->GetSelectedCharacter(), BetrayalPlayerState);
+	//Server_OnReferenceInitialized(BetrayalPlayerState->GetSelectedCharacter(), BetrayalPlayerState);
 		
-		PrintLog("BetrayalPlayerController::SpawnPlayer - PlayerCharacter spawned AND possessed");
-	}
-	else
-	{
-		PrintError("BetrayalPlayerController::SpawnPlayer - SelectedCharacter is not valid using default character blueprint...");
-
-		APlayerCharacter* PlayerCharacter = GetWorld()->SpawnActor<APlayerCharacter>(GetWorld()->GetGameInstance<UBetrayalGameInstance>()->DefaultCharacterBlueprint, SpawnTransform, FActorSpawnParameters());
-		
-		BetrayalPlayerState->SetSelectedCharacter(PlayerCharacter);
-		
-		Possess(PlayerCharacter);
-
-		//Server_OnReferenceInitialized(BetrayalPlayerState->GetSelectedCharacter(), BetrayalPlayerState);
-		
-		PrintLog("BetrayalPlayerController::SpawnPlayer - PlayerCharacter spawned AND possessed using default character blueprint");
-	}
+	PrintLog("BetrayalPlayerController::SpawnPlayer - PlayerCharacter spawned AND possessed");
+	
 }
+
 
 void ABetrayalPlayerController::Server_SpawnPlayerCharacter_Implementation()
 {

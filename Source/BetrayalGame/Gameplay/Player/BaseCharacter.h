@@ -7,6 +7,7 @@
 #include "BaseCharacter.generated.h"
 
 
+class ABetrayalPlayerController;
 struct FInputActionValue;
 
 UCLASS()
@@ -21,6 +22,14 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	bool SweepTraceForCharacter(ABaseCharacter*& HitCharacterOut);
+
+#pragma region References
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|References")
+	ABetrayalPlayerController* BetrayalPlayerController;
+
+private:	
+#pragma endregion 
 	
 #pragma region Debugging
 
@@ -62,7 +71,7 @@ public:
 	void Server_TakeDamage(float Damage);
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Health")
-	void OnDamageTaken(float Damage);
+	void OnDamageTaken(UUserWidget* HUD, float Damage);
 	
 	UFUNCTION(BlueprintCallable)
 	void Heal(float Amount);
@@ -71,7 +80,7 @@ public:
 	void Server_Heal(float Amount);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Character|Health")
-	void OnHeal(float Amount);
+	void OnHeal(UUserWidget* HUD, float Amount);
 
 	UFUNCTION(BlueprintPure, Category = "Character|Health")
 	bool IsDead() const { return bIsDead; }
