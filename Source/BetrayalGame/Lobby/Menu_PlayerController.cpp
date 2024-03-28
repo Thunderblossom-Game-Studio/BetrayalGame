@@ -30,7 +30,7 @@ void AMenu_PlayerController::Login()
 {
 	if (LoginAttempts >= 3)
 	{
-		Print("Failed to login after 3 attempts!");
+		PrintLog("Failed to login after 3 attempts!");
 		GetWorld()->Exec(GetWorld(), TEXT("quit"));
 		
 		return;
@@ -39,14 +39,14 @@ void AMenu_PlayerController::Login()
 	auto OnlineSubsystem = IOnlineSubsystem::Get();
 	if (!OnlineSubsystem)
 	{
-		Print("No OnlineSubsystem found!");
+		PrintLog("No OnlineSubsystem found!");
 		return;
 	}
 
 	auto Identity = OnlineSubsystem->GetIdentityInterface();
 	if (!Identity.IsValid())
 	{
-		Print("No IdentityInterface found!");
+		PrintLog("No IdentityInterface found!");
 		return;
 	}
 
@@ -54,11 +54,11 @@ void AMenu_PlayerController::Login()
 	FUniqueNetIdPtr UserId = Identity->GetUniquePlayerId(0);
 	if (UserId && Identity->GetLoginStatus(0) == ELoginStatus::LoggedIn)
 	{
-		Print("Already logged in!");
+		PrintLog("Already logged in!");
 		auto User = Identity->GetUserAccount(*UserId);
 		if (User.IsValid())
 		{
-			Print("User: " + User->GetDisplayName());
+			PrintLog("User: " + User->GetDisplayName());
 		}
 	}
 
@@ -72,10 +72,10 @@ void AMenu_PlayerController::Login()
 
 	if (!AuthType.IsEmpty())
 	{
-		Print("Logging in with AuthType: " + AuthType);
+		PrintLog("Logging in with AuthType: " + AuthType);
 		if (!Identity->AutoLogin(0))
 		{
-			Print("Failed to login with AuthType: " + AuthType);
+			PrintLog("Failed to login with AuthType: " + AuthType);
 			Identity->ClearOnLoginCompleteDelegate_Handle(0, LoginDelegateHandle);
 			LoginDelegateHandle.Reset();
 
@@ -88,11 +88,11 @@ void AMenu_PlayerController::Login()
 	{
 		FOnlineAccountCredentials Credentials("AccountPortal", "", "");
 
-		Print("Logging in with default AuthType");
+		PrintLog("Logging in with default AuthType");
 
 		if (!Identity->Login(0, Credentials))
 		{
-			Print("Failed to login with default AuthType");
+			PrintLog("Failed to login with default AuthType");
 			Identity->ClearOnLoginCompleteDelegate_Handle(0, LoginDelegateHandle);
 			LoginDelegateHandle.Reset();
 
@@ -114,16 +114,16 @@ void AMenu_PlayerController::OnLoginCompleted(int32 LocalUserNum, bool bWasSucce
 
 	if (bWasSuccessful)
 	{
-		Print("Login successful!");
+		PrintLog("Login successful!");
 		auto User = Identity->GetUserAccount(UserId);
 		if (User.IsValid())
 		{
-			Print("User: " + User->GetDisplayName());
+			PrintLog("User: " + User->GetDisplayName());
 		}
 	}
 	else
 	{
-		Print("Login failed: " + Error);
+		PrintLog("Login failed: " + Error);
 	}
 
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginDelegateHandle);
@@ -140,7 +140,7 @@ void AMenu_PlayerController::OnLoginCompleted(int32 LocalUserNum, bool bWasSucce
 
 void AMenu_PlayerController::UpdateUI()
 {
-	Print("Updating UI...");
+	PrintLog("Updating UI...");
 
 	FTimerHandle TimerHandle;
 	// Update the player list after a delay to allow the network subsystem to update the list of connected clients
@@ -153,21 +153,21 @@ void AMenu_PlayerController::UpdatePlayerList()
 {
 	if (!WB_LobbyRoom)
 	{
-		Print("AMenu_PlayerController::UpdatePlayerList(): WB_LobbyRoom is null!");
+		PrintLog("AMenu_PlayerController::UpdatePlayerList(): WB_LobbyRoom is null!");
 		return;
 	}
 
 	auto PlayerListWidget = WB_LobbyRoom->GetWidgetFromName("PlayerList");
 	if (!PlayerListWidget)
 	{
-		Print("AMenu_PlayerController::UpdatePlayerList(): PlayerListWidget is null!");
+		PrintLog("AMenu_PlayerController::UpdatePlayerList(): PlayerListWidget is null!");
 		return;
 	}
 
 	UPanelWidget* PlayerList = Cast<UPanelWidget>(PlayerListWidget);
 	if (!PlayerList)
 	{
-		Print("AMenu_PlayerController::UpdatePlayerList(): PlayerList is null!");
+		PrintLog("AMenu_PlayerController::UpdatePlayerList(): PlayerList is null!");
 		return;
 	}
 
@@ -177,7 +177,7 @@ void AMenu_PlayerController::UpdatePlayerList()
 	auto Plrs = GetWorld()->GetGameState()->PlayerArray;
 	for (auto Plr : Plrs)
 	{
-		Print("Updating player: " + Plr->GetPlayerName());
+		PrintLog("Updating player: " + Plr->GetPlayerName());
 
 		if (auto PlayerRef = Cast<ABetrayalPlayerState>(Plr))
 		{
@@ -229,21 +229,21 @@ void AMenu_PlayerController::ClearPlayerList()
 {
 	if (!WB_LobbyRoom)
 	{
-		Print("AMenu_PlayerController::ClearPlayerList(): WB_LobbyRoom is null!");
+		PrintLog("AMenu_PlayerController::ClearPlayerList(): WB_LobbyRoom is null!");
 		return;
 	}
 
 	const auto PlayerListWidget = WB_LobbyRoom->GetWidgetFromName("PlayerList");
 	if (!PlayerListWidget)
 	{
-		Print("AMenu_PlayerController::ClearPlayerList(): PlayerListWidget is null!");
+		PrintLog("AMenu_PlayerController::ClearPlayerList(): PlayerListWidget is null!");
 		return;
 	}
 
 	UPanelWidget* PlayerList = Cast<UPanelWidget>(PlayerListWidget);
 	if (!PlayerList)
 	{
-		Print("AMenu_PlayerController::ClearPlayerList(): PlayerList is null!");
+		PrintLog("AMenu_PlayerController::ClearPlayerList(): PlayerList is null!");
 		return;
 	}
 

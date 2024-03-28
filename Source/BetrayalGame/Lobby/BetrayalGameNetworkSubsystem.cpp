@@ -25,7 +25,7 @@ IOnlineSessionPtr UBetrayalGameNetworkSubsystem::GetSessionInterface()
 	auto Subsystem = IOnlineSubsystem::Get();
 	if (!Subsystem)
 	{
-		Print("UBetrayalGameNetworkSubsystem::GetSessionInterface(): No Online Subsystem found!");
+		PrintLog("UBetrayalGameNetworkSubsystem::GetSessionInterface(): No Online Subsystem found!");
 		return nullptr;
 	}
 
@@ -35,7 +35,7 @@ IOnlineSessionPtr UBetrayalGameNetworkSubsystem::GetSessionInterface()
 	}
 	else
 	{
-		Print("UBetrayalGameNetworkSubsystem::GetSessionInterface(): SessionInterface is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::GetSessionInterface(): SessionInterface is null!");
 		return nullptr;
 	}
 }
@@ -44,7 +44,7 @@ void UBetrayalGameNetworkSubsystem::SetupNotifications()
 {
 	auto Sessions = GetSessionInterface();
 
-	Print("Setting up notifications...");
+	PrintLog("Setting up notifications...");
 
 	if (Sessions.IsValid())
 	{
@@ -55,7 +55,7 @@ void UBetrayalGameNetworkSubsystem::SetupNotifications()
 	}
 	else
 	{
-		Print("UBetrayalGameNetworkSubsystem::SetupNotifications(): SessionInterface is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::SetupNotifications(): SessionInterface is null!");
 	}
 }
 
@@ -71,14 +71,14 @@ void UBetrayalGameNetworkSubsystem::CleanupNotifications()
 	}
 	else
 	{
-		Print("UBetrayalGameNetworkSubsystem::CleanupNotifications(): SessionInterface is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::CleanupNotifications(): SessionInterface is null!");
 	}
 }
 
 void UBetrayalGameNetworkSubsystem::OnClientConnected(FName SessionName, const FUniqueNetId& ID)
 {
-	// Print name of connecting player
-	Print("Player connected: " + ID.ToString());
+	// PrintLog name of connecting player
+	PrintLog("Player connected: " + ID.ToString());
 
 	// Call all bound callbacks
 	OnClientConnectedDelegate.Broadcast();
@@ -88,8 +88,8 @@ void UBetrayalGameNetworkSubsystem::OnClientConnected(FName SessionName, const F
 void UBetrayalGameNetworkSubsystem::OnClientDisconnected(FName SessionName, const FUniqueNetId& ID,
                                                          EOnSessionParticipantLeftReason Reason)
 {
-	// Print name of disconnecting player
-	Print("Player disconnected: " + ID.ToString());
+	// PrintLog name of disconnecting player
+	PrintLog("Player disconnected: " + ID.ToString());
 
 	// Call all bound callbacks
 	OnClientDisconnectedDelegate.Broadcast();
@@ -134,7 +134,7 @@ void UBetrayalGameNetworkSubsystem::ResetSessionSearch()
 		// This feels janky as fuck
 		if (!_MenuController)
 		{
-			Print("UBetrayalGameNetworkSubsystem::ResetSessionSearch(): MenuController is null!");
+			PrintLog("UBetrayalGameNetworkSubsystem::ResetSessionSearch(): MenuController is null!");
 			return;
 		}
 	}
@@ -263,7 +263,7 @@ bool UBetrayalGameNetworkSubsystem::HostSession(TSharedPtr<const FUniqueNetId> U
 	}
 	else
 	{
-		Print("No Online Subsystem found!");
+		PrintLog("No Online Subsystem found!");
 	}
 	return false;
 }
@@ -282,7 +282,7 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 
 	if (bWasSuccessful)
 	{
-		Print("Session started successfully!");
+		PrintLog("Session started successfully!");
 
 		// Set the delegate to the handle of the session start function
 		StartSessionDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
@@ -292,7 +292,7 @@ void UBetrayalGameNetworkSubsystem::OnCreateSessionComplete(FName SessionName, b
 	}
 	else
 	{
-		Print("Failed to create session!");
+		PrintLog("Failed to create session!");
 	}
 }
 
@@ -306,7 +306,7 @@ void UBetrayalGameNetworkSubsystem::OnStartOnlineGameComplete(FName SessionName,
 	if (bWasSuccessful)
 	{
 		// Travel to the lobby
-		Print("Server travelling to map...");
+		PrintLog("Server travelling to map...");
 
 		FName Level = "L_Lobby";
 		UGameplayStatics::OpenLevel(GetWorld(), Level, true, "listen");
@@ -326,13 +326,13 @@ ESessionSearchResult UBetrayalGameNetworkSubsystem::FindSessions(TSharedPtr<cons
 
 	if (!Sessions.IsValid())
 	{
-		Print("UBetrayalGameNetworkSubsystem::FindSessions(): SessionInterface is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::FindSessions(): SessionInterface is null!");
 		return ESessionSearchResult::SSR_Failure;
 	}
 
 	if (!UserId.IsValid())
 	{
-		Print("UBetrayalGameNetworkSubsystem::FindSessions(): UserId is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::FindSessions(): UserId is null!");
 		return ESessionSearchResult::SSR_Failure;
 	}
 
@@ -368,7 +368,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 	Sessions->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
 
 	// Log number of results
-	Print("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
+	PrintLog("Found results: " + FString::FromInt(SessionSearch->SearchResults.Num()));
 
 	// Server list reference
 	auto SessionList = _MenuController->WB_Lobby->GetWidgetFromName("Scrl_Sessions");
@@ -376,7 +376,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 
 	if (!Scrl_Sessions)
 	{
-		Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): Scrl_Sessions is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): Scrl_Sessions is null!");
 		return;
 	}
 
@@ -403,7 +403,7 @@ void UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 		}
 		else
 		{
-			Print("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): SessionButton is null!");
+			PrintLog("UBetrayalGameNetworkSubsystem::OnFindSessionsComplete(): SessionButton is null!");
 		}
 	}
 }
@@ -417,7 +417,7 @@ bool UBetrayalGameNetworkSubsystem::JoinSession(TSharedPtr<const FUniqueNetId> U
 
 	if (Sessions.IsValid() && UserId.IsValid())
 	{
-		Print("Attempting to join session: " + SessionName.ToString() + ", " + SearchResult.GetSessionIdStr());
+		PrintLog("Attempting to join session: " + SessionName.ToString() + ", " + SearchResult.GetSessionIdStr());
 		OnJoinSessionCompleteDelegateHandle = Sessions->AddOnJoinSessionCompleteDelegate_Handle(
 			OnJoinSessionCompleteDelegate);
 
@@ -456,18 +456,18 @@ void UBetrayalGameNetworkSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		FString TravelURL;
 		if (Sessions->GetResolvedConnectString(SessionName, TravelURL))
 		{
-			Print(SessionName.ToString() + " resolved to: " + TravelURL);
+			PrintLog(SessionName.ToString() + " resolved to: " + TravelURL);
 			PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
 			SetupNotifications();
 		}
 		else
 		{
-			Print("Failed to resolve connect string!");
+			PrintLog("Failed to resolve connect string!");
 		}
 	}
 	else
 	{
-		Print("No Player Controller found!");
+		PrintLog("No Player Controller found!");
 	}
 
 	ResetSessionSearch();
@@ -477,7 +477,7 @@ void UBetrayalGameNetworkSubsystem::OnSessionUserInviteAccepted(const bool bWasS
                                                                 TSharedPtr<const FUniqueNetId> UserId,
                                                                 const FOnlineSessionSearchResult& InviteResult)
 {
-	Print("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " +
+	PrintLog("Invite accepted: " + FString::FromInt(bWasSuccesful) + ", " + FString::FromInt(ControllerId) + ", " +
 		InviteResult.GetSessionIdStr());
 	JoinSession(GetNetID(), NAME_GameSession, InviteResult);
 
@@ -503,7 +503,7 @@ void UBetrayalGameNetworkSubsystem::BP_DestroySession()
 
 	if (Sessions.IsValid())
 	{
-		Print("Destroying session...");
+		PrintLog("Destroying session...");
 
 		OnDestroySessionCompleteDelegateHandle = Sessions->AddOnDestroySessionCompleteDelegate_Handle(
 			OnDestroySessionCompleteDelegate);
@@ -511,7 +511,7 @@ void UBetrayalGameNetworkSubsystem::BP_DestroySession()
 	}
 	else
 	{
-		Print("UBetrayalGameNetworkSubsystem::BP_DestroySession(): SessionInterface is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::BP_DestroySession(): SessionInterface is null!");
 	}
 
 	CleanupNotifications();
@@ -520,22 +520,22 @@ void UBetrayalGameNetworkSubsystem::BP_DestroySession()
 void UBetrayalGameNetworkSubsystem::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver,
                                                          ENetworkFailure::Type FailureType, const FString& ErrorString)
 {
-	Print("Network failure: " + ErrorString);
+	PrintLog("Network failure: " + ErrorString);
 
 	switch (FailureType)
 	{
 	case ENetworkFailure::ConnectionLost:
-		Print("Connection lost!");
+		PrintLog("Connection lost!");
 		BP_DestroySession();
 		break;
 
 	case ENetworkFailure::ConnectionTimeout:
-		Print("Connection timeout!");
+		PrintLog("Connection timeout!");
 		BP_DestroySession();
 		break;
 
 	default:
-		Print("Unhandled network error: " + ErrorString);
+		PrintLog("Unhandled network error: " + ErrorString);
 		break;
 	}
 }
@@ -573,7 +573,7 @@ void UBetrayalGameNetworkSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	}
 	else
 	{
-		Print("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): SessionInterface is null!");
+		PrintLog("UBetrayalGameNetworkSubsystem::UBetrayalGameNetworkSubsystem(): SessionInterface is null!");
 	}
 
 	if (_GameInstance && _GameInstance->GetEngine())

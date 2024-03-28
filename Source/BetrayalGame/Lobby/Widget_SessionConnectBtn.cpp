@@ -24,7 +24,7 @@ bool UWidget_SessionConnectBtn::CheckPassword()
 			Menu->HidePasswordField();
 		}
 			
-		Print("No password required!");
+		PrintLog("No password required!");
 		
 		// No password, just join
 		return true;
@@ -36,19 +36,19 @@ bool UWidget_SessionConnectBtn::CheckPassword()
 	auto Menu = Cast<AMenu_PlayerController>(Ctrl);
 	if(!Menu)
 	{
-		Print("UWidget_SessionConnectBtn::CheckPassword(): Menu is null!");
+		PrintLog("UWidget_SessionConnectBtn::CheckPassword(): Menu is null!");
 		return false;
 	}
 
 	if (Menu->SessionPassword.IsEmpty())
 	{
-		Print("Password input required!");
+		PrintLog("Password input required!");
 		
 		// No stored password, prompt for password
 		return false;
 	}
 
-	Print("Checking password...");
+	PrintLog("Checking password...");
 	// Compare stored password with session password
 	return Menu->SessionPassword == Password;
 }
@@ -64,20 +64,20 @@ void UWidget_SessionConnectBtn::NativeConstruct()
 	}
 	else
 	{
-		Print("UWidget_SessionConnectBtn::NativeConstruct(): Button is null!");
+		PrintLog("UWidget_SessionConnectBtn::NativeConstruct(): Button is null!");
 	}
 }
 
 void UWidget_SessionConnectBtn::OnClick()
 {
-	Print("Joining session: " + _SessionData.Session.OwningUserName);
+	PrintLog("Joining session: " + _SessionData.Session.OwningUserName);
 
 	//GetGameInstance<UBetrayalGameInstance>()->HideLobby();
 	APlayerController* Ctrl = GetGameInstance()->GetFirstLocalPlayerController();
 	auto Menu = Cast<AMenu_PlayerController>(Ctrl);
 	if(!Menu)
 	{
-		Print("UWidget_SessionConnectBtn::OnClick(): Menu is null!");
+		PrintLog("UWidget_SessionConnectBtn::OnClick(): Menu is null!");
 		return;
 	}
 	
@@ -85,13 +85,13 @@ void UWidget_SessionConnectBtn::OnClick()
 	// Check if the session is password protected
 	if (CheckPassword())
 	{
-		Print("Joining session!");
+		PrintLog("Joining session!");
 		// Join the session
 		GetGameInstance<UBetrayalGameInstance>()->GetSubsystem<UBetrayalGameNetworkSubsystem>()->JoinSession(_SessionName, _SessionData);
 	}
 	else
 	{
-		Print("UWidget_SessionConnectBtn::OnClick(): Password required!");
+		PrintLog("UWidget_SessionConnectBtn::OnClick(): Password required!");
 
 		// Prompt for password
 		//GetGameInstance<UBetrayalGameInstance>()->ShowPasswordField();
@@ -114,7 +114,7 @@ void UWidget_SessionConnectBtn::OnClick()
 
 void UWidget_SessionConnectBtn::UpdateDisplayedData()
 {
-	Print("Updating data!");
+	PrintLog("Updating data!");
 	
 	// Set the displayed data
 	const auto ListedName = _SessionData.Session.SessionSettings.Settings.FindRef(SERVERLIST_NAME).Data;
